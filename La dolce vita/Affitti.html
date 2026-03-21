@@ -143,7 +143,7 @@
 
 .PlusIconTable {
   /* background: linear-gradient(to bottom, #007BFF, #0056b3); sfumatura blu */
-  background: linear-gradient(1deg, rgba(35,96,147,1), silver);
+  background: linear-gradient(135deg, rgba(35,96,147,1), silver);
   color: white;                      /* testo/icona bianca */
   border: none;                      /* nessun bordo */
   border-radius: 6px;                /* angoli arrotondati */
@@ -168,9 +168,9 @@
                 <li><a href="index.html">Home</a></li>
                 <li><a href="Affitti.html">Affitto</a></li>
                 <li><a href="#">Fondo cassa</a></li>
-                <li><a href="#">Utenze</a></li>
-                <li><a href="#">Copponi</a></li>
-                <li><a href="#">Registro Consumazioni</a></li>
+                <li><a href="Utenze.html">Utenze</a></li>
+                <li><a href="Copponi.html">Copponi</a></li>
+                <li><a href="Registro.html">Registro Consumazioni</a></li>
                 <li><a href="ListinoPrezzi.html">Listino Prezzi</a></li>
                 <li><a href="#">Acquisti</a></li>
             </ul>
@@ -664,8 +664,7 @@ ListaUtenti.forEach(utente => {
     document.getElementById('meseSelect').value = Mese;
     document.getElementById("meseSelect").addEventListener("change", LeggiSelezione);
     document.getElementById("annoSelect").addEventListener("change", LeggiSelezione);
-    caricaUtenti();
-    calcolaTotale(Mese, Anno);
+    LeggiSelezione();
 });
 
 async function ApriModalConParametri(UtenteNo, Mese, Anno) {

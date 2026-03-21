@@ -42,7 +42,7 @@ async function getUtenti() {
   const { data, error } = await supabase
     .from('Utenti')   // nome della tabella
     .select('*')      // equivalente a SELECT * FROM Utenti
-    .where('IsDeleted', false) // aggiunge la condizione WHERE IsDeleted = false
+    .eq('IsDeleted', false) // aggiunge la condizione WHERE IsDeleted = false
 
   if (error) {
     console.error('Errore nella query:', error)
@@ -53,9 +53,6 @@ async function getUtenti() {
   return data
 }
 
-// Esempio di utilizzo
-var UtentiList = getUtenti()
-console.log(UtentiList);
 // Funzione che carica gli utenti e li mette nella tabella
 async function caricaUtenti() {
   const { data, error } = await supabase
@@ -70,6 +67,7 @@ console.log('Dati ottenuti:', data);
 
   // Trova la tabella nel DOM
   const tbody = document.querySelector('.styled-table tbody')
+  if (!tbody) return
   tbody.innerHTML = '' // pulisce eventuali righe statiche
 
   // Inserisce una riga per ogni utente

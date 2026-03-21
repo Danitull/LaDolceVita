@@ -177,7 +177,7 @@
   }
 
   .content {
-    background: lightblue;
+    background: rgba(248,251,255,0.95);
   }
 
   .new-content {
@@ -206,8 +206,8 @@
                 <li><a href="index.html">Home</a></li>
                 <li><a href="Affitti.html">Affitto</a></li>
                 <li><a href="#">Fondo cassa</a></li>
-                <li><a href="#">Utenze</a></li>
-                <li><a href="#">Copponi</a></li>
+                <li><a href="Utenze.html">Utenze</a></li>
+                <li><a href="Copponi.html">Copponi</a></li>
                 <li><a href="Registro.html">Registro Consumazioni</a></li>
                 <li><a href="ListinoPrezzi.html">Listino Prezzi</a></li>
                 <li><a href="#">Acquisti</a></li>
@@ -322,9 +322,10 @@
 </body>
     <!-- <script type="module" src="/js/script.js"></script> -->
 <script type="module">
-var ArrayCarrello = [];
-var TotaleCarrello = 0;
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+var ArrayCarrello = [];
+var ArrayCarrelloTotale = [];
+var TotaleCarrello = 0;
 
   const supabaseUrl = "https://tjbsnchbezvhhugkgaxx.supabase.co";
   const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYnNuY2hiZXp2aGh1Z2tnYXh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0OTA4ODAsImV4cCI6MjA3OTA2Njg4MH0.eMDjkjvirN1DrUPysy34TgycmwMkAoMmMuxJ1_o9vzg"; // la tua anon key
@@ -526,7 +527,6 @@ async function OnClickSuBtnAggiungiCarrello(ProdottoNo, ProdottoName, Prezzo) {
 
     });
 }
-    var ArrayCarrelloTotale = [];
     async function AggiungiElementoAlCarrello(ProdottoNo, ProdottoName, Prezzo) {
         var RecTrovato = ArrayCarrello.find(item => item.ProdottoNo === ProdottoNo) || undefined;
         // console.log("RecTrovato:", RecTrovato);

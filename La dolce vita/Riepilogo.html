@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Dolce Vita - Riepilogo Generale</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<style>
+    .selezione-container {
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
+        text-align: center;
+        font-family: "Segoe UI", Arial, sans-serif;
+    }
+    .selezione-container label {
+        display: block;
+        margin: 12px 0 6px;
+        font-weight: 600;
+        color: #333;
+    }
+    .selezione-container select {
+        width: 100%;
+        padding: 10px 12px;
+        margin-bottom: 16px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        background-color: #f9f9f9;
+        font-size: 15px;
+        transition: all 0.3s ease;
+    }
+    .selezione-container select:focus {
+        border-color: #0078d7;
+        background-color: #fff;
+        box-shadow: 0 0 6px rgba(0,120,215,0.3);
+        outline: none;
+    }
+
+    .riepilogo-table {
+        border-collapse: collapse;
+        margin: 25px auto;
+        font-size: 0.95rem;
+        width: 90%;
+        max-width: 1100px;
+        border-radius: 12px 12px 0 0;
+        overflow: hidden;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+    }
+    .riepilogo-table thead tr {
+        background: linear-gradient(1deg, rgba(35,96,147,1), silver);
+        color: #ffffff;
+        text-align: center;
+        font-weight: bold;
+    }
+    .riepilogo-table th, .riepilogo-table td {
+        padding: 12px 16px;
+        text-align: center;
+        border-bottom: 1px solid #ddd;
+    }
+    .riepilogo-table th:first-child,
+    .riepilogo-table td:first-child {
+        text-align: left;
+    }
+    .riepilogo-table tbody tr:nth-of-type(even) {
+        background: rgba(35,96,147,0.08);
+    }
+    .riepilogo-table tbody tr:nth-of-type(odd) {
+        background-color: #f3f3f3;
+    }
+    .riepilogo-table tbody tr:last-of-type {
+        border-bottom: 2px solid #3498db;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.82rem;
+        font-weight: 600;
+    }
+    .badge-paid {
+        background: #d1fae5;
+        color: #065f46;
+    }
+    .badge-partial {
+        background: #fef3c7;
+        color: #92400e;
+    }
+    .badge-unpaid {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .row-fully-paid {
+        border-left: 4px solid #10b981 !important;
+    }
+    .row-partially-paid {
+        border-left: 4px solid #f59e0b !important;
+    }
+    .row-unpaid {
+        border-left: 4px solid #ef4444 !important;
+    }
+
+    .summary-cards {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin: 20px auto;
+        max-width: 900px;
+    }
+    .summary-card {
+        background: white;
+        border-radius: 12px;
+        padding: 16px 24px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        text-align: center;
+        min-width: 180px;
+    }
+    .summary-card .card-label {
+        font-size: 0.85rem;
+        color: #666;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 6px;
+    }
+    .summary-card .card-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #236093;
+    }
+    .summary-card.card-red .card-value { color: #ef4444; }
+    .summary-card.card-green .card-value { color: #10b981; }
+
+    .page-title {
+        text-align: center;
+        color: #236093;
+        font-size: 1.6rem;
+        font-weight: 800;
+        margin: 16px 0 4px;
+        letter-spacing: 0.5px;
+    }
+    .page-subtitle {
+        text-align: center;
+        color: #666;
+        font-size: 0.95rem;
+        margin-bottom: 20px;
+    }
+
+    .category-header {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        opacity: 0.85;
+    }
+    .group-sep {
+        border-left: 2px solid rgba(255,255,255,0.3);
+    }
+
+    #loading-msg {
+        text-align: center;
+        color: #666;
+        font-style: italic;
+        padding: 20px;
+    }
+
+    @media (max-width: 800px) {
+        .riepilogo-table {
+            width: 98%;
+            font-size: 0.82rem;
+        }
+        .riepilogo-table th, .riepilogo-table td {
+            padding: 8px 8px;
+        }
+        .summary-cards {
+            gap: 12px;
+        }
+    }
+</style>
+<body>
+
+<div style="width: 100vw; height: 7vh; position: absolute;">
+    <nav class="top-navbar glass">
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="Affitti.html">Affitto</a></li>
+            <li><a href="#">Fondo cassa</a></li>
+            <li><a href="#">Utenze</a></li>
+            <li><a href="#">Copponi</a></li>
+            <li><a href="#">Registro Consumazioni</a></li>
+            <li><a href="ListinoPrezzi.html">Listino Prezzi</a></li>
+            <li><a href="Riepilogo.html" style="background:#3498db; border-radius:18px;">Riepilogo</a></li>
+        </ul>
+    </nav>
+</div>
+
+<div style="width: 100%; padding-top: 8vh; padding-bottom: 40px; box-sizing: border-box;">
+
+    <h1 class="page-title">📋 Riepilogo Generale</h1>
+    <p class="page-subtitle">Panoramica di tutti i pagamenti (Affitto · WiFi · Utenze) per il mese selezionato</p>
+
+    <div class="selezione-container">
+        <label for="meseSelect">Seleziona Mese</label>
+        <select id="meseSelect">
+            <option value="">Seleziona un mese...</option>
+            <option value="1">Gennaio</option>
+            <option value="2">Febbraio</option>
+            <option value="3">Marzo</option>
+            <option value="4">Aprile</option>
+            <option value="5">Maggio</option>
+            <option value="6">Giugno</option>
+            <option value="7">Luglio</option>
+            <option value="8">Agosto</option>
+            <option value="9">Settembre</option>
+            <option value="10">Ottobre</option>
+            <option value="11">Novembre</option>
+            <option value="12">Dicembre</option>
+        </select>
+
+        <label for="annoSelect">Seleziona Anno</label>
+        <select id="annoSelect">
+            <option value="">Seleziona un anno...</option>
+            <option value="2023">2023</option>
+            <option value="2024">2024</option>
+            <option value="2025">2025</option>
+            <option value="2026">2026</option>
+            <option value="2027">2027</option>
+            <option value="2028">2028</option>
+            <option value="2029">2029</option>
+            <option value="2030">2030</option>
+        </select>
+    </div>
+
+    <!-- Summary cards -->
+    <div class="summary-cards" id="summaryCards" style="display:none;">
+        <div class="summary-card">
+            <div class="card-label">Totale Dovuto</div>
+            <div class="card-value" id="cardTotale">—</div>
+        </div>
+        <div class="summary-card card-green">
+            <div class="card-label">Totale Saldato</div>
+            <div class="card-value" id="cardSaldato">—</div>
+        </div>
+        <div class="summary-card card-red">
+            <div class="card-label">Totale Restante</div>
+            <div class="card-value" id="cardRestante">—</div>
+        </div>
+        <div class="summary-card">
+            <div class="card-label">Residenti Saldati</div>
+            <div class="card-value" id="cardSaldatiCount">—</div>
+        </div>
+    </div>
+
+    <div id="loading-msg" style="display:none;">Caricamento dati in corso...</div>
+
+    <!-- Main table -->
+    <div id="tableContainer" style="display:none;">
+        <table class="riepilogo-table">
+            <thead>
+                <tr>
+                    <th rowspan="2" style="text-align:left;">Residente</th>
+                    <th colspan="2" class="group-sep">🏠 Affitto</th>
+                    <th colspan="2" class="group-sep">📡 WiFi</th>
+                    <th colspan="2" class="group-sep">💡 Utenze</th>
+                    <th colspan="2" class="group-sep">📊 Totale</th>
+                </tr>
+                <tr>
+                    <th class="category-header group-sep">Saldato</th>
+                    <th class="category-header">Restante</th>
+                    <th class="category-header group-sep">Saldato</th>
+                    <th class="category-header">Restante</th>
+                    <th class="category-header group-sep">Saldato</th>
+                    <th class="category-header">Restante</th>
+                    <th class="category-header group-sep">Saldato</th>
+                    <th class="category-header">Restante</th>
+                </tr>
+            </thead>
+            <tbody id="riepilogoTbody">
+                <!-- populated by JS -->
+            </tbody>
+        </table>
+    </div>
+
+    <div id="no-data-msg" style="display:none; text-align:center; color:#999; padding:30px; font-style:italic;">
+        Nessun dato disponibile per il mese e anno selezionati.
+    </div>
+
+</div>
+
+<script type="module">
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const supabaseUrl = "https://tjbsnchbezvhhugkgaxx.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYnNuY2hiZXp2aGh1Z2tnYXh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0OTA4ODAsImV4cCI6MjA3OTA2Njg4MH0.eMDjkjvirN1DrUPysy34TgycmwMkAoMmMuxJ1_o9vzg";
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+async function fetchAll() {
+    const [utenti, pagAffitti, affittiDaPagare, pagWifi, wifiDaPagare, pagUtenze, utenzeDaPagare] = await Promise.all([
+        supabase.from("Utenti").select("*").eq("IsResident", true),
+        supabase.from("PagamentoAffitti").select("*"),
+        supabase.from("AffittiDaPagare").select("*"),
+        supabase.from("PagamentoWiFi").select("*"),
+        supabase.from("WiFiDaPagare").select("*"),
+        supabase.from("PagamentoUtenze").select("*"),
+        supabase.from("UtenzeDaPagare").select("*"),
+    ]);
+    return {
+        utenti: utenti.data || [],
+        pagAffitti: pagAffitti.data || [],
+        affittiDaPagare: affittiDaPagare.data || [],
+        pagWifi: pagWifi.data || [],
+        wifiDaPagare: wifiDaPagare.data || [],
+        pagUtenze: pagUtenze.data || [],
+        utenzeDaPagare: utenzeDaPagare.data || [],
+    };
+}
+
+function getMonthlyAmount(list, mese, anno) {
+    const rec = list.find(r => r.Mese == mese && r.Anno == anno);
+    return rec ? parseFloat(rec.Value) || 0 : 0;
+}
+
+function getPagato(pagamenti, utenteId, mese, anno) {
+    const rec = pagamenti.find(p => p.UtenteNo == utenteId && p.Mese == mese && p.Anno == anno);
+    return rec ? parseFloat(rec.Value) || 0 : 0;
+}
+
+function fmt(n) {
+    return n.toFixed(2) + " €";
+}
+
+function statusBadge(paid, owed) {
+    if (owed <= 0) return '';
+    if (paid >= owed) return '<span class="badge badge-paid">Saldato ✓</span>';
+    if (paid > 0) return '<span class="badge badge-partial">Parziale</span>';
+    return '<span class="badge badge-unpaid">Non pagato</span>';
+}
+
+async function aggiorna() {
+    const mese = document.getElementById("meseSelect").value;
+    const anno = document.getElementById("annoSelect").value;
+
+    document.getElementById("summaryCards").style.display = "none";
+    document.getElementById("tableContainer").style.display = "none";
+    document.getElementById("no-data-msg").style.display = "none";
+
+    if (!mese || !anno) return;
+
+    document.getElementById("loading-msg").style.display = "block";
+
+    const d = await fetchAll();
+    document.getElementById("loading-msg").style.display = "none";
+
+    const nUtenti = d.utenti.length;
+    if (nUtenti === 0) {
+        document.getElementById("no-data-msg").style.display = "block";
+        return;
+    }
+
+    const totAffitto = getMonthlyAmount(d.affittiDaPagare, mese, anno);
+    const totWifi = getMonthlyAmount(d.wifiDaPagare, mese, anno);
+    const totUtenze = getMonthlyAmount(d.utenzeDaPagare, mese, anno);
+
+    const quotaAffitto = nUtenti > 0 ? totAffitto / nUtenti : 0;
+    const quotaWifi = nUtenti > 0 ? totWifi / nUtenti : 0;
+    const quotaUtenze = nUtenti > 0 ? totUtenze / nUtenti : 0;
+
+    let grandTotale = 0;
+    let grandSaldato = 0;
+    let residentiSaldati = 0;
+
+    const tbody = document.getElementById("riepilogoTbody");
+    tbody.innerHTML = "";
+
+    d.utenti.forEach(utente => {
+        const pagatoAffitto = getPagato(d.pagAffitti, utente.id, mese, anno);
+        const pagatoWifi = getPagato(d.pagWifi, utente.id, mese, anno);
+        const pagatoUtenze = getPagato(d.pagUtenze, utente.id, mese, anno);
+
+        const restanteAffitto = Math.max(0, quotaAffitto - pagatoAffitto);
+        const restanteWifi = Math.max(0, quotaWifi - pagatoWifi);
+        const restanteUtenze = Math.max(0, quotaUtenze - pagatoUtenze);
+
+        const totDovuto = quotaAffitto + quotaWifi + quotaUtenze;
+        const totSaldato = pagatoAffitto + pagatoWifi + pagatoUtenze;
+        const totRestante = Math.max(0, totDovuto - totSaldato);
+
+        grandTotale += totDovuto;
+        grandSaldato += totSaldato;
+
+        const fullySaldato = totRestante <= 0.01 && totDovuto > 0;
+        const parziallySaldato = totSaldato > 0 && !fullySaldato;
+        if (fullySaldato) residentiSaldati++;
+
+        const rowClass = fullySaldato ? "row-fully-paid" : (parziallySaldato ? "row-partially-paid" : "row-unpaid");
+
+        const tr = document.createElement("tr");
+        tr.className = rowClass;
+        tr.innerHTML = `
+            <td style="font-weight:600;">${utente.Nome}</td>
+            <td class="group-sep">${fmt(pagatoAffitto)}<br>${statusBadge(pagatoAffitto, quotaAffitto)}</td>
+            <td style="color:${restanteAffitto > 0 ? '#ef4444' : '#10b981'};">${fmt(restanteAffitto)}</td>
+            <td class="group-sep">${fmt(pagatoWifi)}<br>${statusBadge(pagatoWifi, quotaWifi)}</td>
+            <td style="color:${restanteWifi > 0 ? '#ef4444' : '#10b981'};">${fmt(restanteWifi)}</td>
+            <td class="group-sep">${fmt(pagatoUtenze)}<br>${statusBadge(pagatoUtenze, quotaUtenze)}</td>
+            <td style="color:${restanteUtenze > 0 ? '#ef4444' : '#10b981'};">${fmt(restanteUtenze)}</td>
+            <td class="group-sep" style="font-weight:700;">${fmt(totSaldato)}</td>
+            <td style="font-weight:700; color:${totRestante > 0.01 ? '#ef4444' : '#10b981'};">${fmt(totRestante)}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    // Totals row
+    const totalsRow = document.createElement("tr");
+    totalsRow.style.background = "linear-gradient(1deg, rgba(35,96,147,1), #5b8bb5)";
+    totalsRow.style.color = "white";
+    totalsRow.style.fontWeight = "700";
+    const grandRestante = Math.max(0, grandTotale - grandSaldato);
+    totalsRow.innerHTML = `
+        <td>TOTALE</td>
+        <td class="group-sep" colspan="2">${fmt(totAffitto)}</td>
+        <td class="group-sep" colspan="2">${fmt(totWifi)}</td>
+        <td class="group-sep" colspan="2">${fmt(totUtenze)}</td>
+        <td class="group-sep">${fmt(grandSaldato)}</td>
+        <td>${fmt(grandRestante)}</td>
+    `;
+    tbody.appendChild(totalsRow);
+
+    // Update summary cards
+    document.getElementById("cardTotale").textContent = fmt(grandTotale);
+    document.getElementById("cardSaldato").textContent = fmt(grandSaldato);
+    document.getElementById("cardRestante").textContent = fmt(grandRestante);
+    document.getElementById("cardSaldatiCount").textContent = `${residentiSaldati} / ${nUtenti}`;
+
+    document.getElementById("summaryCards").style.display = "flex";
+    document.getElementById("tableContainer").style.display = "block";
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const oggi = new Date();
+    document.getElementById("annoSelect").value = oggi.getFullYear();
+    document.getElementById("meseSelect").value = oggi.getMonth() + 1;
+
+    document.getElementById("meseSelect").addEventListener("change", aggiorna);
+    document.getElementById("annoSelect").addEventListener("change", aggiorna);
+
+    aggiorna();
+});
+</script>
+
+</body>
+</html>

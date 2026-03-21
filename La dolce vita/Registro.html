@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Dolce Vita - VB.NET</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<style>
+    .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-grid label {
+          color: #555;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .form-grid input[type="number"],
+        .form-grid input[type="date"],
+        .form-grid select {
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+            color: #333;
+        }
+
+        .form-grid input[type="number"]:focus,
+        .form-grid input[type="date"]:focus,
+        .form-grid select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-grid select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 35px;
+        }
+
+         .button-container {
+            display: flex;
+            justify-content: flex-start;
+            gap: 15px;
+            margin-top: 20vh;
+            flex-direction: row;
+            position: relative;
+            left: -4vw;
+        }
+
+         .modal-button {
+            padding: 14px 32px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+         .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+         .btn-save:active {
+            transform: translateY(0);
+        }
+
+         .btn-reset {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+         .btn-reset:hover {
+            background: #e0e0e0;
+        }
+
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+             .container {
+                padding: 25px;
+            }
+        }
+        .selezione-container {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  text-align: center;
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.selezione-container label {
+  display: block;
+  margin: 12px 0 6px;
+  font-weight: 600;
+  color: #333;
+}
+
+.selezione-container select {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+  font-size: 15px;
+  transition: all 0.3s ease;
+}
+
+.selezione-container select:focus {
+  border-color: #0078d7; /* blu Microsoft */
+  background-color: #fff;
+  box-shadow: 0 0 6px rgba(0,120,215,0.3);
+  outline: none;
+}
+
+.PlusIconTable {
+  /* background: linear-gradient(to bottom, #007BFF, #0056b3); sfumatura blu */
+  background: linear-gradient(1deg, rgba(35,96,147,1), silver);
+  color: white;                      /* testo/icona bianca */
+  border: none;                      /* nessun bordo */
+  border-radius: 6px;                /* angoli arrotondati */
+  padding: 8px 12px;                 /* spazio interno */
+  font-size: 18px;                   /* dimensione icona */
+  cursor: pointer;                   /* mano al passaggio */
+  transition: background 0.3s ease; /* effetto hover */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* leggero rilievo */
+  margin-bottom: 18px;
+}
+
+.PlusIconTable:hover {
+  background: linear-gradient(to bottom, #0056b3, #003f7f); /* sfumatura più scura al passaggio */
+}
+ .container {
+    width: 100vw;
+    height: 93vh;
+    position: absolute;
+  }
+
+  .content, .new-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s ease;
+  }
+
+  .content {
+    background: lightblue;
+  }
+
+  .new-content {
+    background: lightgray;
+    transform: translateX(100%); /* inizialmente fuori */
+  }
+
+  .slide-btn {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 10px 20px;
+    background: #0078d7;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+</style>
+<body>
+
+<div style="width: 100vw; height: 7vh; position: absolute;">
+<nav class="top-navbar glass">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="Affitti.html">Affitto</a></li>
+                <li><a href="#">Fondo cassa</a></li>
+                <li><a href="#">Utenze</a></li>
+                <li><a href="#">Copponi</a></li>
+                <li><a href="Registro.html">Registro Consumazioni</a></li>
+                <li><a href="ListinoPrezzi.html">Listino Prezzi</a></li>
+                <li><a href="#">Acquisti</a></li>
+            </ul>
+        </nav>
+</div>
+<div style="width: 100vw; margin-top: 7vh; top: 7vh !important; height: 7vh; position: absolute;">
+</div>
+
+    <div id="ModalContainerPanel" style="z-index: 2; display: none; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.5); position: absolute;">
+            <div style="width:70vw; height:70vh; background-color:white; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); border-radius:12px; box-shadow:0 4px 24px rgba(0,0,0,0.15);">
+
+                <!-- header -->
+                <div style="height: 10%; width: 100%; background-color: #236093; border-radius: 12px 12px 0px 0px; display:flex; justify-content:flex-end; align-items:center; padding:0 12px; box-sizing:border-box;">
+                    <div style="width:100%; text-align: left;">
+                    <h2 style="color: white;">📝 Inserimento Dati</h2>
+                </div>
+                    <button id="close-modal" onclick="document.getElementById('ModalContainerPanel').style.display = 'none'" style="margin-bottom: 2vh; margin-left: 3vh; background:none; border:none; color:white; font-size:1.4rem; font-weight:bold; cursor:pointer;">✕</button>
+                </div>
+                <!-- content -->
+                   <div class="container" style="padding: 2vw;">
+
+
+        <form id="dataForm">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="nome">Nome Utente</label>
+                    <select id="nome" name="nome" required>
+                        <option value="">Seleziona un utente...</option>
+                        <!-- Le opzioni verranno caricate dinamicamente -->
+                    </select>
+                </div>
+                <div class="button-container">
+                    <button type="reset" class="btn-reset modal-button">Cancella tutto</button>
+                    <button id="btn_save" type="submit" class="btn-save modal-button">Salva</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+        </div>
+    </div>
+<div class="container">
+<div id="currentDiv" style="width: 100vw; height: 93vh; position: absolute; top: 2vh;">
+    <div style="width: 100%; height: 100%; display: flex; justify-content: space-around; align-items: flex-start; padding: 2vh 0; box-sizing: border-box; gap: 2vh;">
+        <div  style="width: 50%; left: 7vh !important;">
+            <table id="TabellaProdotti" style="overflow-y: scroll;" class="styled-table">
+                <thead>
+                    <tr>
+                        <th style="width: 20%;">Prodotto</th>
+                        <th style="width: 10%;">Prezzo</th>
+                        <th style="width: 20%;">Quantita' totale</th>
+                        <th style="width: 10%;">Restante</th>
+                        <th style="width: 20%;">Aggiungi a carrello</th>
+                    </tr>
+                </thead>
+                <tbody>
+                        <!-- Le righe della tabella verranno inserite qui dinamicamente -->
+                </tbody>
+            </table>
+        </div>
+        <div  style="width: 50%;">
+            <table id="Carrello" style="overflow-y: scroll;" class="styled-table">
+                <thead>
+                    <tr>
+                        <th style="width: 40%;">Prodotto</th>
+                        <th style="width: 20%;">Quantita'</th>
+                        <th style="width: 20%;">Prezzo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                        <!-- Le righe della tabella verranno inserite qui dinamicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div id="newDiv" style="width: 100vw; height: 93vh; left: 100%; position: absolute; top: 7vh;">
+  <div style="width: 100%; height: 100%; display: flex; padding: 2vh; box-sizing: border-box; gap: 2vh;">
+    
+    <!-- Colonna sinistra: calendario -->
+    <div style="width: 25%; display: flex; justify-content: center; align-items: flex-start; flex-direction: column; gap: 1vh;">
+      <label for="calendar">Seleziona giorno:</label>
+      <input type="date" id="calendar" style="padding: 0.5em; font-size: 1em;">
+    </div>
+    
+    <!-- Colonna destra: tabella -->
+    <div style="flex: 1; display: flex; justify-content: center; align-items: center;">
+      <table id="TabellaRegistro" class="styled-table" style="width: 80%; max-height: 100%; overflow-y: auto;">
+        <thead>
+          <tr>
+            <th style="width: 30%;">Data</th>
+            <th style="width: 30%;">Utente</th>
+            <th style="width: 30%;">Prodotto</th>
+            <th style="width: 20%;">Quantita' totale</th>
+            <th style="width: 10%;">Prezzo</th>
+            <th style="width: 10%;">Pagato?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Le righe della tabella verranno inserite qui dinamicamente -->
+        </tbody>
+      </table>
+    </div>
+    
+  </div>
+</div>
+
+  <button id="SlideButton" class="slide-btn">➡</button>
+</div>
+    
+</body>
+    <!-- <script type="module" src="/js/script.js"></script> -->
+<script type="module">
+var ArrayCarrello = [];
+var TotaleCarrello = 0;
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+  const supabaseUrl = "https://tjbsnchbezvhhugkgaxx.supabase.co";
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYnNuY2hiZXp2aGh1Z2tnYXh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0OTA4ODAsImV4cCI6MjA3OTA2Njg4MH0.eMDjkjvirN1DrUPysy34TgycmwMkAoMmMuxJ1_o9vzg"; // la tua anon key
+
+  // Inizializza il client con la chiave anon
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
+async function ElencoSelect() {
+    const { data, error } = await supabase.from("ElencoProdotti").select("*");
+      if (error) {
+    console.error("Errore:", error);
+    return;
+  }
+  console.log("Dati ottenuti:", data);
+  return data;
+}
+async function UtentiSelect() {
+    const { data, error } = await supabase.from("Utenti").select("*");
+      if (error) {
+    console.error("Errore:", error);
+    return;
+  }
+  console.log("Dati ottenuti:", data);
+  return data;
+}
+
+async function AcquistiSpeseSelect() {
+    const { data, error } = await supabase.from("Acquisti_Spese").select("*");
+      if (error) {
+    console.error("Errore:", error);
+    return;
+  }
+  console.log("Dati ottenuti:", data);
+  return data;
+}
+
+async function RegistroConsumazioniSelect() {
+    const { data, error } = await supabase.from("CassaConsumazioni").select("*");
+      if (error) {
+    console.error("Errore:", error);
+    return;
+  }
+    console.log("Dati ottenuti:", data);
+    return data;
+}
+
+  document.addEventListener("DOMContentLoaded", () => {
+    setTodayDate();
+    // caricaRegistroConsumazioni();
+    visualizzaProdotti();
+    caricaUtentiStart();
+    EventSubmitForm();
+});
+
+
+async function EventSubmitForm(CarrelloAcquisti) {
+    const form = document.getElementById("dataForm");
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault(); // Previene il comportamento predefinito del form
+
+        const formData = new FormData(form);
+        const UtenteNo = formData.get("nome");
+
+        console.log("Utente selezionato:", UtenteNo);
+
+        var ChecBox = document.getElementById("check_Coppone");
+        if (ChecBox.checked == true){            
+            var dati = ArrayCarrelloTotale;
+            console.log("Dati estratti dal carrello:", dati);
+            dati.forEach(async (element) => {
+            var ProdottoNo = element.ProdottoNo;
+            var Quantita = element.Quantita;
+            var Prezzo = element.Prezzo;
+
+            const DataCreazione = new Date().toISOString();
+            const DataPagamento = new Date().toISOString();
+
+            // Inserimento nel database
+            const { data, error } = await supabase
+            .from('CassaConsumazioni')            
+            .insert([
+                {   UtenteNo: UtenteNo, 
+                    ProdottoNo: ProdottoNo,
+                    Qty: Quantita,
+                    DataCreazione: DataCreazione, 
+                    DataPagamento: DataPagamento
+                },
+            ]);
+        });
+    } else {
+        var dati = ArrayCarrelloTotale;
+        console.log("Dati estratti dal carrello:", dati);
+        dati.forEach(async (element) => {
+            var ProdottoNo = element.ProdottoNo;
+            var Quantita = element.Quantita;
+            var Prezzo = element.Prezzo;
+
+            const DataCreazione = new Date().toISOString();
+
+            // Inserimento nel database
+            const { data, error } = await supabase
+            .from('CassaConsumazioni')            
+            .insert([
+                {   UtenteNo: UtenteNo, 
+                    ProdottoNo: ProdottoNo,
+                    Qty: Quantita,
+                    DataCreazione: DataCreazione
+                },
+            ]);
+        });
+    }
+    alert("Dati salvati con successo!");
+    const btn = document.getElementById('btn_save');
+    const originalText = btn.textContent;
+    btn.textContent = 'Salvato!';
+    btn.style.background = 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)'; // verde acqua  
+    setTimeout(() => {
+        document.getElementById('ModalContainerPanel').style.display = 'none';
+        btn.textContent = originalText;
+        btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'; // ripristina colore originale
+
+        // Pulisci il carrello
+        ArrayCarrello = [];
+        TotaleCarrello = 0;
+        const TabellaCarrello = document.getElementById('Carrello').getElementsByTagName('tbody')[0];
+        TabellaCarrello.innerHTML = ""; // Pulisci la tabella del carrello
+    }, 1000);
+    });
+}
+
+//     console.log("ApriModalConParametri → Utente:", UtenteNo, "Mese:", meseDaUsare, "Anno:", annoDaUsare);
+// }
+async function visualizzaProdotti(Mese, Anno) {
+  const ListaProdotti = await ElencoSelect();
+  var Trovato = false;
+  const ListaAcquistiSpese = await AcquistiSpeseSelect();
+
+  const tbody = document.getElementById('TabellaProdotti').getElementsByTagName('tbody')[0];
+  tbody.innerHTML = ""; // pulizia
+
+  ListaProdotti.forEach(prodotto => {
+    const tr = document.createElement("tr");
+        Trovato = false;
+
+    ListaAcquistiSpese.find(acquisto => {
+        if (acquisto.ProdottoNo === prodotto.id) {
+            Trovato = true;
+        }
+    });
+    var prezzoConDecimale = parseFloat(prodotto.Prezzo).toFixed(2);
+
+    if (!Trovato) {
+      tr.style.height = '2vh';
+      tr.innerHTML = `
+      <td>${prodotto.Prodotto}</td>
+      <td>${prezzoConDecimale}[€]</td>
+      <td>0</td>
+      <td>0</td>
+      <td><button style="padding:4px 8px; margin-top:0px;" id="btn_Table${prodotto.id}">+</button></td>
+    `;
+    tbody.appendChild(tr);
+    } else {
+        var quantitaTotale = 0;
+        var restante = 0;
+    
+        ListaAcquistiSpese.forEach(acquisto => {
+            if (acquisto.ProdottoNo === prodotto.id) {
+                quantitaTotale += parseInt(acquisto.Qty) * parseInt(acquisto.Confezioni) || 0;
+                // restante += parseInt(acquisto.Restante) || 0;
+            }
+        });
+    
+        tr.style.height = '2vh';
+        tr.innerHTML = `
+        <td>${prodotto.Prodotto}</td>
+        <td>${prezzoConDecimale}[€]</td>
+        <td>${quantitaTotale}</td>
+        <td>-</td>
+        <td><button style="padding:4px 8px; margin-top:0px;" id="btn_Table${prodotto.id}">+</button></td>
+        `;
+    tbody.appendChild(tr);
+    }
+
+  });
+  OnClickSuBtnAggiungiCarrello();
+  document.getElementById("SlideButton").addEventListener("click", slideDiv);
+} 
+
+
+async function OnClickSuBtnAggiungiCarrello(ProdottoNo, ProdottoName, Prezzo) {
+    const ListaProdotti = await ElencoSelect();
+    ListaProdotti.forEach(prodotto => {
+        const button = document.getElementById(`btn_Table${prodotto.id}`);
+        if (button) {
+            button.addEventListener('click', () => {
+                AggiungiElementoAlCarrello(prodotto.id, prodotto.Prodotto, prodotto.Prezzo);
+            });
+        }
+
+    });
+}
+    var ArrayCarrelloTotale = [];
+    async function AggiungiElementoAlCarrello(ProdottoNo, ProdottoName, Prezzo) {
+        var RecTrovato = ArrayCarrello.find(item => item.ProdottoNo === ProdottoNo) || undefined;
+        // console.log("RecTrovato:", RecTrovato);
+        var TabellaCarrello = document.getElementById('Carrello').getElementsByTagName('tbody')[0];
+        var Quantita = 1;
+        TabellaCarrello.innerHTML = ""; // Pulisci la tabella del carrello
+
+        ArrayCarrelloTotale = [];
+        // Aggiungi l'elemento all'array del carrello
+        if (RecTrovato !== undefined) {
+                    RecTrovato.Quantita += 1;
+                    RecTrovato.Prezzo += parseFloat(Prezzo);
+            }else {
+            ArrayCarrello.push({ ProdottoNo: ProdottoNo, ProdottoName: ProdottoName, Prezzo: Prezzo, Quantita: Quantita });
+            };
+            TotaleCarrello += parseFloat(Prezzo);
+            // console.log('Carrello', ArrayCarrello);
+            ArrayCarrelloTotale = ArrayCarrello;
+            ArrayCarrello.forEach(item => {
+                    const tr = document.createElement("tr");
+                    var prezzoConDecimale = parseFloat(item.Prezzo).toFixed(2);
+                    tr.innerHTML = `
+                        <td>${item.ProdottoName}</td>
+                        <td>${item.Quantita}</td>
+                        <td>${item.Prezzo.toFixed(2)}[€]</td>
+                    `;
+                    TabellaCarrello.appendChild(tr);
+                });
+        // // Aggiorna la visualizzazione del carrello
+        // ArrayCarrello.forEach(item => {
+        var SommaTotale = TotaleCarrello.toFixed(2);
+        const tr = document.createElement("tr");
+                    // var prezzoConDecimale = parseFloat(item.Prezzo).toFixed(2);
+                    tr.innerHTML = `
+                        <td>CONTO TOTALE</td>
+                        <td>-</td>
+                        <td>${SommaTotale}€</td>
+                    `;
+                    TabellaCarrello.appendChild(tr);
+                    // tr = document.createElement("tr");
+        const tr1 = document.createElement("tr");
+                    tr1.innerHTML = `
+                        <td><input id="check_Coppone" type="checkbox" name="accetto" value="si"><label>Paga?</label></td>
+                        <td><button id="btn_PulisciCarrello" style="padding:10px 12px; margin-top:0px; width:100%;">Cancella</button></td>
+                        <td><button id="btn_Pagamento" style="padding:10px 12px; margin-top:0px; width:100%;">Coppa</button></td>
+                    `;
+                    TabellaCarrello.appendChild(tr1);
+
+                    document.getElementById("btn_PulisciCarrello").addEventListener("click", function() {
+                        ArrayCarrello = [];
+                        TotaleCarrello = 0;
+                        TabellaCarrello.innerHTML = ""; // Pulisci la tabella del carrello
+                    });
+                    document.getElementById("check_Coppone").addEventListener("change", aggiornaBottone);
+                    document.getElementById("btn_Pagamento").addEventListener("click", function() {
+                        var checkBox = document.getElementById("check_Coppone");
+                        if (checkBox.checked == true){
+                            var ModalContainerPanel = document.getElementById("ModalContainerPanel");
+                            ModalContainerPanel.style.display = "block";
+                        } else {
+                            alert("Hai scelto di copparla!");
+                            var ModalContainerPanel = document.getElementById("ModalContainerPanel");
+                            ModalContainerPanel.style.display = "block";
+                        }
+                    });
+    }
+
+    function aggiornaBottone() {
+    // recupero gli elementi
+    const check_Coppone = document.getElementById("check_Coppone");
+    const btn_Pagamento = document.getElementById("btn_Pagamento");
+
+    // controllo se la checkbox è selezionata
+    if (check_Coppone.checked) {
+      btn_Pagamento.textContent = "Paga";
+    } else {
+      btn_Pagamento.textContent = "Coppa";
+    }
+  }
+  async function caricaUtentiStart() {
+    const ListaUtenti = await UtentiSelect();
+    // 🔹 Popola il select
+    const selectElement = document.getElementById('nome');
+                
+                // Aggiunge gli utenti dal database
+                ListaUtenti.forEach(utente => {
+                    const option = document.createElement('option');
+                    option.value = utente.id; // o utente.nome se preferisci
+                    option.textContent = utente.Nome; // Modifica con il campo corretto del tuo database
+                    selectElement.appendChild(option);
+                });    
+  }
+
+  function estraiCarrello() {
+    // Recupero il tbody della tabella
+    var TabellaCarrello = document.getElementById('Carrello').getElementsByTagName('tbody')[0];
+    
+    // Recupero tutte le righe
+    var righe = TabellaCarrello.getElementsByTagName('tr');
+    
+    // Array che conterrà i dati
+    var ListaCarrello = [];
+    
+    // Ciclo dalla prima riga fino all'ultima meno 2
+    for (var i = 0; i < righe.length - 2; i++) {
+      var celle = righe[i].getElementsByTagName('td');
+      
+      // Estraggo i valori delle celle
+      var prodotto = celle[0].textContent.trim();
+      var quantita = celle[1].textContent.trim();
+      var prezzo   = celle[2].textContent.trim();
+      
+      // Inserisco l'oggetto nell'array
+      ListaCarrello.push({
+        prodotto: prodotto,
+        quantita: quantita,
+        prezzo: prezzo
+      });
+    }
+    
+    return ListaCarrello;
+  }
+
+  let toggled = false;
+
+  function slideDiv() {
+    const current = document.getElementById("currentDiv");
+    const newDiv = document.getElementById("newDiv");
+
+    if (!toggled) {
+      // Primo click: sposta fuori il div attuale e porta dentro il nuovo
+      current.style.left = "100%";
+      newDiv.style.left = "0%";
+    //   newDiv.style.transform = "translateX(0)";
+      toggled = true;
+    } else {
+      // Secondo click: riporta indietro il div attuale e nasconde il nuovo
+      current.style.left = "0%";
+      newDiv.style.left = "100%";
+      toggled = false;
+    }
+  }
+async function caricaRegistroConsumazioni(SelectedDate) {
+  const ListaRegistro = await RegistroConsumazioniSelect();
+  
+
+  const ListaRegistroFiltered = ListaRegistro.filter(record => {
+    const recordDate = new Date(record.DataCreazione);
+    const selectedDateObj = new Date(SelectedDate);
+    return recordDate.toDateString() === selectedDateObj.toDateString();
+  });
+  const tbody = document.getElementById('TabellaRegistro').getElementsByTagName('tbody')[0];
+  tbody.innerHTML = ""; // pulizia
+  const ListaProdotti = await ElencoSelect();
+  var ListaProdottiMap = {};
+  ListaProdotti.forEach(prodotto => {
+    ListaProdottiMap[prodotto.id] = prodotto.Prodotto;
+  });
+  var ListaUtenti = await UtentiSelect();
+  var ListaUtentiMap = {};
+  ListaUtenti.forEach(utente => {
+    ListaUtentiMap[utente.id] = utente.Nome;
+  });
+  
+  ListaRegistroFiltered.forEach(record => {
+    console.log("Record:", record);
+    console.log("DataCreazione:", record.DataCreazione);
+    console.log("DataPagamento:", record.DataPagamento);
+    console.log("ProdottoNo:", record.ProdottoNo);
+    console.log("UtenteNo:", record.UtenteNo);
+      const tr = document.createElement("tr");
+      var prezzoConDecimale = parseFloat(record.Prezzo).toFixed(2);
+      if (prezzoConDecimale === "NaN") {
+        prezzoConDecimale = "0.00";
+      }
+      var dataPagamento = record.DataPagamento ? 'Pagato' : 'Non pagato';
+    tr.style.height = '2vh';
+    tr.innerHTML = `
+      <td>${new Date(record.DataCreazione).toLocaleDateString()}</td>
+      <td>${ListaUtentiMap[record.UtenteNo] || record.UtenteNo}</td>
+      <td>${ListaProdottiMap[record.ProdottoNo] || record.ProdottoNo}</td>
+      <td>${record.Qty}</td>
+      <td>${prezzoConDecimale}[€]</td>
+      <td>${dataPagamento}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+} 
+
+document.getElementById("calendar").addEventListener("change", function() {
+  const selectedDate = this.value; // formato YYYY-MM-DD
+  caricaRegistroConsumazioni(selectedDate);
+  console.log("Hai selezionato:", selectedDate);
+  // Qui puoi filtrare o caricare i dati della tabella in base alla data
+});
+
+// Funzione che imposta la data odierna nel calendario
+  function setTodayDate() {
+    const today = new Date();
+
+    // Formatto la data in YYYY-MM-DD
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0'); // mesi da 0 a 11
+    const dd = String(today.getDate()).padStart(2, '0');
+
+    const formattedDate = `${yyyy}-${mm}-${dd}`;
+    caricaRegistroConsumazioni(formattedDate);
+    // Inserisco la data nell'input
+    document.getElementById("calendar").value = formattedDate;
+  }
+</script>
+
+</body>
+</html>

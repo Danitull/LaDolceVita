@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema QR Code</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        #qrcode {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+        }
+
+        #qrcode canvas {
+            border-radius: 10px;
+        }
+
+        .download-btn {
+            margin-top: 20px;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        #video {
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            background: #000;
+        }
+
+        .result {
+            background: #e8f5e9;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result h3 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+
+        .result p {
+            color: #333;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        #canvas {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 Sistema QR Code</h1>
+        
+        <div class="nav-buttons">
+            <button class="nav-btn active" onclick="showPage('generate')">Genera QR</button>
+            <button class="nav-btn" onclick="showPage('scan')">Scansiona QR</button>
+        </div>
+
+        <!-- Pagina Generazione QR Code -->
+        <div id="generatePage" class="page active">
+            <div class="form-group">
+                <label for="nome">Nome</label>
+                <input type="text" id="nome" placeholder="Inserisci il nome">
+            </div>
+            <div class="form-group">
+                <label for="cognome">Cognome</label>
+                <input type="text" id="cognome" placeholder="Inserisci il cognome">
+            </div>
+            <button class="btn" onclick="generateQR()">Genera QR Code</button>
+            <div id="qrcode"></div>
+            <button class="btn download-btn" id="downloadBtn" style="display:none;" onclick="downloadQR()">Scarica QR Code</button>
+        </div>
+
+        <!-- Pagina Scansione QR Code -->
+        <div id="scanPage" class="page">
+            <video id="video" autoplay></video>
+            <canvas id="canvas"></canvas>
+            <button class="btn" onclick="startScanner()">Avvia Scanner</button>
+            <button class="btn" style="background: #f44336; margin-top: 10px; display:none;" id="stopBtn" onclick="stopScanner()">Ferma Scanner</button>
+            <div class="result" id="result">
+                <h3>✅ QR Code Letto:</h3>
+                <p><strong>Nome:</strong> <span id="scannedNome"></span></p>
+                <p><strong>Cognome:</strong> <span id="scannedCognome"></span></p>
+            </div>
+            <div class="error" id="error"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
+
+    <script>
+        let qrcode = null;
+        let stream = null;
+        let scanning = false;
+
+        function showPage(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            
+            if (page === 'generate') {
+                document.getElementById('generatePage').classList.add('active');
+                document.querySelectorAll('.nav-btn')[0].classList.add('active');
+                stopScanner();
+            } else {
+                document.getElementById('scanPage').classList.add('active');
+                document.querySelectorAll('.nav-btn')[1].classList.add('active');
+            }
+        }
+
+        function generateQR() {
+            const nome = document.getElementById('nome').value.trim();
+            const cognome = document.getElementById('cognome').value.trim();
+
+            if (!nome || !cognome) {
+                alert('Per favore inserisci nome e cognome');
+                return;
+            }
+
+            const data = JSON.stringify({ nome, cognome });
+            const qrcodeDiv = document.getElementById('qrcode');
+            qrcodeDiv.innerHTML = '';
+
+            qrcode = new QRCode(qrcodeDiv, {
+                text: data,
+                width: 256,
+                height: 256,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            document.getElementById('downloadBtn').style.display = 'block';
+        }
+
+        function downloadQR() {
+            const canvas = document.querySelector('#qrcode canvas');
+            if (canvas) {
+                const link = document.createElement('a');
+                link.download = 'qrcode.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            }
+        }
+
+        async function startScanner() {
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const result = document.getElementById('result');
+            const error = document.getElementById('error');
+            
+            result.classList.remove('show');
+            error.classList.remove('show');
+
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'environment' } 
+                });
+                video.srcObject = stream;
+                video.play();
+                
+                document.getElementById('stopBtn').style.display = 'block';
+                scanning = true;
+                scanQRCode(video, canvas);
+            } catch (err) {
+                error.textContent = 'Errore nell\'accesso alla fotocamera: ' + err.message;
+                error.classList.add('show');
+            }
+        }
+
+        function scanQRCode(video, canvas) {
+            if (!scanning) return;
+
+            const ctx = canvas.getContext('2d');
+            
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height);
+                
+                if (code) {
+                    try {
+                        const data = JSON.parse(code.data);
+                        if (data.nome && data.cognome) {
+                            document.getElementById('scannedNome').textContent = data.nome;
+                            document.getElementById('scannedCognome').textContent = data.cognome;
+                            document.getElementById('result').classList.add('show');
+                            stopScanner();
+                            return;
+                        }
+                    } catch (e) {
+                        // Non è un QR code valido per questa app
+                    }
+                }
+            }
+            
+            requestAnimationFrame(() => scanQRCode(video, canvas));
+        }
+
+        function stopScanner() {
+            scanning = false;
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+            const video = document.getElementById('video');
+            video.srcObject = null;
+            document.getElementById('stopBtn').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

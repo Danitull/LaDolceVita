@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Dolce Vita - VB.NET</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<style>
+    .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-grid label {
+          color: #555;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .form-grid input[type="number"],
+        .form-grid input[type="date"],
+        .form-grid select {
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+            color: #333;
+        }
+
+        .form-grid input[type="number"]:focus,
+        .form-grid input[type="date"]:focus,
+        .form-grid select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-grid select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 35px;
+        }
+
+         .button-container {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+         .modal-button {
+            padding: 14px 32px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+         .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+         .btn-save:active {
+            transform: translateY(0);
+        }
+
+         .btn-reset {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+         .btn-reset:hover {
+            background: #e0e0e0;
+        }
+
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+             .container {
+                padding: 25px;
+            }
+        }
+        .selezione-container {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  text-align: center;
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.selezione-container label {
+  display: block;
+  margin: 12px 0 6px;
+  font-weight: 600;
+  color: #333;
+}
+
+.selezione-container select {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+  font-size: 15px;
+  transition: all 0.3s ease;
+}
+
+.selezione-container select:focus {
+  border-color: #0078d7; /* blu Microsoft */
+  background-color: #fff;
+  box-shadow: 0 0 6px rgba(0,120,215,0.3);
+  outline: none;
+}
+
+.PlusIconTable {
+  /* background: linear-gradient(to bottom, #007BFF, #0056b3); sfumatura blu */
+  background: linear-gradient(1deg, rgba(35,96,147,1), silver);
+  color: white;                      /* testo/icona bianca */
+  border: none;                      /* nessun bordo */
+  border-radius: 6px;                /* angoli arrotondati */
+  padding: 8px 12px;                 /* spazio interno */
+  font-size: 18px;                   /* dimensione icona */
+  cursor: pointer;                   /* mano al passaggio */
+  transition: background 0.3s ease; /* effetto hover */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* leggero rilievo */
+  margin-bottom: 18px;
+}
+
+.PlusIconTable:hover {
+  background: linear-gradient(to bottom, #0056b3, #003f7f); /* sfumatura più scura al passaggio */
+}
+
+</style>
+<body>
+
+<div style="width: 100vw; height: 7vh; position: absolute;">
+<nav class="top-navbar glass">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="Affitti.html">Affitto</a></li>
+                <li><a href="#">Fondo cassa</a></li>
+                <li><a href="#">Utenze</a></li>
+                <li><a href="#">Copponi</a></li>
+                <li><a href="#">Registro Consumazioni</a></li>
+                <li><a href="ListinoPrezzi.html">Listino Prezzi</a></li>
+                <li><a href="#">Acquisti</a></li>
+            </ul>
+        </nav>
+</div>
+<div style="width: 100vw; margin-top: 7vh; top: 7vh !important; height: 7vh; position: absolute;">
+</div>
+
+    <div id="ModalContainerPanel" style="z-index: 2; display: none; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.5); position: absolute;">
+            <div style="width:70vw; height:70vh; background-color:white; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); border-radius:12px; box-shadow:0 4px 24px rgba(0,0,0,0.15);">
+
+                <!-- header -->
+                <div style="height: 10%; width: 100%; background-color: #236093; border-radius: 12px 12px 0px 0px; display:flex; justify-content:flex-end; align-items:center; padding:0 12px; box-sizing:border-box;">
+                    <div style="width:100%; text-align: left;">
+                    <h2 style="color: white;">📝 Inserimento Dati</h2>
+                </div>
+                    <button id="close-modal" onclick="document.getElementById('ModalContainerPanel').style.display = 'none'" style="margin-bottom: 2vh; margin-left: 3vh; background:none; border:none; color:white; font-size:1.4rem; font-weight:bold; cursor:pointer;">✕</button>
+                </div>
+                <!-- content -->
+                   <div class="container" style="padding: 2vw;">
+
+
+        <form id="dataForm">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="nome">Nome Utente</label>
+                    <select id="nome" name="nome" required>
+                        <option value="">Seleziona un utente...</option>
+                        <!-- Le opzioni verranno caricate dinamicamente -->
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="importo">Importo (€)</label>
+                    <input type="number" id="importo" name="importo" step="0.01" min="0" placeholder="0.00" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="data">Data</label>
+                    <input type="date" id="data" name="data" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="mese">Mese</label>
+                    <select id="mese" name="mese" required>
+                        <option value="">Seleziona un mese...</option>
+                        <option value="1">Gennaio</option>
+                        <option value="2">Febbraio</option>
+                        <option value="3">Marzo</option>
+                        <option value="4">Aprile</option>
+                        <option value="5">Maggio</option>
+                        <option value="6">Giugno</option>
+                        <option value="7">Luglio</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Settembre</option>
+                        <option value="10">Ottobre</option>
+                        <option value="11">Novembre</option>
+                        <option value="12">Dicembre</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                      <label for="annoSelect1">Seleziona Anno</label>
+                    <select id="annoSelect1" name="annoSelect1" required>
+                        <option value="">Seleziona un anno...</option>
+                        <option value="2023">2023</option>
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                        <option value="2028">2028</option>
+                        <option value="2029">2029</option>
+                        <option value="2030">2030</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="button-container">
+                <button type="reset" class="btn-reset modal-button">Cancella tutto</button>
+                <button type="submit" class="btn-save modal-button">Salva</button>
+            </div>
+        </form>
+    </div>
+
+        </div>
+    </div>
+    <div style="width: 100vw; height: 93vh; position: absolute;">
+        <div style="margin-top: 10vh;">
+            <section class="styled-table-section">
+                <h2 style="text-align:center; margin-bottom:16px; color:transparent;">.</h2>
+</div>
+        <div  style="width: 100%; left: 7vh !important;">
+            <table id="TabellaProdotti" style="overflow-y: scroll;" class="styled-table">
+                <thead>
+                    <tr>
+                        <th style="width: 40%;">Prodotto</th>
+                        <th style="width: 20%;">Prezzo</th>
+                        <th style="width: 20%;">Quantita' totale</th>
+                        <th style="width: 20%;">Restante</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                        <!-- Le righe della tabella verranno inserite qui dinamicamente -->
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+    <!-- <script type="module" src="/js/script.js"></script> -->
+<script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+  const supabaseUrl = "https://tjbsnchbezvhhugkgaxx.supabase.co";
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYnNuY2hiZXp2aGh1Z2tnYXh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0OTA4ODAsImV4cCI6MjA3OTA2Njg4MH0.eMDjkjvirN1DrUPysy34TgycmwMkAoMmMuxJ1_o9vzg"; // la tua anon key
+
+  // Inizializza il client con la chiave anon
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
+  async function ElencoSelect() {
+    const { data, error } = await supabase.from("ElencoProdotti").select("*");
+    if (error) {
+      console.error("Errore:", error);
+      return [];
+    }
+    console.log("Dati ottenuti:", data);
+    return data;
+  }
+
+  async function AcquistiSpeseSelect() {
+    const { data, error } = await supabase.from("Acquisti_Spese").select("*");
+    if (error) {
+      console.error("Errore:", error);
+      return [];
+    }
+    console.log("Dati ottenuti:", data);
+    return data;
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    visualizzaProdotti();
+  });
+
+  async function visualizzaProdotti(Mese, Anno) {
+    console.log('Calcolo totale per Mese: ' + Mese + ' Anno: ' + Anno);
+
+    const ListaProdotti = await ElencoSelect();
+    const ListaAcquistiSpese = await AcquistiSpeseSelect();
+
+    const tbody = document.getElementById('TabellaProdotti').getElementsByTagName('tbody')[0];
+    tbody.innerHTML = ""; // pulizia
+
+    ListaProdotti.forEach(prodotto => {
+      const tr = document.createElement("tr");
+      let trovato = false;
+
+      ListaAcquistiSpese.find(acquisto => {
+        if (acquisto.ProdottoNo === prodotto.id) {
+          trovato = true;
+        }
+      });
+
+      const prezzoConDecimale = parseFloat(prodotto.Prezzo).toFixed(2);
+
+      if (!trovato) {
+        tr.innerHTML = `
+          <td>${prodotto.Prodotto}</td>
+          <td>${prezzoConDecimale} €</td>
+          <td>0</td>
+          <td>0</td>
+        `;
+      } else {
+        let quantitaTotale = 0;
+        ListaAcquistiSpese.forEach(acquisto => {
+          if (acquisto.ProdottoNo === prodotto.id) {
+            quantitaTotale += (parseInt(acquisto.Qty) || 0) * (parseInt(acquisto.Confezioni) || 0);
+          }
+        });
+
+        tr.innerHTML = `
+          <td>${prodotto.Prodotto}</td>
+          <td>${prezzoConDecimale} €</td>
+          <td>${quantitaTotale}</td>
+          <td>-</td>
+        `;
+      }
+
+      tbody.appendChild(tr);
+    });
+  }
+</script>
+
+
+</body>
+</html>

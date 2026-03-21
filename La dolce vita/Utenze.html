@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Dolce Vita - VB.NET</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<style>
+    .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-grid label {
+          color: #555;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .form-grid input[type="number"],
+        .form-grid input[type="date"],
+        .form-grid select {
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+            color: #333;
+        }
+
+        .form-grid input[type="number"]:focus,
+        .form-grid input[type="date"]:focus,
+        .form-grid select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-grid select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 35px;
+        }
+
+         .button-container {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+         .modal-button {
+            padding: 14px 32px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+         .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+         .btn-save:active {
+            transform: translateY(0);
+        }
+
+         .btn-reset {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+         .btn-reset:hover {
+            background: #e0e0e0;
+        }
+
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+             .container {
+                padding: 25px;
+            }
+        }
+        .selezione-container {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  text-align: center;
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.selezione-container label {
+  display: block;
+  margin: 12px 0 6px;
+  font-weight: 600;
+  color: #333;
+}
+
+.selezione-container select {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+  font-size: 15px;
+  transition: all 0.3s ease;
+}
+
+.selezione-container select:focus {
+  border-color: #0078d7; /* blu Microsoft */
+  background-color: #fff;
+  box-shadow: 0 0 6px rgba(0,120,215,0.3);
+  outline: none;
+}
+
+.PlusIconTable {
+  /* background: linear-gradient(to bottom, #007BFF, #0056b3); sfumatura blu */
+  background: linear-gradient(1deg, rgba(35,96,147,1), silver);
+  color: white;                      /* testo/icona bianca */
+  border: none;                      /* nessun bordo */
+  border-radius: 6px;                /* angoli arrotondati */
+  padding: 8px 12px;                 /* spazio interno */
+  font-size: 18px;                   /* dimensione icona */
+  cursor: pointer;                   /* mano al passaggio */
+  transition: background 0.3s ease; /* effetto hover */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* leggero rilievo */
+  margin-bottom: 18px;
+}
+
+.PlusIconTable:hover {
+  background: linear-gradient(to bottom, #0056b3, #003f7f); /* sfumatura più scura al passaggio */
+}
+
+</style>
+<body>
+
+<div style="width: 100vw; height: 7vh; position: absolute;">
+<nav class="top-navbar glass">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="Affitti.html">Affitto</a></li>
+                <li><a href="#">Fondo cassa</a></li>
+                <li><a href="#">Utenze</a></li>
+                <li><a href="#">Copponi</a></li>
+                <li><a href="#">Registro Consumazioni</a></li>
+                <li><a href="ListinoPrezzi.html">Listino Prezzi</a></li>
+                <li><a href="#">Acquisti</a></li>
+            </ul>
+        </nav>
+</div>
+<div style="width: 100vw; margin-top: 7vh; top: 7vh !important; height: 7vh; position: absolute;">
+<nav class="top-navbar glass" style="top: 7vh !important; height: 7vh;">
+            <ul>
+                <li style="width: 31.3vw;"><a id="a_Affitto" href="Affitti.html">Affitto</a></li>
+                <li style="width: 31.3vw;"><a id="a_WiFi" href="WiFi.html">Wi Fi</a></li>
+                <li style="width: 31.3vw; background: #3498db; color: #fff; border-radius: 20px;"><a id="a_Utenze" href="Utenze.html">Utenze</a></li>
+            </ul>
+        </nav>
+</div>
+
+    <div id="ModalContainerPanel" style="z-index: 2; display: none; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.5); position: absolute;">
+            <div style="width:70vw; height:70vh; background-color:white; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); border-radius:12px; box-shadow:0 4px 24px rgba(0,0,0,0.15);">
+                
+                <!-- header -->
+                <div style="height: 10%; width: 100%; background-color: #236093; border-radius: 12px 12px 0px 0px; display:flex; justify-content:flex-end; align-items:center; padding:0 12px; box-sizing:border-box;">
+                    <div style="width:100%; text-align: left;">
+                    <h2 style="color: white;">📝 Inserimento Dati</h2>
+                </div>
+                    <button id="close-modal" onclick="document.getElementById('ModalContainerPanel').style.display = 'none'" style="margin-bottom: 2vh; margin-left: 3vh; background:none; border:none; color:white; font-size:1.4rem; font-weight:bold; cursor:pointer;">✕</button>
+                </div>
+                <!-- content -->
+                   <div class="container" style="padding: 2vw;">
+        
+        
+        <form id="dataForm">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="nome">Nome Utente</label>
+                    <select id="nome" name="nome" required>
+                        <option value="">Seleziona un utente...</option>
+                        <!-- Le opzioni verranno caricate dinamicamente -->
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="importo">Importo (€)</label>
+                    <input type="number" id="importo" name="importo" step="0.01" min="0" placeholder="0.00" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="data">Data</label>
+                    <input type="date" id="data" name="data" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="mese">Mese</label>
+                    <select id="mese" name="mese" required>
+                        <option value="">Seleziona un mese...</option>
+                        <option value="1">Gennaio</option>
+                        <option value="2">Febbraio</option>
+                        <option value="3">Marzo</option>
+                        <option value="4">Aprile</option>
+                        <option value="5">Maggio</option>
+                        <option value="6">Giugno</option>
+                        <option value="7">Luglio</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Settembre</option>
+                        <option value="10">Ottobre</option>
+                        <option value="11">Novembre</option>
+                        <option value="12">Dicembre</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                      <label for="annoSelect1">Seleziona Anno</label>
+                    <select id="annoSelect1" name="annoSelect1" required>
+                        <option value="">Seleziona un anno...</option>
+                        <option value="2023">2023</option>
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                        <option value="2028">2028</option>
+                        <option value="2029">2029</option>
+                        <option value="2030">2030</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="button-container">
+                <button type="reset" class="btn-reset modal-button">Cancella tutto</button>
+                <button type="submit" class="btn-save modal-button">Salva</button>
+            </div>
+        </form>
+    </div>
+
+        </div>
+    </div>
+    <div style="width: 100vw; height: 93vh; position: absolute;">
+        <div style="margin-top: 10vh;">
+            <section class="styled-table-section">
+                <h2 style="text-align:center; margin-bottom:16px; color:transparent;">.</h2>
+<div class="selezione-container">
+  <label for="meseSelect">Seleziona Mese</label>
+  <select id="meseSelect" name="meseSelect" required>
+    <option value="">Seleziona un mese...</option>
+    <option value="1">Gennaio</option>
+    <option value="2">Febbraio</option>
+    <option value="3">Marzo</option>
+    <option value="4">Aprile</option>
+    <option value="5">Maggio</option>
+    <option value="6">Giugno</option>
+    <option value="7">Luglio</option>
+    <option value="8">Agosto</option>
+    <option value="9">Settembre</option>
+    <option value="10">Ottobre</option>
+    <option value="11">Novembre</option>
+    <option value="12">Dicembre</option>
+  </select>
+
+  <label for="annoSelect">Seleziona Anno</label>
+  <select id="annoSelect" name="annoSelect" required>
+    <option value="">Seleziona un anno...</option>
+    <option value="2023">2023</option>
+    <option value="2024">2024</option>
+    <option value="2025">2025</option>
+    <option value="2026">2026</option>
+    <option value="2027">2027</option>
+    <option value="2028">2028</option>
+    <option value="2029">2029</option>
+    <option value="2030">2030</option>
+  </select>
+</div>
+                    <table class="styled-table">
+                    <thead> 
+                        <tr>
+                            <th>id</th>
+                            <th>Nome</th>
+                            <th id="th_DataPagamento" style="display: none;">Data pagamento</th>
+                            <th id="th_Saldo" style="display: none;">Saldo</th>
+                            <th id="th_Restante" style="display: none;">Restante</th>
+                            <th id="th_ButtonAdd" style="display: none;">Aggiungi</th>
+                        </tr>
+                    </thead>
+                <tbody>
+                        <!-- Le righe della tabella verranno inserite qui dinamicamente -->
+
+                </tbody>
+            </table>
+        </section>
+    </div>
+    
+            <!-- <section style="width: 100%; height: 10vh; align-items: end;">
+                <button id="open-modal" onclick="document.getElementById('ModalContainerPanel').style.display = 'block'" style="margin-left: 47%; bottom: 16px; right: 16px; width: 65px; height: 65px; border-radius: 50%; background-color: #236093; color: white; border: none; font-size: 24px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); cursor: pointer;">＋</button>
+            </section> -->
+</div>
+<div style="position: absolute;right: 7vw; width: 25vw; height: 100vh; vertical-align: center;">
+            <section>
+                <table  id="TabellaTotale" class="styled-table" style="z-index: 1;right: 0; top:45vh; position: absolute; width: auto; max-width: 400px; min-width: 300px;">
+                    <thead> 
+                        <tr>
+                            <th style="width: 4vw;">Totale</th>
+                            <th style="width: 4vw;">Saldato</th>
+                            <th style="width: 4vw;">Restante</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Le righe della tabella verranno inserite qui dinamicamente -->
+                                                
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </div>
+</div>
+
+</body>
+    <!-- <script type="module" src="/js/script.js"></script> -->
+<script type="module">
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+  const supabaseUrl = "https://tjbsnchbezvhhugkgaxx.supabase.co";
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYnNuY2hiZXp2aGh1Z2tnYXh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0OTA4ODAsImV4cCI6MjA3OTA2Njg4MH0.eMDjkjvirN1DrUPysy34TgycmwMkAoMmMuxJ1_o9vzg"; // la tua anon key
+
+  // Inizializza il client con la chiave anon
+  const supabase = createClient(supabaseUrl, supabaseKey);
+  async function SaveToDB(Nome, Importo, Data, Mese, Anno, DataCreazione, DataModifica, ID) {
+    console.log('SaveToDB chiamato con: ' + Nome + ' - ' + Importo + ' - ' + Data + ' - ' + Mese + ' - ' + Anno + ' - ' + DataCreazione + ' - ' + DataModifica + ' - ' + ID);
+    if (ID == 0) {   
+        const { data, error } = await supabase
+            .from('PagamentoUtenze')            
+            .insert([
+                {   UtenteNo: Nome, 
+                    Value: Importo,
+                    DataPagamento: Data,
+                    Mese: Mese, 
+                    Anno: Anno,
+                    DataCreazione: DataCreazione, 
+                    DataModifica: DataModifica
+                },
+            ]);
+                if (error) {
+        console.error('Errore durante l\'inserimento:', error);
+    } else {
+        console.log('Dati inseriti con successo:', data);
+    }
+    } else {
+        const { data, error } = await supabase
+        .from('PagamentoUtenze')
+        .update({
+            Value: Importo,
+            DataPagamento: Data,
+            DataModifica: DataModifica
+        })
+        .eq('id', ID);
+
+        if (error) {
+        console.error('Errore update:', error);
+        } else {
+        console.log('Record aggiornato:', data);
+        }
+
+
+}}
+
+async function UtentiSelect() {
+    const { data, error } = await supabase.from("Utenti").select("*").eq('IsResident', true);
+      if (error) {
+    console.error("Errore:", error);
+    return;
+  }     
+  console.log("Dati ottenuti:", data);
+  return data;
+}
+
+async function UtenzeSelect() {
+    const { data, error } = await supabase.from("UtenzeDaPagare").select("*");
+      if (error) {
+    console.error("Errore:", error);
+    return;
+  }     
+  console.log("Dati ottenuti:", data);
+  return data;
+}
+
+async function PagamentiSelect() {
+    const { data, error } = await supabase.from("PagamentoUtenze").select("*");
+      if (error) {
+    console.error("Errore:", error);
+    return;
+  }     
+  console.log("Dati ottenuti:", data);
+  return data;
+}
+
+  async function caricaUtentiStart() {
+    const ListaUtenti = await UtentiSelect();
+    // 🔹 Popola il select
+    const selectElement = document.getElementById('nome');
+                
+                // Rimuove tutte le opzioni tranne la prima (placeholder)
+                // selectElement.innerHTML = '<option value="">Seleziona un utente...</option>';
+                
+                // Aggiunge gli utenti dal database
+                ListaUtenti.forEach(utente => {
+                    const option = document.createElement('option');
+                    option.value = utente.id; // o utente.nome se preferisci
+                    option.textContent = utente.Nome; // Modifica con il campo corretto del tuo database
+                    selectElement.appendChild(option);
+                });
+    const tbody = document.querySelector(".styled-table tbody");
+    tbody.innerHTML = "";
+    ListaUtenti.forEach(utente => {    
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${utente.id}</td><td>${utente.Nome}</td>`;
+      tbody.appendChild(tr);
+    });
+            document.getElementById('th_DataPagamento').style.display = 'none';
+        document.getElementById('th_Saldo').style.display = 'none';
+        document.getElementById('th_Restante').style.display = 'none';
+        document.getElementById('th_ButtonAdd').style.display = 'none';
+
+        
+  }
+  async function LeggiSelezione() {
+    const meseSelezionato = document.getElementById('meseSelect').value;
+    const annoSelezionato = document.getElementById('annoSelect').value;
+
+    console.log('Mese selezionato:', meseSelezionato);
+    console.log('Anno selezionato:', annoSelezionato);
+
+    if (meseSelezionato && annoSelezionato) {
+        const ListaUtenti = await UtentiSelect();
+        const ListaPagamenti = await PagamentiSelect();
+        const ListaUtenze = await UtenzeSelect();
+        var rec = ListaUtenze.find(n => n.Mese == document.getElementById('meseSelect').value && n.Anno == document.getElementById('annoSelect').value);
+        if (rec == null) {
+            // alert("Non esistono record per il mese e anno selezionati.");
+            caricaUtentiStart();         
+            calcolaTotale(meseSelezionato, annoSelezionato);
+        } else {
+            caricaUtenti();
+            calcolaTotale(meseSelezionato, annoSelezionato);
+        }
+    
+
+    } else {
+
+    }
+}
+
+async function calcolaTotale(Mese, Anno) {
+  console.log('Calcolo totale per Mese: ' + Mese + ' Anno: ' + Anno);
+
+  const ListaUtenze = await UtenzeSelect();
+  const rec = ListaUtenze.find(n => n.Mese == Mese && n.Anno == Anno);
+  const ValoreTotale = rec?.Value || 0;
+
+  const ListaPagamenti = await PagamentiSelect();
+  let totaleSaldato = 0;
+  ListaPagamenti.forEach(pagamento => {
+    if (pagamento.Mese == Mese && pagamento.Anno == Anno) {
+      totaleSaldato += parseFloat(pagamento.Value) || 0;
+    }
+  });
+
+  const restanteTotale = ValoreTotale - totaleSaldato;
+
+  // ✅ Accedi al primo tbody
+  const tbody = document.getElementById('TabellaTotale').getElementsByTagName('tbody')[0];
+  tbody.innerHTML = ""; // pulizia
+
+  const row = `
+    <tr>
+      <td>${ValoreTotale.toFixed(2)} euro</td>
+      <td>${totaleSaldato.toFixed(2)} euro</td>
+      <td>${restanteTotale.toFixed(2)} euro</td>
+    </tr>
+  `;
+  tbody.innerHTML = row;
+
+  console.log("Totale:", ValoreTotale, "Saldato:", totaleSaldato, "Restante:", restanteTotale);
+}
+
+
+async function caricaUtenti() {
+    const ListaUtenti = await UtentiSelect();
+    const ListaPagamenti = await PagamentiSelect();
+    const ListaUtenze = await UtenzeSelect();
+    var rec = ListaUtenze.find(n => n.Mese == document.getElementById('meseSelect').value && n.Anno == document.getElementById('annoSelect').value);
+    // 🔹 Pulizia tabella e select all'inizio
+    const tbody = document.querySelector(".styled-table tbody");
+    tbody.innerHTML = "";
+
+    // const selectElement = document.getElementById('nome');
+    // selectElement.innerHTML = '<option value="">Seleziona un utente...</option>';
+
+    const selectElement = document.getElementById('nome');
+                
+                // Rimuove tutte le opzioni tranne la prima (placeholder)
+                selectElement.innerHTML = '<option value="">Seleziona un utente...</option>';
+                
+                // Aggiunge gli utenti dal database
+                ListaUtenti.forEach(utente => {
+                    const option = document.createElement('option');
+                    option.value = utente.id; // o utente.nome se preferisci
+                    option.textContent = utente.Nome; // Modifica con il campo corretto del tuo database
+                    selectElement.appendChild(option);
+                });
+
+    // 🔹 Arricchisci gli utenti con dati di pagamento
+    ListaUtenti.forEach(utente => {
+        const pagamento = ListaPagamenti.find(p => p.UtenteNo === utente.id && p.Mese == rec.Mese && p.Anno == rec.Anno);
+        if (pagamento) {
+            utente.DataPagamento = pagamento.DataPagamento;
+            utente.Saldo = pagamento.Value;
+        } else {
+            utente.DataPagamento = '-';
+            utente.Saldo = 0;
+        }
+    });
+    var ValoreAffittoMensile = rec.Value / ListaUtenti.length;
+    var restanteTotale = rec.Value;
+    ListaUtenti.forEach(utente => {
+        restanteTotale -= parseFloat(utente.Saldo) || 0;
+        utente.Restante = (ValoreAffittoMensile - (parseFloat(utente.Saldo) || 0)).toFixed(2);
+    });
+
+    // 🔹 Popola la tabella
+    let totalSaldo = 0;
+ListaUtenti.forEach(utente => {    
+    const tr = document.createElement("tr");
+    tr.style.height = '4vh';
+    tr.innerHTML = `
+      <td>${utente.id}</td>
+      <td>${utente.Nome}</td>
+      <td>${utente.DataPagamento}</td>
+      <td>${utente.Saldo} euro</td>
+      <td>${utente.Restante} euro</td>
+      <td style="padding: 0px 34px;"><button id="btnAdd_ID${utente.id}" class="PlusIconTable">+</button></td>
+    `;
+    tbody.appendChild(tr);
+
+    // 🔹 aggiungi l'evento al bottone
+    const btn = tr.querySelector(`#btnAdd_ID${utente.id}`);
+    btn.addEventListener("click", () => {
+        const mese = document.getElementById('meseSelect').value;
+        const anno = document.getElementById('annoSelect').value;
+        ApriModalConParametri(utente.id, mese, anno);
+    });
+
+    totalSaldo += parseFloat(utente.Saldo) || 0;
+});
+
+
+
+    // 🔹 Mostra le colonne
+    document.getElementById('th_DataPagamento').style.display = '';
+    document.getElementById('th_Saldo').style.display = '';
+    document.getElementById('th_Restante').style.display = '';
+    document.getElementById('th_ButtonAdd').style.display = ''; 
+}
+
+
+        // Gestione submit del form
+        document.getElementById('dataForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+
+            const ListaUtenti = await UtentiSelect();
+            const ListaPagamenti = await PagamentiSelect();
+
+            const UtenteNo = document.getElementById('nome').value;
+            const importo = document.getElementById('importo').value;
+            const data = document.getElementById('data').value;
+            const mese = document.getElementById('mese').value;
+            const anno = document.getElementById('annoSelect1').value;
+            const oggi = new Date();
+            var annoSelezionato1 = parseInt(anno);
+            console.log('Anno selezionato nel form: ' + annoSelezionato1);
+            console.log('Mese selezionato nel form: ' + mese);
+            console.log('UtenteNo selezionato nel form: ' + UtenteNo);
+
+            var Rec = ListaPagamenti.find(p => 
+                p.UtenteNo == UtenteNo && p.Mese == mese && p.Anno == annoSelezionato1
+            );
+
+            console.log('Record cercato in lista pagamenti' + Rec);
+            var RecUtente = ListaUtenti.find(u => u.id == UtenteNo);
+            console.log('Utente trovato: ' + RecUtente.Nome);
+                if (Rec != null) {
+                    var nuovoImporto = parseFloat(Rec.Value) + parseFloat(importo);
+                    alert("Attenzione: " + RecUtente.Nome + " ha già effettuato un pagamento di " + Rec.Value + " euro il " + Rec.DataPagamento + " per il mese di " + mese + "/" + anno + ". Sto aggiungendo il pagamento sommandolo al precedente (Totale: " + nuovoImporto + " ).");
+                    SaveToDB(UtenteNo, nuovoImporto, data, mese, anno, Rec.DataCreazione, oggi.toISOString().split('T')[0], Rec.id);
+                    console.log('Dati Aggiornati: ' + RecUtente.Nome + ' - ' + nuovoImporto + ' euro - ' + data + ' per il mese/anno ' + mese + '/' + anno);
+
+                } else {
+                    SaveToDB(UtenteNo, importo, data, mese, anno, oggi.toISOString().split('T')[0]  , oggi.toISOString().split('T')[0], 0);
+                    console.log('Dati Aggiornati: ' + RecUtente.Nome + ' - ' + importo + ' euro - ' + data + ' per il mese/anno ' + mese + '/' + anno);
+
+                }
+
+            // Animazione di successo
+            const btn = e.target.querySelector('.btn-save');
+            const originalText = btn.textContent;
+            btn.textContent = '✓ Salvato!';
+            btn.style.background = 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)';
+            
+            // Salva i dati nel database
+            
+            LeggiSelezione(); // Ricarica la tabella con i nuovi dati
+            document.getElementById('ModalContainerPanel').style.display = 'none'
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = '';
+                this.reset();
+                document.getElementById('data').valueAsDate = new Date();
+            }, 200);
+            
+        });
+
+//   window.addEventListener("DOMContentLoaded", );
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // Crea un oggetto Date con la data e ora attuale
+    const oggi = new Date();
+
+    // Ottieni l'anno corrente
+    const Anno = oggi.getFullYear();
+
+    // Ottieni il mese corrente (attenzione: i mesi partono da 0 → Gennaio = 0, Dicembre = 11)
+    const Mese = oggi.getMonth() + 1; // aggiungo +1 per avere 1–12
+
+    console.log("Anno:", Anno);
+    console.log("Mese:", Mese);
+
+    document.getElementById('annoSelect').value = Anno;
+    document.getElementById('meseSelect').value = Mese;
+    document.getElementById("meseSelect").addEventListener("change", LeggiSelezione);
+    document.getElementById("annoSelect").addEventListener("change", LeggiSelezione);
+    caricaUtenti();
+    calcolaTotale(Mese, Anno);
+});
+
+async function ApriModalConParametri(UtenteNo, Mese, Anno) {
+    document.getElementById('ModalContainerPanel').style.display = 'block';
+
+    const meseOrig = document.getElementById('mese').value;
+    const annoOrig = document.getElementById('annoSelect1').value;
+
+    const meseDaUsare = Mese || meseOrig;
+    const annoDaUsare = Anno || annoOrig;
+
+    const meseSelect = document.getElementById('mese');
+    const utenteSelect = document.getElementById('nome');
+    const dataTextBox = document.getElementById('data');
+
+const annoSelect = document.getElementById('annoSelect1');
+// document.getElementById('ModalContainerPanel').style.display = 'block';
+
+setTimeout(() => {
+  meseSelect.value = String(meseDaUsare);
+  annoSelect.value = String(annoDaUsare);
+  utenteSelect.value = String(UtenteNo);
+    const today = new Date().toISOString().split('T')[0];
+    dataTextBox.value = today;
+}, 50);
+
+
+    console.log("ApriModalConParametri → Utente:", UtenteNo, "Mese:", meseDaUsare, "Anno:", annoDaUsare);
+}
+
+
+</script>
+
+</body>
+</html>

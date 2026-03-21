@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Dolce Vita - VB.NET</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="top-navbar">
+        <ul>
+            <li><a href="#">Home</a></li>
+            <li><a onclick="Response.redirect('../affitti.html')">Affitto</a></li>
+            <li><a href="#">Fondo cassa</a></li>
+            <li><a href="#">Copponi</a></li>
+            <li><a href="#">Registro Consumazioni</a></li>
+            <li><a href="#">Listino Prezzi</a></li>
+            <li><a href="#">Acquisti</a></li>
+        </ul>
+    </nav>
+
+    <header class="hero-header">
+        <nav class="top-navbar glass">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="Affitti.html">Affitto</a></li>
+                <li><a href="#">Fondo cassa</a></li>
+                <li><a href="Copponi.html">Copponi</a></li>
+                <li><a href="Registro.html">Registro Consumazioni</a></li>
+                <li><a href="ListinoPrezzi.html">Listino Prezzi</a></li>
+                <li><a href="#">Acquisti</a></li>
+            </ul>
+        </nav>
+        <div class="hero-content">
+            <section class="tiles-grid" aria-label="Seleziona una sezione">
+                <a class="tile" href="Affitti.html">
+                    <div class="tile-icon">📊</div>
+                    <div  class="tile-title">Affitto</div>
+                    <div class="tile-desc">Riepilogo degli affitti del locale</div>
+                </a>
+                <a class="tile" href="ListinoPrezzi.html">
+                    <div class="tile-icon">📅</div>
+                    <div class="tile-title">Listino Prezzi</div>
+                    <div class="tile-desc">Consulta il listino prezzi del locaale 'La Dolce Vita'</div>
+                </a>
+                <a class="tile" href="Registro.html">
+                    <div class="tile-icon">🧾</div>
+                    <div class="tile-title">Registro</div>
+                    <div class="tile-desc">Storico e tracciamento delle consumazioni</div>
+                </a>
+                <a class="tile" href="#">
+                    <div class="tile-icon">🛒</div>
+                    <div class="tile-title">Acquisti</div>
+                    <div class="tile-desc">Registro degli acquisti del locale</div>
+                </a>
+                <a class="tile" href="#">
+                    <div class="tile-icon">🛒</div>
+                    <div class="tile-title">Copponi</div>
+                    <div class="tile-desc">Storico dei nostri copponi <br>(mvp Dimi)</div>
+                </a>
+                <a class="tile" href="#">
+                    <div class="tile-icon">⚙️</div>
+                    <div class="tile-title">Impostazioni</div>
+                    <div class="tile-desc">Configura il sistema</div>
+                </a>
+                <a class="tile" href="#">
+                    <div class="tile-icon">❓</div>
+                    <div class="tile-title">Aiuto</div>
+                    <div class="tile-desc">Guide e supporto</div>
+                </a>
+            </section>
+        </div>
+    </header>
+    <script type="module" src="/js/script.js"></script>
+</body>
+</html>

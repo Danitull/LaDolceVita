@@ -8,7 +8,10 @@
 </head>
 <body>
     <header class="hero-header">
-        <nav class="top-navbar glass">
+        <nav class="top-navbar glass nav-main">
+            <button class="navbar-hamburger" aria-label="Apri menu" onclick="this.classList.toggle('is-active'); this.closest('nav').querySelector('ul').classList.toggle('nav-open');">
+                <span></span><span></span><span></span>
+            </button>
             <ul>
                 <li><a href="index.html">Home</a></li>
                 <li><a href="Affitti.html">Affitto</a></li>

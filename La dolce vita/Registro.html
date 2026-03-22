@@ -438,13 +438,11 @@ async function EventSubmitForm(CarrelloAcquisti) {
             for (const element of dati) {
                 const ProdottoNo = element.ProdottoNo;
                 const Quantita = element.Quantita;
-                const Prezzo = element.Prezzo;
-                const DataCreazione = new Date().toISOString();
+                const DataCreazione = new Date().toISOString().slice(0, 10);
                 const record = {
                     UtenteNo: UtenteNo,
                     ProdottoNo: ProdottoNo,
                     Qty: Quantita,
-                    Prezzo: Prezzo,
                     DataCreazione: DataCreazione,
                 };
                 if (pagaSubito) {

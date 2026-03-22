@@ -71,7 +71,7 @@ class NavMain extends HTMLElement {
     const email = getSessionEmail();
 
     // Link admin visibile solo all'amministratore
-    const adminLink = email === 'danilotullo01@gmail.com'
+    const adminLink = (email === 'danilotullo01@gmail.com' || email === 'francesco.caldarola92@gmail.com')
       ? `<li><a href="Admin.html"${page === 'Admin.html' ? ' class="nav-active"' : ''}>⚙️ Admin</a></li>`
       : '';
 

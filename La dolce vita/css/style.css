@@ -477,3 +477,111 @@ button:hover { background: #2980b9; }
   transform: scale(1.2);
   color: #fff;
 }
+
+/* ============================================================
+   RESPONSIVE LAYOUT — aggiunto per supporto mobile/tablet
+   Breakpoints: 320px, 768px, 1280px
+   ============================================================ */
+
+body {
+  overflow-x: hidden;
+}
+
+/* Wrapper scrollabile per tabelle larghe */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Layout pagine interne con DUE navbar (Affitti, WiFi, Utenze) */
+.page-content {
+  padding-top: 15vh;
+  padding-bottom: 40px;
+  padding-left: 16px;
+  padding-right: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 24px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* Layout pagine con UNA sola navbar (ListinoPrezzi, Copponi) */
+.page-content.single-nav {
+  padding-top: 9vh;
+}
+
+/* Area tabella principale */
+.main-table-area {
+  flex: 1;
+  min-width: 0; /* evita overflow nei flex container */
+}
+
+/* Area tabella totali (a destra su desktop) */
+.totale-area {
+  width: 320px;
+  flex-shrink: 0;
+}
+
+.totale-area .styled-table {
+  min-width: unset;
+  width: 100%;
+}
+
+/* Tablet ≤ 900px: riduce width del pannello totale */
+@media (max-width: 900px) {
+  .totale-area {
+    width: 260px;
+  }
+}
+
+/* Mobile ≤ 640px: layout verticale, totale sotto la tabella */
+@media (max-width: 640px) {
+  .page-content {
+    flex-direction: column;
+    padding-top: 16vh;
+    padding-left: 8px;
+    padding-right: 8px;
+    gap: 16px;
+  }
+
+  .page-content.single-nav {
+    padding-top: 9vh;
+  }
+
+  .totale-area {
+    width: 100%;
+  }
+
+  /* Modal più ampio su piccoli schermi */
+  #ModalContainerPanel > div {
+    width: 95vw !important;
+    height: auto !important;
+    min-height: 60vh;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+}
+
+/* Registro: overflow fix sul contenitore slide */
+.container-registro {
+  width: 100%;
+  min-height: calc(100vh - 14vh);
+  position: relative;
+  margin-top: 14vh;
+  overflow: hidden;
+}
+
+/* Colonne interne registro */
+.registro-col {
+  flex: 1;
+  min-width: 280px;
+}
+
+@media (max-width: 640px) {
+  .registro-col {
+    min-width: 100%;
+  }
+}

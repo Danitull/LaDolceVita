@@ -266,11 +266,9 @@
 
         </div>
     </div>
-    <div style="width: 100vw; height: 93vh; position: absolute;">
-        <div style="margin-top: 10vh;">
-            <section class="styled-table-section">
-                <h2 style="text-align:center; margin-bottom:16px; color:transparent;">.</h2>
-<div class="selezione-container">
+<div class="page-content">
+    <div class="main-table-area">
+        <div class="selezione-container">
   <label for="meseSelect">Seleziona Mese</label>
   <select id="meseSelect" name="meseSelect" required>
     <option value="">Seleziona un mese...</option>
@@ -313,9 +311,20 @@
                             <th id="th_ButtonAdd" style="display: none;">Aggiungi</th>
                         </tr>
                     </thead>
+        <div class="table-responsive">
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>Nome</th>
+                        <th id="th_DataPagamento" style="display: none;">Data pagamento</th>
+                        <th id="th_Saldo" style="display: none;">Saldo</th>
+                        <th id="th_Restante" style="display: none;">Restante</th>
+                        <th id="th_ButtonAdd" style="display: none;">Aggiungi</th>
+                    </tr>
+                </thead>
                 <tbody>
-                        <!-- Le righe della tabella verranno inserite qui dinamicamente -->
-
+                    <!-- Le righe della tabella verranno inserite qui dinamicamente -->
                 </tbody>
             </table>
             </div>
@@ -344,6 +353,23 @@
                 </table>
             </section>
         </div>
+    </div>
+    <div class="totale-area">
+        <div class="table-responsive">
+            <table id="TabellaTotale" class="styled-table">
+                <thead>
+                    <tr>
+                        <th>Totale</th>
+                        <th>Saldato</th>
+                        <th>Restante</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Le righe della tabella verranno inserite qui dinamicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 </body>

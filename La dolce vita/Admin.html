@@ -1105,9 +1105,9 @@ window.saveRecord = async function(e) {
         }
     }
 
-    let error;
+    let error, updatedData;
     if (currentEditId) {
-        ({ error } = await sb.from(cfg.table).update(payload).eq('id', currentEditId));
+        ({ data: updatedData, error } = await sb.from(cfg.table).update(payload).eq('id', currentEditId).select());
     } else {
         ({ error } = await sb.from(cfg.table).insert(payload));
     }
@@ -1116,7 +1116,13 @@ window.saveRecord = async function(e) {
     saveBtn.textContent = 'Salva';
 
     if (error) {
-        if (window.showToast) showToast(`Errore: ${error.message}`, 'error'); else alert(`Errore: ${error.message}`);
+        alert(`Errore durante il salvataggio:\n${error.message}`);
+        return;
+    }
+
+    // Rileva silent failure: update andato "a vuoto" (es. RLS blocca senza errore)
+    if (currentEditId && (!updatedData || updatedData.length === 0)) {
+        alert('Modifica non salvata: nessuna riga aggiornata.\nControlla i permessi RLS su Supabase per la tabella "' + cfg.table + '".');
         return;
     }
 

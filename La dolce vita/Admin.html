@@ -206,9 +206,6 @@
         </div>
     </div>
 
-    <!-- Debug box — visibile solo in caso di errore o risposta vuota -->
-    <div id="debug-box" style="display:none;background:#f8f9fa;border:1px solid #dde5f0;border-radius:10px;padding:14px 18px;margin-bottom:16px;font-size:0.85rem;color:#334;line-height:1.7;"></div>
-
     <div class="admin-toolbar">
         <input type="search" class="admin-search" id="search-input"
                placeholder="Cerca per email..."
@@ -260,17 +257,6 @@ window.loadUsers = async function () {
     tbody.innerHTML = `<tr><td colspan="5"><div class="admin-state"><div class="state-icon">⏳</div>Caricamento...</div></td></tr>`;
 
     const { data, error } = await supabase.rpc('get_auth_users');
-
-    // Debug box — mostra sempre il risultato grezzo
-    const debugBox = document.getElementById('debug-box');
-    debugBox.style.display = 'block';
-    debugBox.innerHTML = `
-        <strong>Debug RPC get_auth_users</strong><br>
-        <b>error:</b> <code>${error ? JSON.stringify({ code: error.code, message: error.message, details: error.details }) : 'null'}</code><br>
-        <b>data:</b> <code>${data !== null ? `Array(${(data||[]).length})` : 'null'}</code><br>
-        <b>session uid:</b> <code>${session?.user?.id ?? '—'}</code><br>
-        <b>session email:</b> <code>${session?.user?.email ?? '—'}</code>
-    `;
 
     if (error) {
         const isNotFound = error.message.includes('function') || error.code === 'PGRST202';

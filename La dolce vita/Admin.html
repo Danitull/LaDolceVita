@@ -601,6 +601,7 @@ async function loadLookups() {
     LOOKUP.utenti    = u.data || [];
     LOOKUP.prodotti  = p.data || [];
     LOOKUP.categorie = c.data || [];
+    if (c.error) console.error('loadLookups – CategorieProdotti:', c.error.message);
 }
 
 function utenteName(id) {
@@ -1168,7 +1169,7 @@ window.saveRecord = async function(e) {
 
     closeModal();
     // Refresh lookups if we edited Utenti or Prodotti
-    if (currentSection === 'utenti' || currentSection === 'prodotti') await loadLookups();
+    if (['utenti', 'prodotti', 'categorie'].includes(currentSection)) await loadLookups();
     loadCurrentSection();
 };
 
@@ -1202,7 +1203,7 @@ async function executeDelete() {
     }
 
     if (error) { if (window.showToast) showToast(`Errore: ${error.message}`, 'error'); else alert(`Errore: ${error.message}`); return; }
-    if (currentSection === 'utenti' || currentSection === 'prodotti') await loadLookups();
+    if (['utenti', 'prodotti', 'categorie'].includes(currentSection)) await loadLookups();
     loadCurrentSection();
 }
 
@@ -1210,7 +1211,7 @@ window.restoreRecord = async function(id) {
     const cfg = TABLE_CONFIG[currentSection];
     const { error } = await sb.from(cfg.table).update({ IsDeleted: false }).eq('id', id);
     if (error) { if (window.showToast) showToast(`Errore: ${error.message}`, 'error'); else alert(`Errore: ${error.message}`); return; }
-    if (currentSection === 'utenti' || currentSection === 'prodotti') await loadLookups();
+    if (['utenti', 'prodotti', 'categorie'].includes(currentSection)) await loadLookups();
     loadCurrentSection();
 };
 

@@ -269,15 +269,21 @@ window.loadUsers = async function () {
     const { data, error } = await supabase.rpc('get_auth_users');
 
     if (error) {
+        const isNotFound = error.message.includes('function') || error.code === 'PGRST202';
         tbody.innerHTML = `<tr><td colspan="5">
             <div class="admin-state">
-                <div class="state-icon">⚠️</div>
-                Errore: ${error.message}<br>
-                <small style="color:#aaa;margin-top:6px;display:block;">
-                    Assicurati di aver creato la funzione <code>get_auth_users()</code> su Supabase (vedi istruzioni).
-                </small>
+                <div class="state-icon">${isNotFound ? '🔧' : '⚠️'}</div>
+                <strong style="color:#c0392b">${isNotFound ? 'Funzione SQL non trovata' : 'Errore'}</strong><br>
+                <code style="font-size:0.8rem;color:#556;background:#f5f5f5;padding:4px 8px;border-radius:4px;display:inline-block;margin:8px 0">
+                    ${error.message}
+                </code><br>
+                ${isNotFound
+                    ? '<span style="color:#556;font-size:0.88rem">Crea la funzione <strong>get_auth_users()</strong> su Supabase → SQL Editor.</span>'
+                    : `<span style="color:#556;font-size:0.88rem">Codice: <code>${error.code}</code> ${error.details || ''}</span>`
+                }
             </div>
         </td></tr>`;
+        console.error('Admin RPC error:', error);
         return;
     }
 

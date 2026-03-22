@@ -114,32 +114,40 @@
         }
 
         /* Card-view per TabellaRegistro e TabellaProdotti su mobile */
-        @media (max-width: 580px) {
+        @media (max-width: 768px) {
             #TabellaRegistro thead,
-            #TabellaProdotti thead { display: none; }
+            #TabellaProdotti thead,
+            #Carrello thead { display: none; }
+
             #TabellaRegistro tbody tr,
-            #TabellaProdotti tbody tr {
-                display: block;
+            #TabellaProdotti tbody tr,
+            #Carrello tbody tr {
+                display: block !important;
+                height: auto !important;   /* override inline height:2vh */
                 background: #fff;
                 border-radius: 10px;
-                box-shadow: 0 2px 8px rgba(11,22,40,0.07);
+                box-shadow: 0 2px 8px rgba(11,22,40,0.10);
                 margin-bottom: 10px;
                 padding: 10px 14px;
                 border-left: 4px solid #3498db;
             }
             #TabellaRegistro td,
-            #TabellaProdotti td {
-                display: flex;
+            #TabellaProdotti td,
+            #Carrello td {
+                display: flex !important;
                 justify-content: space-between;
                 align-items: center;
-                padding: 5px 0;
+                padding: 6px 0;
                 border-bottom: 1px solid #f0f4f8;
-                font-size: 0.86rem;
+                font-size: 0.88rem;
+                height: auto !important;
             }
             #TabellaRegistro td:last-child,
-            #TabellaProdotti td:last-child { border-bottom: none; }
+            #TabellaProdotti td:last-child,
+            #Carrello td:last-child { border-bottom: none; }
             #TabellaRegistro td::before,
-            #TabellaProdotti td::before {
+            #TabellaProdotti td::before,
+            #Carrello td::before {
                 content: attr(data-label);
                 font-size: 0.72rem;
                 font-weight: 700;
@@ -148,6 +156,11 @@
                 letter-spacing: 0.4px;
                 flex-shrink: 0;
                 margin-right: 8px;
+            }
+            /* Bottone + nelle card prodotti */
+            #TabellaProdotti td button {
+                padding: 8px 16px !important;
+                font-size: 1rem !important;
             }
         }
         .selezione-container {
@@ -238,10 +251,130 @@
     cursor: pointer;
     border-radius: 5px;
   }
+
+  /* ── Mobile tab bar ── */
+  .mob-tabs { display: none; }
+
+  @media (max-width: 768px) {
+    /* Tab bar fisso sotto la navbar */
+    .mob-tabs {
+      display: flex;
+      position: fixed;
+      top: 7vh;
+      left: 0; right: 0;
+      z-index: 50;
+      background: white;
+      border-bottom: 2px solid #dde5f0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .mob-tab-btn {
+      flex: 1;
+      padding: 11px 4px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #556b7a;
+      cursor: pointer;
+      font-family: inherit;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .mob-tab-btn.active {
+      color: #236093;
+      border-bottom-color: #236093;
+    }
+
+    /* Container: normale, scrollabile */
+    .container {
+      margin-top: calc(14vh + 44px) !important;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      height: auto !important;
+      min-height: calc(100vh - 14vh - 44px) !important;
+    }
+
+    /* Pannelli: da absolute a block, nascosti di default */
+    #currentDiv, #newDiv {
+      position: relative !important;
+      height: auto !important;
+      left: 0 !important;
+      width: 100% !important;
+      transition: none !important;
+      display: none !important;
+    }
+    #currentDiv.mob-active, #newDiv.mob-active {
+      display: block !important;
+      background: rgba(248,251,255,0.97) !important;
+      min-height: calc(100vh - 14vh - 44px);
+      padding-bottom: 24px;
+    }
+
+    /* Layout interno currentDiv: colonna singola */
+    #currentDiv > div {
+      flex-direction: column !important;
+      padding: 8px !important;
+      gap: 12px !important;
+      height: auto !important;
+      overflow-y: visible !important;
+    }
+
+    /* Colonne registro: full width, nascondibili */
+    .registro-col {
+      min-width: 100% !important;
+      width: 100% !important;
+    }
+    .registro-col.mob-hidden { display: none !important; }
+
+    /* Layout interno newDiv */
+    #newDiv > div {
+      flex-direction: column !important;
+      padding: 8px !important;
+      height: auto !important;
+      overflow-y: visible !important;
+    }
+    #newDiv > div > div:first-child {
+      flex: none !important;
+      width: 100% !important;
+    }
+
+    /* Nascondi slide button desktop */
+    .slide-btn { display: none !important; }
+
+    /* Modal: fix pulsanti e altezza */
+    #ModalContainerPanel {
+      z-index: 200 !important;
+      position: fixed !important;
+    }
+    /* Il .container dentro il modal NON deve avere il margin-top della pagina */
+    #ModalContainerPanel .container {
+      margin-top: 0 !important;
+      min-height: auto !important;
+      overflow: visible !important;
+      padding: 16px !important;
+    }
+    .button-container {
+      margin-top: 16px !important;
+      position: static !important;
+      left: 0 !important;
+    }
+    .modal-inner-panel {
+      width: 95vw !important;
+      max-height: 90vh !important;
+      overflow-y: auto !important;
+    }
+  }
 </style>
 <body>
 
 <nav-main></nav-main>
+
+<!-- Tab bar mobile (nascosta su desktop) -->
+<div class="mob-tabs">
+  <button class="mob-tab-btn active" data-tab="prodotti" onclick="switchMobTab('prodotti')">🛒 Prodotti</button>
+  <button class="mob-tab-btn" data-tab="carrello" onclick="switchMobTab('carrello')">🧺 Carrello</button>
+  <button class="mob-tab-btn" data-tab="registro" onclick="switchMobTab('registro')">📋 Registro</button>
+</div>
 
     <div id="ModalContainerPanel" style="z-index: 2; display: none; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.5); position: absolute;">
             <div class="modal-inner-panel">
@@ -279,7 +412,7 @@
 <div class="container fade-in">
 <div id="currentDiv" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; transition: left 0.4s ease;">
     <div style="width: 100%; height: 100%; display: flex; flex-wrap: wrap; justify-content: space-around; align-items: flex-start; padding: 2vh 0; box-sizing: border-box; gap: 2vh; overflow-y: auto;">
-        <div class="registro-col">
+        <div class="registro-col" id="col-prodotti">
             <div class="table-responsive">
             <table id="TabellaProdotti" class="styled-table">
                 <thead>
@@ -297,7 +430,7 @@
             </table>
             </div>
         </div>
-        <div class="registro-col">
+        <div class="registro-col" id="col-carrello">
             <div class="table-responsive">
             <table id="Carrello" class="styled-table">
                 <thead>
@@ -410,6 +543,10 @@ async function RegistroConsumazioniSelect() {
     visualizzaProdotti();
     caricaUtentiStart();
     EventSubmitForm();
+    // Inizializza tab mobile: mostra currentDiv
+    if (window.innerWidth <= 768) {
+      document.getElementById('currentDiv').classList.add('mob-active');
+    }
 });
 
 
@@ -546,6 +683,8 @@ async function OnClickSuBtnAggiungiCarrello(ProdottoNo, ProdottoName, Prezzo) {
     });
 }
     async function AggiungiElementoAlCarrello(ProdottoNo, ProdottoName, Prezzo) {
+        // Su mobile: passa automaticamente al tab carrello
+        if (window.innerWidth <= 768) switchMobTab('carrello');
         var RecTrovato = ArrayCarrello.find(item => item.ProdottoNo === ProdottoNo) || undefined;
         // console.log("RecTrovato:", RecTrovato);
         var TabellaCarrello = document.getElementById('Carrello').getElementsByTagName('tbody')[0];
@@ -567,9 +706,9 @@ async function OnClickSuBtnAggiungiCarrello(ProdottoNo, ProdottoName, Prezzo) {
                     const tr = document.createElement("tr");
                     var prezzoConDecimale = parseFloat(item.Prezzo).toFixed(2);
                     tr.innerHTML = `
-                        <td>${item.ProdottoName}</td>
-                        <td>${item.Quantita}</td>
-                        <td>${item.Prezzo.toFixed(2)}[€]</td>
+                        <td data-label="Prodotto">${item.ProdottoName}</td>
+                        <td data-label="Quantità">${item.Quantita}</td>
+                        <td data-label="Prezzo">${item.Prezzo.toFixed(2)}[€]</td>
                     `;
                     TabellaCarrello.appendChild(tr);
                 });
@@ -675,16 +814,41 @@ async function OnClickSuBtnAggiungiCarrello(ProdottoNo, ProdottoName, Prezzo) {
     const newDiv = document.getElementById("newDiv");
 
     if (!toggled) {
-      // Primo click: sposta fuori il div attuale e porta dentro il nuovo
       current.style.left = "100%";
       newDiv.style.left = "0%";
-    //   newDiv.style.transform = "translateX(0)";
       toggled = true;
     } else {
-      // Secondo click: riporta indietro il div attuale e nasconde il nuovo
       current.style.left = "0%";
       newDiv.style.left = "100%";
       toggled = false;
+    }
+  }
+
+  window.switchMobTab = function switchMobTab(tab) {
+    const currentDiv = document.getElementById('currentDiv');
+    const newDiv = document.getElementById('newDiv');
+    const colProdotti = document.getElementById('col-prodotti');
+    const colCarrello = document.getElementById('col-carrello');
+
+    // Aggiorna tab attivo
+    document.querySelectorAll('.mob-tab-btn').forEach(b => b.classList.remove('active'));
+    const btn = document.querySelector(`.mob-tab-btn[data-tab="${tab}"]`);
+    if (btn) btn.classList.add('active');
+
+    // Reset visibilità pannelli
+    currentDiv.classList.remove('mob-active');
+    newDiv.classList.remove('mob-active');
+    colProdotti.classList.remove('mob-hidden');
+    colCarrello.classList.remove('mob-hidden');
+
+    if (tab === 'prodotti') {
+      currentDiv.classList.add('mob-active');
+      colCarrello.classList.add('mob-hidden');
+    } else if (tab === 'carrello') {
+      currentDiv.classList.add('mob-active');
+      colProdotti.classList.add('mob-hidden');
+    } else if (tab === 'registro') {
+      newDiv.classList.add('mob-active');
     }
   }
 async function caricaRegistroConsumazioni(SelectedDate) {

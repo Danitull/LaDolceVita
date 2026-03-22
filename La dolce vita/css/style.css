@@ -69,16 +69,13 @@ body, html {
 
 @media (max-width: 800px) { .tiles-grid { width: calc(100% - 48px); margin: 24px auto; } }
 
-.top-navbar { width: 100%; position: fixed; top: 0; left: 0; z-index: 1000; height: 60px; display: flex; align-items: center; }
-.top-navbar a { color: #ffffff; }
-
 #side-tab { position: fixed; top: 50vh; left: 0; width: 32px; height: 60px; background: #3498db; color: #fff; display: flex; align-items: center; justify-content: center; border-radius: 0 8px 8px 0; cursor: pointer; z-index: 1001; box-shadow: 1px 2px 6px rgba(0,0,0,0.08); transition: left 0.3s; }
 #sidebar.open ~ #side-tab { left: 180px; }
 .chevron { font-size: 2rem; transition: transform 0.3s; }
 #sidebar { position: fixed; top: 6vh; left: -180px; width: 180px; height: 100%; background: #34495e; color: #fff; transition: left 0.3s; z-index: 1000; box-shadow: 2px 0 8px rgba(0,0,0,0.08); padding-top: 20px; }
 #sidebar.open { left: 0; }
 #sidebar ul { list-style: none; padding: 0; }
-#sidebar li { margin: 0; width: 12%; }
+#sidebar li { margin: 0; width: 100%; }
 #sidebar a { display: block; color: #fff; text-decoration: none; padding: 14px 24px; transition: background 0.2s; }
 #sidebar a:hover { background: #3d566e; }
 
@@ -100,7 +97,7 @@ button:hover { background: #2980b9; }
 }
 
 .styled-table thead tr {
-  background: linear-gradient(1deg, rgba(35,96,147,1), silver);
+  background: linear-gradient(135deg, rgba(35,96,147,1), silver);
   color: #ffffff;
   text-align: left;
   font-weight: bold;
@@ -115,7 +112,7 @@ button:hover { background: #2980b9; }
 }
 
 .styled-table tbody tr:nth-of-type(even) {
-  background: linear-gradient(1deg, rgba(35,96,147,1), silver);
+  background: linear-gradient(135deg, rgba(35,96,147,1), silver);
   color: rgb(255, 255, 255);
   
 }
@@ -160,7 +157,7 @@ button:hover { background: #2980b9; }
   left: 50%;
   top: 50%;
   width: 70vw;
-  height: 7vh;
+  height: auto;
   transform: translate(-50%, -50%) scale(0.98);
   background: #ffffff;
   color: #1f2937;
@@ -269,5 +266,5 @@ button:hover { background: #2980b9; }
 
 #close-modal:hover {
   transform: scale(1.2);
-  color: #ffdddd;
+  color: #fff;
 }

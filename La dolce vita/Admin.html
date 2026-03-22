@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Dolce Vita - Amministrazione</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/navbar.js"></script>
+</head>
+<style>
+    .admin-wrap {
+        width: 100%;
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 90px 24px 60px;
+        box-sizing: border-box;
+    }
+
+    .admin-header {
+        margin-bottom: 32px;
+    }
+    .admin-header h1 {
+        font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+        font-weight: 800;
+        color: #236093;
+        margin: 0 0 6px;
+    }
+    .admin-header p {
+        font-size: 0.95rem;
+        color: #556b7a;
+        margin: 0;
+    }
+
+    .admin-stats {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 28px;
+    }
+    .stat-card {
+        background: rgba(255,255,255,0.92);
+        border-radius: 12px;
+        padding: 18px 24px;
+        box-shadow: 0 3px 12px rgba(11,22,40,0.07);
+        border-left: 4px solid #3498db;
+        min-width: 140px;
+    }
+    .stat-card .stat-value {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #236093;
+        line-height: 1;
+    }
+    .stat-card .stat-label {
+        font-size: 0.82rem;
+        color: #778;
+        margin-top: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Toolbar */
+    .admin-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+    }
+    .admin-search {
+        flex: 1;
+        min-width: 200px;
+        padding: 9px 14px;
+        border: 2px solid #dde5f0;
+        border-radius: 10px;
+        font-size: 0.93rem;
+        font-family: inherit;
+        color: #213240;
+        background: rgba(255,255,255,0.9);
+        transition: border-color 0.2s;
+    }
+    .admin-search:focus {
+        outline: none;
+        border-color: #3498db;
+    }
+    .admin-refresh {
+        padding: 9px 18px;
+        background: linear-gradient(135deg, #236093, #3498db);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: opacity 0.2s;
+        white-space: nowrap;
+    }
+    .admin-refresh:hover { opacity: 0.88; }
+
+    /* Table */
+    .admin-table-wrap {
+        background: rgba(255,255,255,0.95);
+        border-radius: 14px;
+        box-shadow: 0 4px 20px rgba(11,22,40,0.08);
+        overflow: hidden;
+    }
+    .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.92rem;
+    }
+    .admin-table thead tr {
+        background: linear-gradient(135deg, rgba(35,96,147,1), #4a90d9);
+        color: white;
+    }
+    .admin-table th {
+        padding: 13px 16px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+    }
+    .admin-table td {
+        padding: 12px 16px;
+        color: #334;
+        border-bottom: 1px solid #f0f4f8;
+        vertical-align: middle;
+    }
+    .admin-table tbody tr:last-child td { border-bottom: none; }
+    .admin-table tbody tr:hover { background: #f5f9ff; }
+
+    .badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+    .badge-ok      { background: #eafaf1; color: #1a7a40; }
+    .badge-pending { background: #fff8e1; color: #b07800; }
+
+    /* Loading / empty state */
+    .admin-state {
+        text-align: center;
+        padding: 48px 24px;
+        color: #778;
+        font-size: 0.95rem;
+    }
+    .admin-state .state-icon { font-size: 2.2rem; margin-bottom: 10px; }
+
+    /* Access denied overlay */
+    #access-denied {
+        display: none;
+        min-height: 100vh;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+        padding: 20px;
+    }
+    #access-denied .ad-icon { font-size: 3.5rem; }
+    #access-denied h2 { color: #c0392b; font-size: 1.5rem; margin: 0; }
+    #access-denied p  { color: #778; margin: 0; }
+
+    @media (max-width: 640px) {
+        .admin-wrap { padding: 80px 12px 40px; }
+        .admin-table th:nth-child(1),
+        .admin-table td:nth-child(1) { display: none; } /* nascondi ID su mobile */
+    }
+</style>
+<body>
+
+<nav-main></nav-main>
+
+<!-- Accesso negato (mostrato se non sei admin) -->
+<div id="access-denied">
+    <div class="ad-icon">🔒</div>
+    <h2>Accesso negato</h2>
+    <p>Non hai i permessi per visualizzare questa pagina.</p>
+</div>
+
+<!-- Contenuto admin (nascosto finché non verificata l'identità) -->
+<div class="admin-wrap" id="admin-content" style="display:none;">
+
+    <div class="admin-header">
+        <h1>⚙️ Amministrazione Utenti</h1>
+        <p>Tutti gli utenti registrati e autenticati nel sistema.</p>
+    </div>
+
+    <div class="admin-stats">
+        <div class="stat-card">
+            <div class="stat-value" id="stat-total">—</div>
+            <div class="stat-label">Utenti totali</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="stat-confirmed">—</div>
+            <div class="stat-label">Email confermate</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="stat-recent">—</div>
+            <div class="stat-label">Attivi (30 gg)</div>
+        </div>
+    </div>
+
+    <div class="admin-toolbar">
+        <input type="search" class="admin-search" id="search-input"
+               placeholder="Cerca per email..."
+               oninput="filterTable(this.value)">
+        <button class="admin-refresh" onclick="loadUsers()">↺ Aggiorna</button>
+    </div>
+
+    <div class="admin-table-wrap">
+        <table class="admin-table" id="users-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Email</th>
+                    <th>Email confermata</th>
+                    <th>Registrato il</th>
+                    <th>Ultimo accesso</th>
+                </tr>
+            </thead>
+            <tbody id="users-tbody">
+                <tr>
+                    <td colspan="5">
+                        <div class="admin-state">
+                            <div class="state-icon">⏳</div>
+                            Caricamento utenti...
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const ADMIN_EMAIL = 'danilotullo01@gmail.com';
+
+const supabase = createClient(
+    'https://tjbsnchbezvhhugkgaxx.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYnNuY2hiZXp2aGh1Z2tnYXh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0OTA4ODAsImV4cCI6MjA3OTA2Njg4MH0.eMDjkjvirN1DrUPysy34TgycmwMkAoMmMuxJ1_o9vzg'
+);
+
+/* ── Verifica identità ───────────────────────────────────────── */
+const { data: { session } } = await supabase.auth.getSession();
+
+if (!session || session.user.email !== ADMIN_EMAIL) {
+    document.getElementById('access-denied').style.display = 'flex';
+} else {
+    document.getElementById('admin-content').style.display = 'block';
+    loadUsers();
+}
+
+/* ── Carica utenti via RPC ───────────────────────────────────── */
+let allUsers = [];
+
+window.loadUsers = async function () {
+    const tbody = document.getElementById('users-tbody');
+    tbody.innerHTML = `<tr><td colspan="5"><div class="admin-state"><div class="state-icon">⏳</div>Caricamento...</div></td></tr>`;
+
+    const { data, error } = await supabase.rpc('get_auth_users');
+
+    if (error) {
+        tbody.innerHTML = `<tr><td colspan="5">
+            <div class="admin-state">
+                <div class="state-icon">⚠️</div>
+                Errore: ${error.message}<br>
+                <small style="color:#aaa;margin-top:6px;display:block;">
+                    Assicurati di aver creato la funzione <code>get_auth_users()</code> su Supabase (vedi istruzioni).
+                </small>
+            </div>
+        </td></tr>`;
+        return;
+    }
+
+    allUsers = data || [];
+    renderTable(allUsers);
+    updateStats(allUsers);
+};
+
+function renderTable(users) {
+    const tbody = document.getElementById('users-tbody');
+
+    if (users.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5"><div class="admin-state"><div class="state-icon">👤</div>Nessun utente trovato.</div></td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = users.map(u => {
+        const confirmed = u.email_confirmed_at
+            ? `<span class="badge badge-ok">✓ Confermata</span>`
+            : `<span class="badge badge-pending">In attesa</span>`;
+
+        const registrato  = formatDate(u.created_at);
+        const ultimoAccesso = u.last_sign_in_at ? formatDate(u.last_sign_in_at) : '<span style="color:#bbb">Mai</span>';
+        const shortId = u.id ? u.id.split('-')[0] + '…' : '—';
+
+        return `<tr>
+            <td style="font-family:monospace;font-size:0.8rem;color:#99a">${shortId}</td>
+            <td style="font-weight:600">${u.email}</td>
+            <td>${confirmed}</td>
+            <td>${registrato}</td>
+            <td>${ultimoAccesso}</td>
+        </tr>`;
+    }).join('');
+}
+
+function updateStats(users) {
+    const now = Date.now();
+    const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+    const confirmed = users.filter(u => u.email_confirmed_at).length;
+    const recent    = users.filter(u => u.last_sign_in_at && (now - new Date(u.last_sign_in_at)) < thirtyDays).length;
+
+    document.getElementById('stat-total').textContent     = users.length;
+    document.getElementById('stat-confirmed').textContent = confirmed;
+    document.getElementById('stat-recent').textContent    = recent;
+}
+
+window.filterTable = function (query) {
+    const q = query.toLowerCase().trim();
+    const filtered = q ? allUsers.filter(u => u.email.toLowerCase().includes(q)) : allUsers;
+    renderTable(filtered);
+};
+
+function formatDate(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleString('it-IT', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+    });
+}
+</script>
+
+</body>
+</html>

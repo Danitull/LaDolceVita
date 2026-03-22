@@ -68,6 +68,12 @@ class NavMain extends HTMLElement {
     }).join('');
 
     const email = getSessionEmail();
+
+    // Link admin visibile solo all'amministratore
+    const adminLink = email === 'danilotullo01@gmail.com'
+      ? `<li><a href="Admin.html"${page === 'Admin.html' ? ' class="nav-active"' : ''}>⚙️ Admin</a></li>`
+      : '';
+
     const userHtml = email
       ? `<div class="nav-user">
            <span class="nav-user-email">${email}</span>
@@ -81,7 +87,7 @@ class NavMain extends HTMLElement {
     onclick="this.classList.toggle('is-active'); this.closest('nav').querySelector('ul').classList.toggle('nav-open');">
     <span></span><span></span><span></span>
   </button>
-  <ul>${items}</ul>
+  <ul>${items}${adminLink}</ul>
   ${userHtml}
 </nav>`;
   }

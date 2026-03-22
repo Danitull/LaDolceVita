@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>La Dolce Vita - Riepilogo Generale</title>
     <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/navbar.js"></script>
 </head>
 <style>
     .selezione-container {
@@ -181,23 +182,7 @@
 </style>
 <body>
 
-<div style="width: 100vw; height: 7vh; position: absolute;">
-    <nav class="top-navbar glass nav-main">
-        <button class="navbar-hamburger" aria-label="Apri menu" onclick="this.classList.toggle('is-active'); this.closest('nav').querySelector('ul').classList.toggle('nav-open');">
-            <span></span><span></span><span></span>
-        </button>
-        <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="Affitti.html">Affitto</a></li>
-            <li><a href="#">Fondo cassa</a></li>
-            <li><a href="#">Utenze</a></li>
-            <li><a href="#">Copponi</a></li>
-            <li><a href="#">Registro Consumazioni</a></li>
-            <li><a href="ListinoPrezzi.html">Listino Prezzi</a></li>
-            <li><a href="Riepilogo.html" style="background:#3498db; border-radius:18px;">Riepilogo</a></li>
-        </ul>
-    </nav>
-</div>
+<nav-main></nav-main>
 
 <div style="width: 100%; padding-top: 8vh; padding-bottom: 40px; box-sizing: border-box;">
 

@@ -5,24 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>La Dolce Vita - VB.NET</title>
     <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/navbar.js"></script>
 </head>
 <body>
     <header class="hero-header">
-        <nav class="top-navbar glass nav-main">
-            <button class="navbar-hamburger" aria-label="Apri menu" onclick="this.classList.toggle('is-active'); this.closest('nav').querySelector('ul').classList.toggle('nav-open');">
-                <span></span><span></span><span></span>
-            </button>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="Affitti.html">Affitto</a></li>
-                <li><a href="#">Fondo cassa</a></li>
-                <li><a href="Copponi.html">Copponi</a></li>
-                <li><a href="Registro.html">Registro Consumazioni</a></li>
-                <li><a href="ListinoPrezzi.html">Listino Prezzi</a></li>
-                <li><a href="#">Acquisti</a></li>
-                <li><a href="Riepilogo.html">Riepilogo</a></li>
-            </ul>
-        </nav>
+        <nav-main></nav-main>
         <div class="hero-content">
             <section class="tiles-grid" aria-label="Seleziona una sezione">
                 <a class="tile" href="Affitti.html">

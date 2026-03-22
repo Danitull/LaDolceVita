@@ -41,6 +41,7 @@ body, html {
 .top-navbar li { margin: 0 2px; text-align: center; flex-shrink: 1; }
 .top-navbar a { display: block; color: #fbfbfbca; text-decoration: none; padding: 10px 12px; border-radius: 18px; font-weight: 500; font-size: clamp(0.78rem, 1.1vw, 1rem); white-space: nowrap; transition: background 0.2s, color 0.2s; }
 .top-navbar a:hover { background: #3498db; color: #fff; }
+.top-navbar a.nav-active { background: #2980b9; color: #fff; font-weight: 700; }
 
 /* ===== HAMBURGER MENU ===== */
 .navbar-hamburger {

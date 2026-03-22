@@ -467,6 +467,7 @@
         <button class="admin-tab-btn active" data-section="auth-users"    onclick="switchTab('auth-users')">👤 Auth Users</button>
         <button class="admin-tab-btn"         data-section="utenti"        onclick="switchTab('utenti')">🏠 Utenti</button>
         <button class="admin-tab-btn"         data-section="prodotti"      onclick="switchTab('prodotti')">📦 Prodotti</button>
+        <button class="admin-tab-btn"         data-section="categorie"     onclick="switchTab('categorie')">🏷️ Categorie</button>
         <button class="admin-tab-btn"         data-section="affDaPagare"   onclick="switchTab('affDaPagare')">🏷️ Affitti/mese</button>
         <button class="admin-tab-btn"         data-section="wifiDaPagare"  onclick="switchTab('wifiDaPagare')">📡 WiFi/mese</button>
         <button class="admin-tab-btn"         data-section="utDaPagare"    onclick="switchTab('utDaPagare')">💡 Utenze/mese</button>
@@ -589,15 +590,17 @@ function fmtDateTime(iso) {
 function todayISO() { return new Date().toISOString().slice(0,10); }
 
 /* ─── Lookup cache ────────────────────────────────────────────── */
-const LOOKUP = { utenti: [], prodotti: [] };
+const LOOKUP = { utenti: [], prodotti: [], categorie: [] };
 
 async function loadLookups() {
-    const [u, p] = await Promise.all([
+    const [u, p, c] = await Promise.all([
         sb.from('Utenti').select('id,Nome').eq('IsDeleted', false).order('Nome'),
         sb.from('ElencoProdotti').select('id,Prodotto').eq('IsDeleted', false).order('Prodotto'),
+        sb.from('CategorieProdotti').select('id,Nome,Icona,Colore').order('Ordine'),
     ]);
-    LOOKUP.utenti   = u.data || [];
-    LOOKUP.prodotti = p.data || [];
+    LOOKUP.utenti    = u.data || [];
+    LOOKUP.prodotti  = p.data || [];
+    LOOKUP.categorie = c.data || [];
 }
 
 function utenteName(id) {
@@ -653,17 +656,41 @@ const TABLE_CONFIG = {
         label: 'Prodotti',
         softDelete: true,
         cols: [
-            { key: 'id',        label: 'ID' },
-            { key: 'Prodotto',  label: 'Prodotto' },
-            { key: 'Prezzo',    label: 'Prezzo', render: v => `€ ${Number(v).toFixed(2)}` },
-            { key: 'Costo',     label: 'Costo', render: v => v != null ? `€ ${Number(v).toFixed(2)}` : '—' },
-            { key: 'IsDeleted', label: 'Stato', render: v => v ? '<span class="badge badge-del">Eliminato</span>' : '<span class="badge badge-ok">Attivo</span>' },
+            { key: 'id',          label: 'ID' },
+            { key: 'Prodotto',    label: 'Prodotto' },
+            { key: 'CategoriaId', label: 'Categoria', render: v => {
+                const c = LOOKUP.categorie?.find(x => x.id === v);
+                return c ? `<span style="display:inline-block;padding:2px 8px;border-radius:10px;background:${c.Colore};color:#fff;font-size:0.78rem;font-weight:700;">${c.Icona} ${c.Nome}</span>` : '—';
+            }},
+            { key: 'Prezzo',      label: 'Prezzo', render: v => `€ ${Number(v).toFixed(2)}` },
+            { key: 'Costo',       label: 'Costo',  render: v => v != null ? `€ ${Number(v).toFixed(2)}` : '—' },
+            { key: 'IsDeleted',   label: 'Stato',  render: v => v ? '<span class="badge badge-del">Eliminato</span>' : '<span class="badge badge-ok">Attivo</span>' },
         ],
         fields: [
-            { name: 'Prodotto',  label: 'Prodotto', type: 'text',   required: true },
-            { name: 'Prezzo',    label: 'Prezzo €', type: 'number', required: true, step: '0.01', min: '0' },
-            { name: 'Costo',     label: 'Costo €',  type: 'number', step: '0.01', min: '0' },
-            { name: 'IsDeleted', label: 'Eliminato', type: 'checkbox' },
+            { name: 'Prodotto',   label: 'Prodotto',  type: 'text',            required: true },
+            { name: 'CategoriaId',label: 'Categoria', type: 'select-categorie' },
+            { name: 'Prezzo',     label: 'Prezzo €',  type: 'number', required: true, step: '0.01', min: '0' },
+            { name: 'Costo',      label: 'Costo €',   type: 'number', step: '0.01', min: '0' },
+            { name: 'IsDeleted',  label: 'Eliminato', type: 'checkbox' },
+        ],
+    },
+
+    categorie: {
+        table: 'CategorieProdotti',
+        label: 'Categorie Prodotti',
+        softDelete: false,
+        cols: [
+            { key: 'id',     label: 'ID' },
+            { key: 'Icona',  label: 'Icona' },
+            { key: 'Nome',   label: 'Nome' },
+            { key: 'Colore', label: 'Colore', render: v => `<span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:${v};vertical-align:middle;"></span> ${v}` },
+            { key: 'Ordine', label: 'Ordine' },
+        ],
+        fields: [
+            { name: 'Nome',   label: 'Nome',   type: 'text', required: true },
+            { name: 'Icona',  label: 'Icona (emoji)', type: 'text', required: true },
+            { name: 'Colore', label: 'Colore hex (es. #f39c12)', type: 'text', required: true },
+            { name: 'Ordine', label: 'Ordine visualizzazione', type: 'number', min: '1', step: '1' },
         ],
     },
 
@@ -1017,6 +1044,16 @@ function buildFormFields(section, row) {
             </div>`;
         }
 
+        if (f.type === 'select-categorie') {
+            const opts = LOOKUP.categorie.map(c =>
+                `<option value="${c.id}" ${val == c.id ? 'selected' : ''}>${c.Icona} ${c.Nome}</option>`
+            ).join('');
+            return `<div class="crud-field">
+                <label>${f.label}${f.required?' *':''}</label>
+                <select id="f_${f.name}" name="${f.name}" ${req}><option value="">— Nessuna categoria —</option>${opts}</select>
+            </div>`;
+        }
+
         if (f.type === 'textarea') {
             return `<div class="crud-field">
                 <label>${f.label}</label>
@@ -1079,6 +1116,9 @@ window.saveRecord = async function(e) {
         if (f.type === 'checkbox') {
             payload[f.name] = el.checked;
         } else if (f.type === 'number' && el.value !== '') {
+            payload[f.name] = Number(el.value);
+        } else if (f.type.startsWith('select-') && el.value !== '') {
+            // I select di FK (utenti/prodotti/categorie) devono essere interi
             payload[f.name] = Number(el.value);
         } else if (el.value !== '') {
             payload[f.name] = el.value;

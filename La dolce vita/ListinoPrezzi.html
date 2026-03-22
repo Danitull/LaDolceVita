@@ -110,6 +110,39 @@
             }
         }
 
+        /* Filtro categorie */
+        .cat-filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .cat-btn {
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 2px solid transparent;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: #f0f4f8;
+            color: #555;
+            transition: all 0.2s;
+        }
+        .cat-btn.active, .cat-btn:hover {
+            border-color: currentColor;
+            background: white;
+        }
+        /* Badge categoria nella tabella */
+        .badge-cat {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: white;
+            white-space: nowrap;
+        }
+
         /* Card-view per TabellaProdotti (ListinoPrezzi) su mobile */
         @media (max-width: 580px) {
             #TabellaProdotti thead { display: none; }
@@ -277,15 +310,19 @@
     </div>
 <div class="page-content single-nav fade-in">
     <div class="main-table-area">
+        <div id="cat-filter-bar" class="cat-filter-bar">
+            <!-- Bottoni categoria generati via JS -->
+        </div>
         <div class="table-responsive">
             <table id="TabellaProdotti" class="styled-table">
                 <thead>
                     <tr>
-                        <th style="width: 35%;">Prodotto</th>
-                        <th style="width: 15%;">Prezzo</th>
-                        <th style="width: 15%;">Costo</th>
-                        <th style="width: 20%;">Quantita' totale</th>
-                        <th style="width: 15%;">Restante</th>
+                        <th style="width: 30%;">Prodotto</th>
+                        <th style="width: 18%;">Categoria</th>
+                        <th style="width: 12%;">Prezzo</th>
+                        <th style="width: 12%;">Costo</th>
+                        <th style="width: 14%;">Qtà totale</th>
+                        <th style="width: 14%;">Restante</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -299,85 +336,101 @@
 </body>
     <!-- <script type="module" src="/js/script.js"></script> -->
 <script type="module">
-    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
   const supabaseUrl = "https://tjbsnchbezvhhugkgaxx.supabase.co";
-  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYnNuY2hiZXp2aGh1Z2tnYXh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0OTA4ODAsImV4cCI6MjA3OTA2Njg4MH0.eMDjkjvirN1DrUPysy34TgycmwMkAoMmMuxJ1_o9vzg"; // la tua anon key
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYnNuY2hiZXp2aGh1Z2tnYXh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0OTA4ODAsImV4cCI6MjA3OTA2Njg4MH0.eMDjkjvirN1DrUPysy34TgycmwMkAoMmMuxJ1_o9vzg";
 
-  // Inizializza il client con la chiave anon
   const supabase = createClient(supabaseUrl, supabaseKey);
 
+  let categorieMap = {};       // id → { Nome, Icona, Colore }
+  let filtroCategoria = null;  // null = tutte
+
+  async function loadCategorie() {
+    const { data } = await supabase
+      .from("CategorieProdotti")
+      .select("*")
+      .order("Ordine");
+    if (data) data.forEach(c => { categorieMap[c.id] = c; });
+    return data || [];
+  }
+
   async function ElencoSelect() {
-    const { data, error } = await supabase.from("ElencoProdotti").select("*");
-    if (error) {
-      console.error("Errore:", error);
-      return [];
-    }
-    console.log("Dati ottenuti:", data);
+    const { data, error } = await supabase
+      .from("ElencoProdotti")
+      .select("*, CategorieProdotti(id, Nome, Icona, Colore)")
+      .eq("IsDeleted", false)
+      .order("Prodotto");
+    if (error) { console.error("Errore ElencoProdotti:", error); return []; }
     return data;
   }
 
   async function AcquistiSpeseSelect() {
     const { data, error } = await supabase.from("Acquisti_Spese").select("*");
-    if (error) {
-      console.error("Errore:", error);
-      return [];
-    }
-    console.log("Dati ottenuti:", data);
+    if (error) { console.error("Errore Acquisti_Spese:", error); return []; }
     return data;
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
-    visualizzaProdotti();
+  function renderFilterBar(categorie) {
+    const bar = document.getElementById('cat-filter-bar');
+    const tuttiBtn = `<button class="cat-btn active" data-cat="all" style="border-color:#3498db; color:#3498db;">Tutti</button>`;
+    const catBtns = categorie.map(c =>
+      `<button class="cat-btn" data-cat="${c.id}" style="color:${c.Colore};">${c.Icona} ${c.Nome}</button>`
+    ).join('');
+    bar.innerHTML = tuttiBtn + catBtns;
+
+    bar.addEventListener('click', e => {
+      const btn = e.target.closest('.cat-btn');
+      if (!btn) return;
+      bar.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      filtroCategoria = btn.dataset.cat === 'all' ? null : parseInt(btn.dataset.cat);
+      applicaFiltro();
+    });
+  }
+
+  function applicaFiltro() {
+    document.querySelectorAll('#TabellaProdotti tbody tr').forEach(tr => {
+      const catId = parseInt(tr.dataset.catId) || null;
+      tr.style.display = (filtroCategoria === null || catId === filtroCategoria) ? '' : 'none';
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    const [categorie] = await Promise.all([loadCategorie()]);
+    renderFilterBar(categorie);
+    await visualizzaProdotti();
   });
 
-  async function visualizzaProdotti(Mese, Anno) {
-    console.log('Calcolo totale per Mese: ' + Mese + ' Anno: ' + Anno);
-
-    const ListaProdotti = await ElencoSelect();
-    const ListaAcquistiSpese = await AcquistiSpeseSelect();
+  async function visualizzaProdotti() {
+    const [ListaProdotti, ListaAcquistiSpese] = await Promise.all([
+      ElencoSelect(),
+      AcquistiSpeseSelect(),
+    ]);
 
     const tbody = document.getElementById('TabellaProdotti').getElementsByTagName('tbody')[0];
-    tbody.innerHTML = ""; // pulizia
+    tbody.innerHTML = "";
 
     ListaProdotti.forEach(prodotto => {
+      const cat = prodotto.CategorieProdotti;
+      const badgeHtml = cat
+        ? `<span class="badge-cat" style="background:${cat.Colore};">${cat.Icona} ${cat.Nome}</span>`
+        : `<span class="badge-cat" style="background:#bdc3c7;">—</span>`;
+
+      const quantitaTotale = ListaAcquistiSpese
+        .filter(a => a.ProdottoNo === prodotto.id)
+        .reduce((sum, a) => sum + (parseInt(a.Qty) || 0) * (parseInt(a.Confezioni) || 0), 0);
+
       const tr = document.createElement("tr");
-      let trovato = false;
-
-      ListaAcquistiSpese.find(acquisto => {
-        if (acquisto.ProdottoNo === prodotto.id) {
-          trovato = true;
-        }
-      });
-
-      const prezzoConDecimale = parseFloat(prodotto.Prezzo).toFixed(2);
-      const costoConDecimale = prodotto.Costo != null ? parseFloat(prodotto.Costo).toFixed(2) + ' €' : '—';
-
-      if (!trovato) {
-        tr.innerHTML = `
-          <td data-label="Prodotto">${prodotto.Prodotto}</td>
-          <td data-label="Prezzo">${prezzoConDecimale} €</td>
-          <td data-label="Costo">${costoConDecimale}</td>
-          <td data-label="Qtà totale">0</td>
-          <td data-label="Restante">0</td>
-        `;
-      } else {
-        let quantitaTotale = 0;
-        ListaAcquistiSpese.forEach(acquisto => {
-          if (acquisto.ProdottoNo === prodotto.id) {
-            quantitaTotale += (parseInt(acquisto.Qty) || 0) * (parseInt(acquisto.Confezioni) || 0);
-          }
-        });
-
-        tr.innerHTML = `
-          <td data-label="Prodotto">${prodotto.Prodotto}</td>
-          <td data-label="Prezzo">${prezzoConDecimale} €</td>
-          <td data-label="Costo">${costoConDecimale}</td>
-          <td data-label="Qtà totale">${quantitaTotale}</td>
-          <td data-label="Restante">-</td>
-        `;
-      }
-
+      tr.dataset.catId = cat ? cat.id : '';
+      tr.innerHTML = `
+        <td data-label="Prodotto">${prodotto.Prodotto}</td>
+        <td data-label="Categoria">${badgeHtml}</td>
+        <td data-label="Prezzo">${parseFloat(prodotto.Prezzo).toFixed(2)} €</td>
+        <td data-label="Costo">${prodotto.Costo != null ? parseFloat(prodotto.Costo).toFixed(2) + ' €' : '—'}</td>
+        <td data-label="Qtà totale">${quantitaTotale}</td>
+        <td data-label="Restante">-</td>
+      `;
       tbody.appendChild(tr);
     });
   }

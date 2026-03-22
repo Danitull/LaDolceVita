@@ -43,6 +43,40 @@ body, html {
 .top-navbar a:hover { background: #3498db; color: #fff; }
 .top-navbar a.nav-active { background: #2980b9; color: #fff; font-weight: 700; }
 
+/* ── User / logout area (right side of navbar) ── */
+.nav-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+    padding: 0 14px;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+.nav-user-email {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.75);
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.nav-logout-btn {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    border-radius: 14px;
+    padding: 5px 14px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.nav-logout-btn:hover { background: rgba(255,255,255,0.28); }
+@media (max-width: 768px) {
+    .nav-user-email { display: none; }
+    .nav-logout-btn { margin-right: 48px; }
+}
+
 /* ===== HAMBURGER MENU ===== */
 .navbar-hamburger {
     display: none;

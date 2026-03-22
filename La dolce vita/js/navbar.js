@@ -1,5 +1,5 @@
 /**
- * navbar.js — Componenti navbar condivisi
+ * navbar.js — Componenti navbar condivisi + auth guard
  *
  * Uso:
  *   <nav-main></nav-main>          → navbar principale (tutte le pagine)
@@ -7,6 +7,32 @@
  *
  * Per modificare i link: aggiorna NAV_LINKS o AFFITTI_TABS qui sotto.
  */
+
+/* ── Auth guard ─────────────────────────────────────────────── */
+(function () {
+  const PUBLIC_PAGES = ['Login.html'];
+  const page = window.location.pathname.split('/').pop() || 'index.html';
+  if (PUBLIC_PAGES.includes(page)) return;
+
+  const PROJECT_REF = 'tjbsnchbezvhhugkgaxx';
+  if (!localStorage.getItem(`sb-${PROJECT_REF}-auth-token`)) {
+    window.location.replace('/Login.html');
+  }
+})();
+
+/* ── Logout ─────────────────────────────────────────────────── */
+function navbarLogout() {
+  localStorage.removeItem('sb-tjbsnchbezvhhugkgaxx-auth-token');
+  window.location.replace('/Login.html');
+}
+
+/* ── Leggi email utente dalla sessione ──────────────────────── */
+function getSessionEmail() {
+  try {
+    const raw = localStorage.getItem('sb-tjbsnchbezvhhugkgaxx-auth-token');
+    return raw ? JSON.parse(raw)?.user?.email : null;
+  } catch { return null; }
+}
 
 const NAV_LINKS = [
   { href: 'index.html',        label: 'Home' },
@@ -41,6 +67,14 @@ class NavMain extends HTMLElement {
       return `<li><a href="${link.href}"${isActive ? ' class="nav-active"' : ''}>${link.label}</a></li>`;
     }).join('');
 
+    const email = getSessionEmail();
+    const userHtml = email
+      ? `<div class="nav-user">
+           <span class="nav-user-email">${email}</span>
+           <button class="nav-logout-btn" onclick="navbarLogout()">Esci</button>
+         </div>`
+      : '';
+
     this.innerHTML = `
 <nav class="top-navbar glass nav-main">
   <button class="navbar-hamburger" aria-label="Apri menu"
@@ -48,6 +82,7 @@ class NavMain extends HTMLElement {
     <span></span><span></span><span></span>
   </button>
   <ul>${items}</ul>
+  ${userHtml}
 </nav>`;
   }
 }

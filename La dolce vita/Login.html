@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Dolce Vita - Accesso</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<style>
+    .auth-wrap {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+
+    .auth-card {
+        background: rgba(255,255,255,0.96);
+        border-radius: 20px;
+        box-shadow: 0 8px 40px rgba(11,22,40,0.14);
+        padding: 40px 36px;
+        width: 100%;
+        max-width: 400px;
+        animation: fadeInUp 0.45s ease both;
+    }
+
+    .auth-logo {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    .auth-logo .auth-icon { font-size: 2.8rem; margin-bottom: 6px; }
+    .auth-logo h1 {
+        font-size: 1.7rem;
+        font-weight: 800;
+        color: #236093;
+        margin: 0 0 4px;
+    }
+    .auth-logo p { font-size: 0.88rem; color: #778; margin: 0; }
+
+    /* Tabs */
+    .auth-tabs {
+        display: flex;
+        background: #f0f4f8;
+        border-radius: 10px;
+        padding: 4px;
+        margin-bottom: 24px;
+        gap: 4px;
+    }
+    .auth-tab {
+        flex: 1;
+        padding: 9px;
+        border: none;
+        background: none;
+        border-radius: 7px;
+        font-size: 0.93rem;
+        font-weight: 600;
+        color: #778;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .auth-tab.active {
+        background: white;
+        color: #236093;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.09);
+    }
+
+    /* Fields */
+    .auth-field { margin-bottom: 16px; }
+    .auth-field label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #445;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .auth-field input {
+        width: 100%;
+        padding: 12px 14px;
+        border: 2px solid #dde5f0;
+        border-radius: 10px;
+        font-size: 1rem;
+        color: #213240;
+        background: white;
+        box-sizing: border-box;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        font-family: inherit;
+    }
+    .auth-field input:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52,152,219,0.13);
+    }
+
+    /* Button */
+    .auth-btn {
+        width: 100%;
+        padding: 13px;
+        background: linear-gradient(135deg, #236093, #3498db);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: opacity 0.2s, transform 0.15s;
+        margin-top: 6px;
+        letter-spacing: 0.3px;
+        font-family: inherit;
+    }
+    .auth-btn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+    .auth-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    /* Messages */
+    .auth-msg {
+        border-radius: 9px;
+        font-size: 0.88rem;
+        line-height: 1.5;
+        margin-bottom: 16px;
+        padding: 11px 14px;
+        display: none;
+    }
+    .auth-msg.error   { background: #fff0f0; color: #c0392b; border: 1px solid #f5c6cb; display: block; }
+    .auth-msg.success { background: #eafaf1; color: #1a7a40; border: 1px solid #a9dfbf; display: block; }
+    .auth-msg.info    { background: #eef6ff; color: #1a5276; border: 1px solid #aed6f1; display: block; }
+
+    @media (max-width: 480px) {
+        .auth-card { padding: 28px 20px; }
+    }
+</style>
+<body>
+
+<div class="auth-wrap">
+    <div class="auth-card">
+
+        <div class="auth-logo">
+            <div class="auth-icon">🍷</div>
+            <h1>La Dolce Vita</h1>
+            <p>Gestione del locale</p>
+        </div>
+
+        <div class="auth-tabs">
+            <button class="auth-tab active" id="tab-login"    onclick="switchTab('login')">Accedi</button>
+            <button class="auth-tab"         id="tab-register" onclick="switchTab('register')">Registrati</button>
+        </div>
+
+        <div id="auth-msg" class="auth-msg"></div>
+
+        <form id="auth-form" onsubmit="submitForm(event)" novalidate>
+            <div class="auth-field">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="nome@esempio.com" required autocomplete="email">
+            </div>
+            <div class="auth-field">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password" minlength="6">
+            </div>
+            <button type="submit" class="auth-btn" id="submit-btn">Accedi</button>
+        </form>
+
+    </div>
+</div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const supabase = createClient(
+    'https://tjbsnchbezvhhugkgaxx.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYnNuY2hiZXp2aGh1Z2tnYXh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0OTA4ODAsImV4cCI6MjA3OTA2Njg4MH0.eMDjkjvirN1DrUPysy34TgycmwMkAoMmMuxJ1_o9vzg'
+);
+
+// Se già loggato → vai alla home
+const { data: { session } } = await supabase.auth.getSession();
+if (session) window.location.replace('/index.html');
+
+let currentTab = 'login';
+
+window.switchTab = (tab) => {
+    currentTab = tab;
+    document.getElementById('tab-login').classList.toggle('active',    tab === 'login');
+    document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+    document.getElementById('submit-btn').textContent = tab === 'login' ? 'Accedi' : 'Crea account';
+    setMsg('');
+};
+
+window.submitForm = async (e) => {
+    e.preventDefault();
+    const email    = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const btn      = document.getElementById('submit-btn');
+
+    btn.disabled = true;
+    btn.textContent = '...';
+    setMsg('');
+
+    if (currentTab === 'login') {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+            setMsg(traduci(error.message), 'error');
+        } else {
+            window.location.replace('/index.html');
+            return;
+        }
+    } else {
+        const { error } = await supabase.auth.signUp({ email, password });
+        if (error) {
+            setMsg(traduci(error.message), 'error');
+        } else {
+            setMsg('Account creato! Controlla la tua email per confermare la registrazione, poi accedi.', 'success');
+        }
+    }
+
+    btn.disabled = false;
+    btn.textContent = currentTab === 'login' ? 'Accedi' : 'Crea account';
+};
+
+function setMsg(text, type = '') {
+    const el = document.getElementById('auth-msg');
+    el.className = 'auth-msg' + (type ? ` ${type}` : '');
+    el.textContent = text;
+}
+
+function traduci(msg) {
+    if (msg.includes('Invalid login credentials'))    return 'Email o password errata.';
+    if (msg.includes('Email not confirmed'))          return 'Devi confermare la tua email prima di accedere.';
+    if (msg.includes('User already registered'))      return 'Esiste già un account con questa email.';
+    if (msg.includes('Password should be at least'))  return 'La password deve essere di almeno 6 caratteri.';
+    if (msg.includes('Unable to validate email'))     return 'Formato email non valido.';
+    if (msg.includes('signup is disabled'))           return 'La registrazione pubblica è disabilitata. Contatta l\'amministratore.';
+    return msg;
+}
+</script>
+
+</body>
+</html>

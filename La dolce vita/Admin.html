@@ -643,11 +643,13 @@ const TABLE_CONFIG = {
             { key: 'id',        label: 'ID' },
             { key: 'Prodotto',  label: 'Prodotto' },
             { key: 'Prezzo',    label: 'Prezzo', render: v => `€ ${Number(v).toFixed(2)}` },
+            { key: 'Costo',     label: 'Costo', render: v => v != null ? `€ ${Number(v).toFixed(2)}` : '—' },
             { key: 'IsDeleted', label: 'Stato', render: v => v ? '<span class="badge badge-del">Eliminato</span>' : '<span class="badge badge-ok">Attivo</span>' },
         ],
         fields: [
             { name: 'Prodotto',  label: 'Prodotto', type: 'text',   required: true },
             { name: 'Prezzo',    label: 'Prezzo €', type: 'number', required: true, step: '0.01', min: '0' },
+            { name: 'Costo',     label: 'Costo €',  type: 'number', step: '0.01', min: '0' },
             { name: 'IsDeleted', label: 'Eliminato', type: 'checkbox' },
         ],
     },

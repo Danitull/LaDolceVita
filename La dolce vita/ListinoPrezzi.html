@@ -281,10 +281,11 @@
             <table id="TabellaProdotti" class="styled-table">
                 <thead>
                     <tr>
-                        <th style="width: 40%;">Prodotto</th>
-                        <th style="width: 20%;">Prezzo</th>
+                        <th style="width: 35%;">Prodotto</th>
+                        <th style="width: 15%;">Prezzo</th>
+                        <th style="width: 15%;">Costo</th>
                         <th style="width: 20%;">Quantita' totale</th>
-                        <th style="width: 20%;">Restante</th>
+                        <th style="width: 15%;">Restante</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -350,11 +351,13 @@
       });
 
       const prezzoConDecimale = parseFloat(prodotto.Prezzo).toFixed(2);
+      const costoConDecimale = prodotto.Costo != null ? parseFloat(prodotto.Costo).toFixed(2) + ' €' : '—';
 
       if (!trovato) {
         tr.innerHTML = `
           <td data-label="Prodotto">${prodotto.Prodotto}</td>
           <td data-label="Prezzo">${prezzoConDecimale} €</td>
+          <td data-label="Costo">${costoConDecimale}</td>
           <td data-label="Qtà totale">0</td>
           <td data-label="Restante">0</td>
         `;
@@ -369,6 +372,7 @@
         tr.innerHTML = `
           <td data-label="Prodotto">${prodotto.Prodotto}</td>
           <td data-label="Prezzo">${prezzoConDecimale} €</td>
+          <td data-label="Costo">${costoConDecimale}</td>
           <td data-label="Qtà totale">${quantitaTotale}</td>
           <td data-label="Restante">-</td>
         `;

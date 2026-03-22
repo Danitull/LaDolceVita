@@ -179,12 +179,52 @@
             gap: 12px;
         }
     }
+
+    /* Card-view per .riepilogo-table su mobile */
+    @media (max-width: 580px) {
+        .riepilogo-table thead { display: none; }
+        .riepilogo-table tbody tr {
+            display: block;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(11,22,40,0.07);
+            margin-bottom: 12px;
+            padding: 10px 14px;
+            border-left: 4px solid #3498db;
+        }
+        .riepilogo-table.row-fully-paid { border-left-color: #10b981; }
+        .riepilogo-table.row-partially-paid { border-left-color: #f59e0b; }
+        .riepilogo-table.row-unpaid { border-left-color: #ef4444; }
+        .riepilogo-table td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid #f0f4f8;
+            font-size: 0.86rem;
+            text-align: right;
+        }
+        .riepilogo-table td:last-child { border-bottom: none; }
+        .riepilogo-table td::before {
+            content: attr(data-label);
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #94a3b8;
+            letter-spacing: 0.4px;
+            flex-shrink: 0;
+            margin-right: 8px;
+            text-align: left;
+        }
+        .riepilogo-table td.group-sep { border-left: none; }
+        .summary-card { min-width: 130px; padding: 12px 14px; }
+    }
 </style>
 <body>
 
 <nav-main></nav-main>
 
-<div style="width: 100%; padding-top: 8vh; padding-bottom: 40px; box-sizing: border-box;">
+<div class="fade-in" style="width: 100%; padding-top: 8vh; padding-bottom: 40px; box-sizing: border-box;">
 
     <h1 class="page-title">📋 Riepilogo Generale</h1>
     <p class="page-subtitle">Panoramica di tutti i pagamenti (Affitto · WiFi · Utenze) per il mese selezionato</p>
@@ -245,8 +285,7 @@
 
     <!-- Main table -->
     <div id="tableContainer" style="display:none;">
-        <div class="table-scroll-wrapper">
-    <div id="tableContainer" style="display:none; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+        <div class="table-scroll-wrapper" style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
         <table class="riepilogo-table">
             <thead>
                 <tr>
@@ -278,10 +317,17 @@
         Nessun dato disponibile per il mese e anno selezionati.
     </div>
 
+    <!-- Chart -->
+    <div id="chart-section" style="display:none; max-width:700px; margin:28px auto 0; background:rgba(255,255,255,0.95); border-radius:14px; box-shadow:0 4px 20px rgba(11,22,40,0.07); padding:24px;">
+        <h3 style="text-align:center;color:#236093;font-size:1rem;margin:0 0 16px;font-weight:700;">📊 Saldato vs Restante per categoria</h3>
+        <canvas id="myChart" height="120"></canvas>
+    </div>
+
 </div>
 
 <script type="module">
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import Chart from 'https://esm.sh/chart.js@4/auto';
 
 const supabaseUrl = "https://tjbsnchbezvhhugkgaxx.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYnNuY2hiZXp2aGh1Z2tnYXh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0OTA4ODAsImV4cCI6MjA3OTA2Njg4MH0.eMDjkjvirN1DrUPysy34TgycmwMkAoMmMuxJ1_o9vzg";
@@ -354,9 +400,28 @@ async function aggiorna() {
     const totWifi = getMonthlyAmount(d.wifiDaPagare, mese, anno);
     const totUtenze = getMonthlyAmount(d.utenzeDaPagare, mese, anno);
 
-    const quotaAffitto = nUtenti > 0 ? totAffitto / nUtenti : 0;
-    const quotaWifi = nUtenti > 0 ? totWifi / nUtenti : 0;
-    const quotaUtenze = nUtenti > 0 ? totUtenze / nUtenti : 0;
+    // Quote con regole complete: AbitaQui, PocoFrequente, EsclusoDa*
+    const QUOTA_AFF_FISSO = 150;
+    const QUOTA_UT_FISSO  = 60;
+    const QUOTA_PF_UT     = 10;
+
+    const utentiAff  = d.utenti.filter(u => !u.EsclusoDaAffitto);
+    const utentiWifi = d.utenti.filter(u => !u.EsclusoDaWiFi && !u.PocoFrequente);
+    const utentiUt   = d.utenti.filter(u => !u.EsclusoDaUtenze);
+
+    // Affitto
+    const nAQaff    = utentiAff.filter(u => u.AbitaQui).length;
+    const nNonAQaff = utentiAff.filter(u => !u.AbitaQui).length;
+    const quotaAffNonAQ = nNonAQaff > 0 ? (totAffitto - QUOTA_AFF_FISSO * nAQaff) / nNonAQaff : 0;
+
+    // WiFi
+    const quotaWifiPerUtente = utentiWifi.length > 0 ? totWifi / utentiWifi.length : 0;
+
+    // Utenze
+    const nAQut   = utentiUt.filter(u => u.AbitaQui).length;
+    const nPFut   = utentiUt.filter(u => u.PocoFrequente && !u.AbitaQui).length;
+    const nNormUt = utentiUt.filter(u => !u.AbitaQui && !u.PocoFrequente).length;
+    const quotaUtNorm = nNormUt > 0 ? (totUtenze - QUOTA_UT_FISSO * nAQut - QUOTA_PF_UT * nPFut) / nNormUt : 0;
 
     let grandTotale = 0;
     let grandSaldato = 0;
@@ -366,6 +431,21 @@ async function aggiorna() {
     tbody.innerHTML = "";
 
     d.utenti.forEach(utente => {
+        // Quota affitto
+        let quotaAffitto = 0;
+        if (!utente.EsclusoDaAffitto) {
+            quotaAffitto = utente.AbitaQui ? QUOTA_AFF_FISSO : quotaAffNonAQ;
+        }
+        // Quota WiFi
+        const quotaWifi = (!utente.EsclusoDaWiFi && !utente.PocoFrequente) ? quotaWifiPerUtente : 0;
+        // Quota utenze
+        let quotaUtenze = 0;
+        if (!utente.EsclusoDaUtenze) {
+            if (utente.AbitaQui)       quotaUtenze = QUOTA_UT_FISSO;
+            else if (utente.PocoFrequente) quotaUtenze = QUOTA_PF_UT;
+            else                       quotaUtenze = quotaUtNorm;
+        }
+
         const pagatoAffitto = getPagato(d.pagAffitti, utente.id, mese, anno);
         const pagatoWifi = getPagato(d.pagWifi, utente.id, mese, anno);
         const pagatoUtenze = getPagato(d.pagUtenze, utente.id, mese, anno);
@@ -390,15 +470,15 @@ async function aggiorna() {
         const tr = document.createElement("tr");
         tr.className = rowClass;
         tr.innerHTML = `
-            <td style="font-weight:600;">${utente.Nome}</td>
-            <td class="group-sep">${fmt(pagatoAffitto)}<br>${statusBadge(pagatoAffitto, quotaAffitto)}</td>
-            <td style="color:${restanteAffitto > 0 ? '#ef4444' : '#10b981'};">${fmt(restanteAffitto)}</td>
-            <td class="group-sep">${fmt(pagatoWifi)}<br>${statusBadge(pagatoWifi, quotaWifi)}</td>
-            <td style="color:${restanteWifi > 0 ? '#ef4444' : '#10b981'};">${fmt(restanteWifi)}</td>
-            <td class="group-sep">${fmt(pagatoUtenze)}<br>${statusBadge(pagatoUtenze, quotaUtenze)}</td>
-            <td style="color:${restanteUtenze > 0 ? '#ef4444' : '#10b981'};">${fmt(restanteUtenze)}</td>
-            <td class="group-sep" style="font-weight:700;">${fmt(totSaldato)}</td>
-            <td style="font-weight:700; color:${totRestante > 0.01 ? '#ef4444' : '#10b981'};">${fmt(totRestante)}</td>
+            <td data-label="Residente" style="font-weight:600;">${utente.Nome}${utente.AbitaQui ? ' <span style="font-size:0.72rem;background:rgba(39,174,96,0.12);color:#1a7a40;padding:2px 6px;border-radius:10px;">🏠</span>' : ''}</td>
+            <td data-label="Affitto Saldato" class="group-sep">${fmt(pagatoAffitto)}<br>${statusBadge(pagatoAffitto, quotaAffitto)}</td>
+            <td data-label="Affitto Restante" style="color:${restanteAffitto > 0 ? '#ef4444' : '#10b981'};">${fmt(restanteAffitto)}</td>
+            <td data-label="WiFi Saldato" class="group-sep">${fmt(pagatoWifi)}<br>${statusBadge(pagatoWifi, quotaWifi)}</td>
+            <td data-label="WiFi Restante" style="color:${restanteWifi > 0 ? '#ef4444' : '#10b981'};">${fmt(restanteWifi)}</td>
+            <td data-label="Utenze Saldate" class="group-sep">${fmt(pagatoUtenze)}<br>${statusBadge(pagatoUtenze, quotaUtenze)}</td>
+            <td data-label="Utenze Restanti" style="color:${restanteUtenze > 0 ? '#ef4444' : '#10b981'};">${fmt(restanteUtenze)}</td>
+            <td data-label="Tot. Saldato" class="group-sep" style="font-weight:700;">${fmt(totSaldato)}</td>
+            <td data-label="Tot. Restante" style="font-weight:700; color:${totRestante > 0.01 ? '#ef4444' : '#10b981'};">${fmt(totRestante)}</td>
         `;
         tbody.appendChild(tr);
     });
@@ -427,6 +507,61 @@ async function aggiorna() {
 
     document.getElementById("summaryCards").style.display = "flex";
     document.getElementById("tableContainer").style.display = "block";
+
+    // ── Chart
+    renderChart(
+        grandSaldato, Math.max(0, grandTotale - grandSaldato),
+        d.pagAffitti.filter(p=>p.Mese==mese&&p.Anno==anno).reduce((s,p)=>s+(parseFloat(p.Value)||0),0),
+        Math.max(0, totAffitto - d.pagAffitti.filter(p=>p.Mese==mese&&p.Anno==anno).reduce((s,p)=>s+(parseFloat(p.Value)||0),0)),
+        d.pagWifi.filter(p=>p.Mese==mese&&p.Anno==anno).reduce((s,p)=>s+(parseFloat(p.Value)||0),0),
+        Math.max(0, totWifi - d.pagWifi.filter(p=>p.Mese==mese&&p.Anno==anno).reduce((s,p)=>s+(parseFloat(p.Value)||0),0)),
+        d.pagUtenze.filter(p=>p.Mese==mese&&p.Anno==anno).reduce((s,p)=>s+(parseFloat(p.Value)||0),0),
+        Math.max(0, totUtenze - d.pagUtenze.filter(p=>p.Mese==mese&&p.Anno==anno).reduce((s,p)=>s+(parseFloat(p.Value)||0),0))
+    );
+    document.getElementById("chart-section").style.display = "block";
+}
+
+let chartInstance = null;
+function renderChart(totSald, totRest, affSald, affRest, wifiSald, wifiRest, utSald, utRest) {
+    const ctx = document.getElementById('myChart').getContext('2d');
+    if (chartInstance) chartInstance.destroy();
+    chartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['🏠 Affitto', '📡 WiFi', '💡 Utenze', '📊 Totale'],
+            datasets: [
+                {
+                    label: 'Saldato',
+                    data: [affSald, wifiSald, utSald, totSald],
+                    backgroundColor: 'rgba(39,174,96,0.75)',
+                    borderRadius: 6,
+                },
+                {
+                    label: 'Restante',
+                    data: [affRest, wifiRest, utRest, totRest],
+                    backgroundColor: 'rgba(231,76,60,0.65)',
+                    borderRadius: 6,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ` ${ctx.dataset.label}: € ${ctx.parsed.y.toFixed(2)}`
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { callback: v => '€ ' + v }
+                }
+            }
+        }
+    });
 }
 
 document.addEventListener("DOMContentLoaded", () => {

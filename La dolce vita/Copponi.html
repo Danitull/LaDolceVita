@@ -109,6 +109,39 @@
                 padding: 25px;
             }
         }
+
+        /* Card-view per TabellaProdotti (Copponi) su mobile */
+        @media (max-width: 580px) {
+            #TabellaProdotti thead { display: none; }
+            #TabellaProdotti tbody tr {
+                display: block;
+                background: #fff;
+                border-radius: 10px;
+                box-shadow: 0 2px 8px rgba(11,22,40,0.07);
+                margin-bottom: 10px;
+                padding: 10px 14px;
+                border-left: 4px solid #3498db;
+            }
+            #TabellaProdotti td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 5px 0;
+                border-bottom: 1px solid #f0f4f8;
+                font-size: 0.86rem;
+            }
+            #TabellaProdotti td:last-child { border-bottom: none; }
+            #TabellaProdotti td::before {
+                content: attr(data-label);
+                font-size: 0.72rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                color: #94a3b8;
+                letter-spacing: 0.4px;
+                flex-shrink: 0;
+                margin-right: 8px;
+            }
+        }
         .selezione-container {
   width: 100%;
   max-width: 400px;
@@ -242,7 +275,7 @@
 
         </div>
     </div>
-<div class="page-content single-nav">
+<div class="page-content single-nav fade-in">
     <div class="main-table-area">
         <div class="table-responsive">
             <table id="TabellaProdotti" class="styled-table">
@@ -333,7 +366,7 @@
         const utente = ListaGroupedByUtente.find(u => u.id === record.UtenteNo);
         if (utente) {
             var RecProdotto = ListaProdotti.find(p => p.id === record.ProdottoNo);
-            utente.DaPagare += RecProdotto.Prezzo * record.Qty;
+            utente.DaPagare += RecProdotto ? RecProdotto.Prezzo * record.Qty : (parseFloat(record.Prezzo) || 0);
         } else {
             ListaGroupedByUtente.push({                
                 DaPagare: parseFloat(record.Prezzo)
@@ -352,9 +385,9 @@
       const tr = document.createElement("tr");
       tr.style.height = '2vh';
       tr.innerHTML = `
-        <td>${nomeUtente}</td>
-        <td>${totaleDaSaldare.toFixed(2)}[€]</td>
-        <td><button class="PlusIconTable" onclick="alert('Funzionalità in sviluppo')">+</button></td>
+        <td data-label="Utente">${nomeUtente}</td>
+        <td data-label="Da Saldare">${totaleDaSaldare.toFixed(2)}[€]</td>
+        <td data-label="Dettagli"><button class="PlusIconTable" onclick="alert('Funzionalità in sviluppo')">+</button></td>
       `;
       tbody.appendChild(tr);
     });

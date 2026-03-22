@@ -10,66 +10,64 @@
 <style>
     .admin-wrap {
         width: 100%;
-        max-width: 960px;
+        max-width: 1100px;
         margin: 0 auto;
-        padding: 90px 24px 60px;
+        padding: 80px 24px 60px;
         box-sizing: border-box;
     }
-
-    .admin-header {
-        margin-bottom: 32px;
-    }
+    .admin-header { margin-bottom: 24px; }
     .admin-header h1 {
-        font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+        font-size: clamp(1.4rem, 3vw, 2rem);
         font-weight: 800;
         color: #236093;
-        margin: 0 0 6px;
+        margin: 0 0 4px;
     }
-    .admin-header p {
-        font-size: 0.95rem;
-        color: #556b7a;
-        margin: 0;
-    }
+    .admin-header p { font-size: 0.92rem; color: #556b7a; margin: 0; }
 
-    .admin-stats {
+    /* ── TAB BAR ── */
+    .admin-tabs {
         display: flex;
-        gap: 16px;
-        flex-wrap: wrap;
-        margin-bottom: 28px;
+        gap: 6px;
+        overflow-x: auto;
+        padding-bottom: 6px;
+        margin-bottom: 20px;
+        scrollbar-width: thin;
+        scrollbar-color: #b0c8e0 transparent;
     }
-    .stat-card {
-        background: rgba(255,255,255,0.92);
-        border-radius: 12px;
-        padding: 18px 24px;
-        box-shadow: 0 3px 12px rgba(11,22,40,0.07);
-        border-left: 4px solid #3498db;
-        min-width: 140px;
+    .admin-tabs::-webkit-scrollbar { height: 4px; }
+    .admin-tabs::-webkit-scrollbar-thumb { background: #b0c8e0; border-radius: 4px; }
+    .admin-tab-btn {
+        padding: 8px 16px;
+        border: 2px solid #dde5f0;
+        border-radius: 20px;
+        background: rgba(255,255,255,0.85);
+        font-size: 0.83rem;
+        font-weight: 600;
+        color: #556b7a;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: all 0.18s;
+        font-family: inherit;
+        flex-shrink: 0;
     }
-    .stat-card .stat-value {
-        font-size: 2rem;
-        font-weight: 800;
-        color: #236093;
-        line-height: 1;
+    .admin-tab-btn.active {
+        background: linear-gradient(135deg, #236093, #3498db);
+        color: #fff;
+        border-color: transparent;
     }
-    .stat-card .stat-label {
-        font-size: 0.82rem;
-        color: #778;
-        margin-top: 4px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
+    .admin-tab-btn:hover:not(.active) { border-color: #3498db; color: #236093; }
 
-    /* Toolbar */
+    /* ── TOOLBAR ── */
     .admin-toolbar {
         display: flex;
         align-items: center;
-        gap: 12px;
-        margin-bottom: 16px;
+        gap: 10px;
+        margin-bottom: 14px;
         flex-wrap: wrap;
     }
     .admin-search {
         flex: 1;
-        min-width: 200px;
+        min-width: 180px;
         padding: 9px 14px;
         border: 2px solid #dde5f0;
         border-radius: 10px;
@@ -79,79 +77,145 @@
         background: rgba(255,255,255,0.9);
         transition: border-color 0.2s;
     }
-    .admin-search:focus {
-        outline: none;
-        border-color: #3498db;
-    }
-    .admin-refresh {
-        padding: 9px 18px;
+    .admin-search:focus { outline: none; border-color: #3498db; }
+
+    .btn-refresh {
+        padding: 9px 16px;
         background: linear-gradient(135deg, #236093, #3498db);
-        color: white;
+        color: #fff;
         border: none;
         border-radius: 10px;
-        font-size: 0.88rem;
+        font-size: 0.85rem;
         font-weight: 600;
         cursor: pointer;
         font-family: inherit;
-        transition: opacity 0.2s;
         white-space: nowrap;
     }
-    .admin-refresh:hover { opacity: 0.88; }
+    .btn-add {
+        padding: 9px 16px;
+        background: #27ae60;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        white-space: nowrap;
+    }
+    .btn-show-deleted {
+        padding: 9px 14px;
+        background: rgba(255,255,255,0.8);
+        color: #778;
+        border: 2px solid #dde5f0;
+        border-radius: 10px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        white-space: nowrap;
+        transition: all 0.18s;
+    }
+    .btn-show-deleted.active { border-color: #e74c3c; color: #e74c3c; }
 
-    /* Table */
+    /* ── TABLE ── */
     .admin-table-wrap {
         background: rgba(255,255,255,0.95);
         border-radius: 14px;
         box-shadow: 0 4px 20px rgba(11,22,40,0.08);
         overflow: hidden;
+        overflow-x: auto;
     }
     .admin-table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 0.92rem;
+        font-size: 0.88rem;
+        min-width: 500px;
     }
     .admin-table thead tr {
-        background: linear-gradient(135deg, rgba(35,96,147,1), #4a90d9);
-        color: white;
+        background: linear-gradient(135deg, #236093, #4a90d9);
+        color: #fff;
     }
     .admin-table th {
-        padding: 13px 16px;
+        padding: 12px 14px;
         text-align: left;
         font-weight: 600;
-        font-size: 0.82rem;
+        font-size: 0.78rem;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.4px;
         white-space: nowrap;
     }
     .admin-table td {
-        padding: 12px 16px;
+        padding: 10px 14px;
         color: #334;
         border-bottom: 1px solid #f0f4f8;
         vertical-align: middle;
+        max-width: 220px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
     .admin-table tbody tr:last-child td { border-bottom: none; }
     .admin-table tbody tr:hover { background: #f5f9ff; }
+    .admin-table td.actions { white-space: nowrap; width: 1px; }
+
+    .btn-edit {
+        padding: 4px 10px;
+        background: #f0f7ff;
+        color: #3498db;
+        border: 1px solid #b8d8f0;
+        border-radius: 7px;
+        font-size: 0.76rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        margin-right: 4px;
+    }
+    .btn-del {
+        padding: 4px 10px;
+        background: #fff5f5;
+        color: #e74c3c;
+        border: 1px solid #f5b8b8;
+        border-radius: 7px;
+        font-size: 0.76rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+    }
+    .btn-restore {
+        padding: 4px 10px;
+        background: #f0fff4;
+        color: #27ae60;
+        border: 1px solid #a8e6c0;
+        border-radius: 7px;
+        font-size: 0.76rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        margin-right: 4px;
+    }
 
     .badge {
         display: inline-block;
-        padding: 3px 10px;
+        padding: 2px 9px;
         border-radius: 20px;
-        font-size: 0.78rem;
+        font-size: 0.75rem;
         font-weight: 600;
     }
     .badge-ok      { background: #eafaf1; color: #1a7a40; }
-    .badge-pending { background: #fff8e1; color: #b07800; }
+    .badge-no      { background: #fef9e7; color: #b07800; }
+    .badge-del     { background: #fdedec; color: #c0392b; }
 
-    /* Loading / empty state */
+    /* ── LOADING/EMPTY STATE ── */
     .admin-state {
         text-align: center;
         padding: 48px 24px;
         color: #778;
-        font-size: 0.95rem;
+        font-size: 0.92rem;
     }
-    .admin-state .state-icon { font-size: 2.2rem; margin-bottom: 10px; }
+    .admin-state .state-icon { font-size: 2rem; margin-bottom: 10px; }
 
-    /* Access denied overlay */
+    /* ── ACCESS DENIED ── */
     #access-denied {
         display: none;
         min-height: 100vh;
@@ -162,101 +226,944 @@
         text-align: center;
         padding: 20px;
     }
-    #access-denied .ad-icon { font-size: 3.5rem; }
-    #access-denied h2 { color: #c0392b; font-size: 1.5rem; margin: 0; }
+    #access-denied .ad-icon { font-size: 3rem; }
+    #access-denied h2 { color: #c0392b; font-size: 1.4rem; margin: 0; }
     #access-denied p  { color: #778; margin: 0; }
 
+    /* ── AUTH USERS STATS ── */
+    .admin-stats {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+    .stat-card {
+        background: rgba(255,255,255,0.92);
+        border-radius: 12px;
+        padding: 16px 22px;
+        box-shadow: 0 3px 12px rgba(11,22,40,0.07);
+        border-left: 4px solid #3498db;
+        min-width: 130px;
+    }
+    .stat-card .stat-value { font-size: 1.8rem; font-weight: 800; color: #236093; line-height: 1; }
+    .stat-card .stat-label { font-size: 0.78rem; color: #778; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.4px; }
+
+    /* ── CRUD MODAL ── */
+    .crud-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.52);
+        z-index: 3000;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+    .crud-overlay.open { display: flex; }
+    .crud-box {
+        background: #fff;
+        border-radius: 16px;
+        width: clamp(300px, 92vw, 560px);
+        max-height: 88vh;
+        overflow-y: auto;
+        box-shadow: 0 16px 48px rgba(0,0,0,0.22);
+        padding: 26px 26px 18px;
+        position: relative;
+    }
+    .crud-box::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0;
+        height: 4px; width: 100%;
+        background: linear-gradient(90deg, #236093, #6dd5fa);
+        border-radius: 16px 16px 0 0;
+    }
+    .crud-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #236093;
+        margin: 0 0 18px;
+    }
+    .crud-field { margin-bottom: 13px; }
+    .crud-field label {
+        display: block;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #556;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        margin-bottom: 4px;
+    }
+    .crud-field input,
+    .crud-field select,
+    .crud-field textarea {
+        width: 100%;
+        padding: 9px 12px;
+        border: 2px solid #dde5f0;
+        border-radius: 10px;
+        font-size: 0.91rem;
+        font-family: inherit;
+        color: #213240;
+        background: #fafcff;
+        box-sizing: border-box;
+        transition: border-color 0.2s;
+    }
+    .crud-field input:focus,
+    .crud-field select:focus,
+    .crud-field textarea:focus { outline: none; border-color: #3498db; }
+    .crud-field textarea { resize: vertical; min-height: 72px; }
+    .crud-field-check { display: flex; align-items: center; gap: 10px; padding: 4px 0; }
+    .crud-field-check input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #3498db; }
+    .crud-field-check label { font-size: 0.9rem; font-weight: 500; color: #334; text-transform: none; letter-spacing: 0; margin: 0; cursor: pointer; }
+    .crud-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 18px;
+        padding-top: 14px;
+        border-top: 1px solid #eee;
+    }
+    .btn-save {
+        padding: 9px 22px;
+        background: linear-gradient(135deg, #236093, #3498db);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        font-family: inherit;
+    }
+    .btn-cancel {
+        padding: 9px 22px;
+        background: #f0f4f8;
+        color: #556;
+        border: 1px solid #dde5f0;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        font-family: inherit;
+    }
+
+    /* ── CONFIRM DIALOG ── */
+    .confirm-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+        z-index: 4000;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+    .confirm-overlay.open { display: flex; }
+    .confirm-box {
+        background: #fff;
+        border-radius: 14px;
+        padding: 28px 26px 20px;
+        width: clamp(280px, 80vw, 420px);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+        text-align: center;
+    }
+    .confirm-icon { font-size: 2.2rem; margin-bottom: 10px; }
+    .confirm-box h3 { margin: 0 0 8px; color: #213240; font-size: 1rem; }
+    .confirm-box p { margin: 0 0 20px; color: #778; font-size: 0.88rem; }
+    .confirm-btns { display: flex; gap: 10px; justify-content: center; }
+    .btn-confirm-del {
+        padding: 9px 22px;
+        background: #e74c3c;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        font-family: inherit;
+    }
+
     @media (max-width: 640px) {
-        .admin-wrap { padding: 80px 12px 40px; }
-        .admin-table th:nth-child(1),
-        .admin-table td:nth-child(1) { display: none; } /* nascondi ID su mobile */
+        .admin-wrap { padding: 76px 12px 40px; }
+    }
+
+    /* Card-view per .admin-table su mobile */
+    @media (max-width: 580px) {
+        .admin-table thead { display: none; }
+        .admin-table tbody tr {
+            display: block;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(11,22,40,0.07);
+            margin-bottom: 10px;
+            padding: 10px 14px;
+            border-left: 4px solid #3498db;
+        }
+        .admin-table td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid #f0f4f8;
+            font-size: 0.84rem;
+            max-width: none;
+            white-space: normal;
+            overflow: visible;
+            text-overflow: clip;
+        }
+        .admin-table td:last-child { border-bottom: none; }
+        .admin-table td::before {
+            content: attr(data-label);
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #94a3b8;
+            letter-spacing: 0.4px;
+            flex-shrink: 0;
+            margin-right: 8px;
+        }
+        .admin-table td.actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: flex-end;
+            padding-top: 8px;
+        }
+        .admin-table td.actions::before { display: none; }
+        .admin-table-wrap { overflow-x: visible; }
     }
 </style>
 <body>
 
 <nav-main></nav-main>
 
-<!-- Accesso negato (mostrato se non sei admin) -->
 <div id="access-denied">
     <div class="ad-icon">🔒</div>
     <h2>Accesso negato</h2>
     <p>Non hai i permessi per visualizzare questa pagina.</p>
 </div>
 
-<!-- Contenuto admin (nascosto finché non verificata l'identità) -->
-<div class="admin-wrap" id="admin-content" style="display:none;">
+<div class="admin-wrap fade-in" id="admin-content" style="display:none;">
 
     <div class="admin-header">
-        <h1>⚙️ Amministrazione Utenti</h1>
-        <p>Tutti gli utenti registrati e autenticati nel sistema.</p>
+        <h1>⚙️ Pannello Amministrazione</h1>
+        <p>Gestione CRUD di tutte le tabelle del database.</p>
     </div>
 
-    <div class="admin-stats">
-        <div class="stat-card">
-            <div class="stat-value" id="stat-total">—</div>
-            <div class="stat-label">Utenti totali</div>
+    <!-- TAB BAR -->
+    <div class="admin-tabs" id="admin-tabs">
+        <button class="admin-tab-btn active" data-section="auth-users"    onclick="switchTab('auth-users')">👤 Auth Users</button>
+        <button class="admin-tab-btn"         data-section="utenti"        onclick="switchTab('utenti')">🏠 Utenti</button>
+        <button class="admin-tab-btn"         data-section="prodotti"      onclick="switchTab('prodotti')">📦 Prodotti</button>
+        <button class="admin-tab-btn"         data-section="affDaPagare"   onclick="switchTab('affDaPagare')">🏷️ Affitti/mese</button>
+        <button class="admin-tab-btn"         data-section="wifiDaPagare"  onclick="switchTab('wifiDaPagare')">📡 WiFi/mese</button>
+        <button class="admin-tab-btn"         data-section="utDaPagare"    onclick="switchTab('utDaPagare')">💡 Utenze/mese</button>
+        <button class="admin-tab-btn"         data-section="pagAffitti"    onclick="switchTab('pagAffitti')">💰 Pag. Affitto</button>
+        <button class="admin-tab-btn"         data-section="pagWifi"       onclick="switchTab('pagWifi')">💰 Pag. WiFi</button>
+        <button class="admin-tab-btn"         data-section="pagUtenze"     onclick="switchTab('pagUtenze')">💰 Pag. Utenze</button>
+        <button class="admin-tab-btn"         data-section="acquisti"      onclick="switchTab('acquisti')">🛒 Acquisti</button>
+        <button class="admin-tab-btn"         data-section="consumazioni"  onclick="switchTab('consumazioni')">🧾 Consumazioni</button>
+    </div>
+
+    <!-- ── AUTH USERS SECTION ── -->
+    <div id="section-auth-users">
+        <div class="admin-stats">
+            <div class="stat-card">
+                <div class="stat-value" id="stat-total">—</div>
+                <div class="stat-label">Utenti totali</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-confirmed">—</div>
+                <div class="stat-label">Email confermate</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-recent">—</div>
+                <div class="stat-label">Attivi (30 gg)</div>
+            </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-value" id="stat-confirmed">—</div>
-            <div class="stat-label">Email confermate</div>
+        <div class="admin-toolbar">
+            <input type="search" class="admin-search" id="auth-search"
+                   placeholder="Cerca per email..." oninput="filterAuthTable(this.value)">
+            <button class="btn-refresh" onclick="loadAuthUsers()">↺ Aggiorna</button>
         </div>
-        <div class="stat-card">
-            <div class="stat-value" id="stat-recent">—</div>
-            <div class="stat-label">Attivi (30 gg)</div>
+        <div class="admin-table-wrap">
+            <table class="admin-table" id="auth-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Email</th>
+                        <th>Email confermata</th>
+                        <th>Registrato il</th>
+                        <th>Ultimo accesso</th>
+                    </tr>
+                </thead>
+                <tbody id="auth-tbody">
+                    <tr><td colspan="5"><div class="admin-state"><div class="state-icon">⏳</div>Caricamento...</div></td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <div class="admin-toolbar">
-        <input type="search" class="admin-search" id="search-input"
-               placeholder="Cerca per email..."
-               oninput="filterTable(this.value)">
-        <button class="admin-refresh" onclick="loadUsers()">↺ Aggiorna</button>
+    <!-- ── CRUD GENERIC SECTION ── -->
+    <div id="section-crud" style="display:none;">
+        <div class="admin-toolbar">
+            <input type="search" class="admin-search" id="crud-search"
+                   placeholder="Cerca..." oninput="filterCrudTable(this.value)">
+            <button class="btn-show-deleted" id="btn-deleted" onclick="toggleShowDeleted()">👁 Mostra eliminati</button>
+            <button class="btn-add" onclick="openAddModal()">+ Aggiungi</button>
+            <button class="btn-refresh" onclick="loadCurrentSection()">↺ Aggiorna</button>
+        </div>
+        <div class="admin-table-wrap">
+            <table class="admin-table" id="crud-table">
+                <thead id="crud-thead"></thead>
+                <tbody id="crud-tbody">
+                    <tr><td colspan="99"><div class="admin-state"><div class="state-icon">⏳</div>Caricamento...</div></td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <div class="admin-table-wrap">
-        <table class="admin-table" id="users-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Email</th>
-                    <th>Email confermata</th>
-                    <th>Registrato il</th>
-                    <th>Ultimo accesso</th>
-                </tr>
-            </thead>
-            <tbody id="users-tbody">
-                <tr>
-                    <td colspan="5">
-                        <div class="admin-state">
-                            <div class="state-icon">⏳</div>
-                            Caricamento utenti...
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+</div><!-- /admin-wrap -->
 
+<!-- ── CRUD MODAL ── -->
+<div class="crud-overlay" id="crud-modal">
+    <div class="crud-box">
+        <div class="crud-title" id="crud-modal-title">Aggiungi record</div>
+        <form id="crud-form" onsubmit="saveRecord(event)">
+            <div id="crud-form-fields"></div>
+            <div class="crud-actions">
+                <button type="button" class="btn-cancel" onclick="closeModal()">Annulla</button>
+                <button type="submit" class="btn-save" id="crud-save-btn">Salva</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ── CONFIRM DIALOG ── -->
+<div class="confirm-overlay" id="confirm-dialog">
+    <div class="confirm-box">
+        <div class="confirm-icon">⚠️</div>
+        <h3 id="confirm-title">Conferma eliminazione</h3>
+        <p id="confirm-msg">Sei sicuro di voler eliminare questo record?</p>
+        <div class="confirm-btns">
+            <button class="btn-cancel" onclick="closeConfirm()">Annulla</button>
+            <button class="btn-confirm-del" id="confirm-ok-btn">Elimina</button>
+        </div>
+    </div>
 </div>
 
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
+/* ─── Config ──────────────────────────────────────────────────── */
 const ADMIN_EMAIL = 'danilotullo01@gmail.com';
+const SUPABASE_URL = 'https://tjbsnchbezvhhugkgaxx.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYnNuY2hiZXp2aGh1Z2tnYXh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0OTA4ODAsImV4cCI6MjA3OTA2Njg4MH0.eMDjkjvirN1DrUPysy34TgycmwMkAoMmMuxJ1_o9vzg';
 
-const supabase = createClient(
-    'https://tjbsnchbezvhhugkgaxx.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYnNuY2hiZXp2aGh1Z2tnYXh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0OTA4ODAsImV4cCI6MjA3OTA2Njg4MH0.eMDjkjvirN1DrUPysy34TgycmwMkAoMmMuxJ1_o9vzg'
-);
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-/* ── Carica utenti via RPC ───────────────────────────────────── */
-let allUsers = [];
+/* ─── Helpers ─────────────────────────────────────────────────── */
+const MESI = ['','Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno',
+              'Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
 
-window.loadUsers = async function () {
-    const tbody = document.getElementById('users-tbody');
+function fmtDate(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric' });
+}
+function fmtDateTime(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+function todayISO() { return new Date().toISOString().slice(0,10); }
+
+/* ─── Lookup cache ────────────────────────────────────────────── */
+const LOOKUP = { utenti: [], prodotti: [] };
+
+async function loadLookups() {
+    const [u, p] = await Promise.all([
+        sb.from('Utenti').select('id,Nome').eq('IsDeleted', false).order('Nome'),
+        sb.from('ElencoProdotti').select('id,Prodotto').eq('IsDeleted', false).order('Prodotto'),
+    ]);
+    LOOKUP.utenti   = u.data || [];
+    LOOKUP.prodotti = p.data || [];
+}
+
+function utenteName(id) {
+    const u = LOOKUP.utenti.find(x => x.id == id);
+    return u ? u.Nome : `#${id}`;
+}
+function prodottoName(id) {
+    const p = LOOKUP.prodotti.find(x => x.id == id);
+    return p ? p.Prodotto : `#${id}`;
+}
+
+/* ─── Table config ────────────────────────────────────────────── */
+/*
+  cols: array of { key, label, render? }
+  fields: array of { name, label, type, required?, options? }
+    types: text | number | date | email | textarea | checkbox | select-mese | select-utenti | select-prodotti
+  softDelete: true = set IsDeleted=true | false = hard delete
+  autoFields: object of fields to auto-fill (not shown in form)
+*/
+const TABLE_CONFIG = {
+
+    utenti: {
+        table: 'Utenti',
+        label: 'Utenti',
+        softDelete: true,
+        cols: [
+            { key: 'id',              label: 'ID' },
+            { key: 'Nome',            label: 'Nome' },
+            { key: 'EMail',           label: 'Email' },
+            { key: 'IsResident',      label: 'Residente',       render: v => v ? '<span class="badge badge-ok">✓ Sì</span>' : '<span class="badge badge-no">No</span>' },
+            { key: 'AbitaQui',        label: 'Abita Qui',       render: v => v ? '<span class="badge badge-ok">🏠 Sì</span>' : '<span class="badge badge-no">No</span>' },
+            { key: 'PocoFrequente',   label: 'Poco Frequente',  render: v => v ? '<span class="badge badge-ok">🌙 Sì</span>' : '<span class="badge badge-no">No</span>' },
+            { key: 'EsclusoDaAffitto', label: 'Escl. Affitto',  render: v => v ? '<span class="badge badge-del">Escluso</span>' : '<span class="badge badge-ok">Include</span>' },
+            { key: 'EsclusoDaWiFi',   label: 'Escl. WiFi',      render: v => v ? '<span class="badge badge-del">Escluso</span>' : '<span class="badge badge-ok">Include</span>' },
+            { key: 'EsclusoDaUtenze', label: 'Escl. Utenze',    render: v => v ? '<span class="badge badge-del">Escluso</span>' : '<span class="badge badge-ok">Include</span>' },
+            { key: 'IsDeleted',       label: 'Stato',           render: v => v ? '<span class="badge badge-del">Eliminato</span>' : '<span class="badge badge-ok">Attivo</span>' },
+        ],
+        fields: [
+            { name: 'Nome',            label: 'Nome',      type: 'text',  required: true },
+            { name: 'EMail',           label: 'Email',     type: 'email' },
+            { name: 'IsResident',      label: 'Residente', type: 'checkbox' },
+            { name: 'AbitaQui',        label: 'Abita Qui (€150 affitto fisso · €60 utenze fisse)', type: 'checkbox' },
+            { name: 'PocoFrequente',   label: 'Poco Frequente (€10 utenze · no WiFi)', type: 'checkbox' },
+            { name: 'EsclusoDaAffitto', label: 'Escluso da Affitto', type: 'checkbox' },
+            { name: 'EsclusoDaWiFi',   label: 'Escluso da WiFi',    type: 'checkbox' },
+            { name: 'EsclusoDaUtenze', label: 'Escluso da Utenze',  type: 'checkbox' },
+            { name: 'IsDeleted',       label: 'Eliminato', type: 'checkbox' },
+        ],
+    },
+
+    prodotti: {
+        table: 'ElencoProdotti',
+        label: 'Prodotti',
+        softDelete: true,
+        cols: [
+            { key: 'id',        label: 'ID' },
+            { key: 'Prodotto',  label: 'Prodotto' },
+            { key: 'Prezzo',    label: 'Prezzo', render: v => `€ ${Number(v).toFixed(2)}` },
+            { key: 'IsDeleted', label: 'Stato', render: v => v ? '<span class="badge badge-del">Eliminato</span>' : '<span class="badge badge-ok">Attivo</span>' },
+        ],
+        fields: [
+            { name: 'Prodotto',  label: 'Prodotto', type: 'text',   required: true },
+            { name: 'Prezzo',    label: 'Prezzo €', type: 'number', required: true, step: '0.01', min: '0' },
+            { name: 'IsDeleted', label: 'Eliminato', type: 'checkbox' },
+        ],
+    },
+
+    affDaPagare: {
+        table: 'AffittiDaPagare',
+        label: 'Affitti Da Pagare (quote mensili)',
+        softDelete: false,
+        cols: [
+            { key: 'id',    label: 'ID' },
+            { key: 'Mese',  label: 'Mese', render: v => MESI[v] || v },
+            { key: 'Anno',  label: 'Anno' },
+            { key: 'Value', label: 'Importo', render: v => `€ ${Number(v).toFixed(2)}` },
+        ],
+        fields: [
+            { name: 'Mese',  label: 'Mese',     type: 'select-mese', required: true },
+            { name: 'Anno',  label: 'Anno',     type: 'number', required: true, min: '2020', max: '2030', step: '1' },
+            { name: 'Value', label: 'Importo €', type: 'number', required: true, step: '0.01', min: '0' },
+        ],
+    },
+
+    wifiDaPagare: {
+        table: 'WiFiDaPagare',
+        label: 'WiFi Da Pagare (quote mensili)',
+        softDelete: false,
+        cols: [
+            { key: 'id',    label: 'ID' },
+            { key: 'Mese',  label: 'Mese', render: v => MESI[v] || v },
+            { key: 'Anno',  label: 'Anno' },
+            { key: 'Value', label: 'Importo', render: v => `€ ${Number(v).toFixed(2)}` },
+        ],
+        fields: [
+            { name: 'Mese',  label: 'Mese',     type: 'select-mese', required: true },
+            { name: 'Anno',  label: 'Anno',     type: 'number', required: true, min: '2020', max: '2030', step: '1' },
+            { name: 'Value', label: 'Importo €', type: 'number', required: true, step: '0.01', min: '0' },
+        ],
+    },
+
+    utDaPagare: {
+        table: 'UtenzeDaPagare',
+        label: 'Utenze Da Pagare (quote mensili)',
+        softDelete: false,
+        cols: [
+            { key: 'id',    label: 'ID' },
+            { key: 'Mese',  label: 'Mese', render: v => MESI[v] || v },
+            { key: 'Anno',  label: 'Anno' },
+            { key: 'Value', label: 'Importo', render: v => `€ ${Number(v).toFixed(2)}` },
+        ],
+        fields: [
+            { name: 'Mese',  label: 'Mese',     type: 'select-mese', required: true },
+            { name: 'Anno',  label: 'Anno',     type: 'number', required: true, min: '2020', max: '2030', step: '1' },
+            { name: 'Value', label: 'Importo €', type: 'number', required: true, step: '0.01', min: '0' },
+        ],
+    },
+
+    pagAffitti: {
+        table: 'PagamentoAffitti',
+        label: 'Pagamenti Affitto',
+        softDelete: true,
+        autoFields: { DataCreazione: todayISO, DataModifica: todayISO },
+        hasUtenteTracking: true,
+        cols: [
+            { key: 'id',            label: 'ID' },
+            { key: 'UtenteNo',      label: 'Utente', render: v => utenteName(v) },
+            { key: 'Mese',          label: 'Mese', render: v => MESI[v] || v },
+            { key: 'Anno',          label: 'Anno' },
+            { key: 'DataPagamento', label: 'Data Pag.', render: fmtDate },
+            { key: 'Value',         label: 'Importo', render: v => v != null ? `€ ${Number(v).toFixed(2)}` : '—' },
+            { key: 'IsDeleted',     label: 'Stato', render: v => v ? '<span class="badge badge-del">Eliminato</span>' : '<span class="badge badge-ok">Attivo</span>' },
+        ],
+        fields: [
+            { name: 'UtenteNo',      label: 'Utente',    type: 'select-utenti', required: true },
+            { name: 'Mese',          label: 'Mese',      type: 'select-mese',   required: true },
+            { name: 'Anno',          label: 'Anno',      type: 'number', required: true, min: '2020', max: '2030', step: '1' },
+            { name: 'DataPagamento', label: 'Data Pagamento', type: 'date', required: true },
+            { name: 'Value',         label: 'Importo €', type: 'number', step: '0.01', min: '0' },
+            { name: 'IsDeleted',     label: 'Eliminato', type: 'checkbox' },
+        ],
+    },
+
+    pagWifi: {
+        table: 'PagamentoWiFi',
+        label: 'Pagamenti WiFi',
+        softDelete: true,
+        autoFields: { DataCreazione: todayISO, DataModifica: todayISO },
+        hasUtenteTracking: true,
+        cols: [
+            { key: 'id',            label: 'ID' },
+            { key: 'UtenteNo',      label: 'Utente', render: v => utenteName(v) },
+            { key: 'Mese',          label: 'Mese', render: v => MESI[v] || v },
+            { key: 'Anno',          label: 'Anno' },
+            { key: 'DataPagamento', label: 'Data Pag.', render: fmtDate },
+            { key: 'Value',         label: 'Importo', render: v => v != null ? `€ ${Number(v).toFixed(2)}` : '—' },
+            { key: 'IsDeleted',     label: 'Stato', render: v => v ? '<span class="badge badge-del">Eliminato</span>' : '<span class="badge badge-ok">Attivo</span>' },
+        ],
+        fields: [
+            { name: 'UtenteNo',      label: 'Utente',    type: 'select-utenti', required: true },
+            { name: 'Mese',          label: 'Mese',      type: 'select-mese',   required: true },
+            { name: 'Anno',          label: 'Anno',      type: 'number', required: true, min: '2020', max: '2030', step: '1' },
+            { name: 'DataPagamento', label: 'Data Pagamento', type: 'date', required: true },
+            { name: 'Value',         label: 'Importo €', type: 'number', step: '0.01', min: '0' },
+            { name: 'IsDeleted',     label: 'Eliminato', type: 'checkbox' },
+        ],
+    },
+
+    pagUtenze: {
+        table: 'PagamentoUtenze',
+        label: 'Pagamenti Utenze',
+        softDelete: true,
+        autoFields: { DataCreazione: todayISO, DataModifica: todayISO },
+        hasUtenteTracking: true,
+        cols: [
+            { key: 'id',            label: 'ID' },
+            { key: 'UtenteNo',      label: 'Utente', render: v => utenteName(v) },
+            { key: 'Mese',          label: 'Mese', render: v => MESI[v] || v },
+            { key: 'Anno',          label: 'Anno' },
+            { key: 'DataPagamento', label: 'Data Pag.', render: fmtDate },
+            { key: 'Value',         label: 'Importo', render: v => v != null ? `€ ${Number(v).toFixed(2)}` : '—' },
+            { key: 'IsDeleted',     label: 'Stato', render: v => v ? '<span class="badge badge-del">Eliminato</span>' : '<span class="badge badge-ok">Attivo</span>' },
+        ],
+        fields: [
+            { name: 'UtenteNo',      label: 'Utente',    type: 'select-utenti', required: true },
+            { name: 'Mese',          label: 'Mese',      type: 'select-mese',   required: true },
+            { name: 'Anno',          label: 'Anno',      type: 'number', required: true, min: '2020', max: '2030', step: '1' },
+            { name: 'DataPagamento', label: 'Data Pagamento', type: 'date', required: true },
+            { name: 'Value',         label: 'Importo €', type: 'number', step: '0.01', min: '0' },
+            { name: 'IsDeleted',     label: 'Eliminato', type: 'checkbox' },
+        ],
+    },
+
+    acquisti: {
+        table: 'Acquisti_Spese',
+        label: 'Acquisti & Spese',
+        softDelete: true,
+        hasUtenteTracking: true,
+        cols: [
+            { key: 'id',           label: 'ID' },
+            { key: 'ProdottoNo',   label: 'Prodotto', render: v => prodottoName(v) },
+            { key: 'DataAcquisto', label: 'Data', render: fmtDate },
+            { key: 'Qty',          label: 'Qty', render: v => v ?? '—' },
+            { key: 'Confezioni',   label: 'Confezioni', render: v => v ?? '—' },
+            { key: 'Prezzo',       label: 'Prezzo', render: v => v != null ? `€ ${Number(v).toFixed(2)}` : '—' },
+            { key: 'Note',         label: 'Note' },
+            { key: 'IsDeleted',    label: 'Stato', render: v => v ? '<span class="badge badge-del">Eliminato</span>' : '<span class="badge badge-ok">Attivo</span>' },
+        ],
+        fields: [
+            { name: 'ProdottoNo',   label: 'Prodotto',    type: 'select-prodotti', required: true },
+            { name: 'DataAcquisto', label: 'Data Acquisto', type: 'date' },
+            { name: 'Qty',          label: 'Quantità',     type: 'number', step: '0.01', min: '0' },
+            { name: 'Confezioni',   label: 'Confezioni',   type: 'number', step: '0.01', min: '0' },
+            { name: 'Prezzo',       label: 'Prezzo €',     type: 'number', step: '0.01', min: '0' },
+            { name: 'Note',         label: 'Note',         type: 'textarea' },
+            { name: 'IsDeleted',    label: 'Eliminato',    type: 'checkbox' },
+        ],
+    },
+
+    consumazioni: {
+        table: 'CassaConsumazioni',
+        label: 'Consumazioni (Cassa)',
+        softDelete: true,
+        hasUtenteTracking: true,
+        cols: [
+            { key: 'id',             label: 'ID' },
+            { key: 'UtenteNo',       label: 'Utente',   render: v => utenteName(v) },
+            { key: 'ProdottoNo',     label: 'Prodotto', render: v => prodottoName(v) },
+            { key: 'DataCreazione',  label: 'Creazione', render: fmtDate },
+            { key: 'DataPagamento',  label: 'Pagamento', render: fmtDate },
+            { key: 'Qty',            label: 'Qty' },
+            { key: 'Note',           label: 'Note' },
+            { key: 'IsDeleted',      label: 'Stato', render: v => v ? '<span class="badge badge-del">Eliminato</span>' : '<span class="badge badge-ok">Attivo</span>' },
+        ],
+        fields: [
+            { name: 'UtenteNo',      label: 'Utente',       type: 'select-utenti' },
+            { name: 'ProdottoNo',    label: 'Prodotto',     type: 'select-prodotti' },
+            { name: 'DataCreazione', label: 'Data Creazione', type: 'date' },
+            { name: 'DataPagamento', label: 'Data Pagamento', type: 'date' },
+            { name: 'Qty',           label: 'Quantità',     type: 'number', min: '0' },
+            { name: 'Note',          label: 'Note',         type: 'textarea' },
+            { name: 'IsDeleted',     label: 'Eliminato',    type: 'checkbox' },
+        ],
+    },
+};
+
+/* ─── State ───────────────────────────────────────────────────── */
+let SESSION = null;
+let currentSection = 'auth-users';
+let currentData = [];
+let currentEditId = null;
+let showDeleted = false;
+let allAuthUsers = [];
+
+/* ─── Tab switching ───────────────────────────────────────────── */
+window.switchTab = function(section) {
+    currentSection = section;
+    showDeleted = false;
+    document.getElementById('btn-deleted') && (document.getElementById('btn-deleted').classList.remove('active'));
+
+    // Update active tab button
+    document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.section === section);
+    });
+
+    const authSection = document.getElementById('section-auth-users');
+    const crudSection = document.getElementById('section-crud');
+
+    if (section === 'auth-users') {
+        authSection.style.display = '';
+        crudSection.style.display = 'none';
+        loadAuthUsers();
+    } else {
+        authSection.style.display = 'none';
+        crudSection.style.display = '';
+
+        // Show/hide the "Mostra eliminati" button only for tables with soft delete
+        const cfg = TABLE_CONFIG[section];
+        const btnDel = document.getElementById('btn-deleted');
+        if (btnDel) btnDel.style.display = cfg?.softDelete ? '' : 'none';
+
+        renderCrudHeader(section);
+        loadCurrentSection();
+    }
+};
+
+window.loadCurrentSection = async function() {
+    if (currentSection === 'auth-users') { loadAuthUsers(); return; }
+    const cfg = TABLE_CONFIG[currentSection];
+    if (!cfg) return;
+
+    setCrudLoading();
+    let query = sb.from(cfg.table).select('*').order('id', { ascending: false });
+    if (cfg.softDelete && !showDeleted) query = query.eq('IsDeleted', false);
+
+    const { data, error } = await query;
+    if (error) { setCrudError(error.message); return; }
+
+    currentData = data || [];
+    renderCrudRows(currentSection, currentData);
+};
+
+/* ─── CRUD table header ───────────────────────────────────────── */
+function renderCrudHeader(section) {
+    const cfg = TABLE_CONFIG[section];
+    const thead = document.getElementById('crud-thead');
+    thead.innerHTML = `<tr>
+        ${cfg.cols.map(c => `<th>${c.label}</th>`).join('')}
+        <th>Azioni</th>
+    </tr>`;
+}
+
+/* ─── CRUD table rows ─────────────────────────────────────────── */
+function renderCrudRows(section, data) {
+    const cfg = TABLE_CONFIG[section];
+    const tbody = document.getElementById('crud-tbody');
+
+    if (!data.length) {
+        tbody.innerHTML = `<tr><td colspan="99"><div class="admin-state"><div class="state-icon">📭</div>Nessun record trovato.</div></td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = data.map(row => {
+        const cells = cfg.cols.map(c => {
+            const val = row[c.key];
+            const display = c.render ? c.render(val) : (val != null ? String(val) : '—');
+            return `<td data-label="${c.label}" title="${val ?? ''}">${display}</td>`;
+        }).join('');
+
+        let actions = `<button class="btn-edit" onclick="openEditModal(${row.id})">✏️ Modifica</button>`;
+        if (cfg.softDelete) {
+            if (row.IsDeleted) {
+                actions += `<button class="btn-restore" onclick="restoreRecord(${row.id})">↩ Ripristina</button>`;
+            } else {
+                actions += `<button class="btn-del" onclick="confirmDelete(${row.id})">🗑 Elimina</button>`;
+            }
+        } else {
+            actions += `<button class="btn-del" onclick="confirmDelete(${row.id})">🗑 Elimina</button>`;
+        }
+
+        return `<tr>${cells}<td class="actions">${actions}</td></tr>`;
+    }).join('');
+}
+
+/* ─── Filter ──────────────────────────────────────────────────── */
+window.filterCrudTable = function(q) {
+    const lower = q.toLowerCase().trim();
+    if (!lower) { renderCrudRows(currentSection, currentData); return; }
+    const filtered = currentData.filter(row =>
+        Object.values(row).some(v => v != null && String(v).toLowerCase().includes(lower))
+    );
+    renderCrudRows(currentSection, filtered);
+};
+
+window.toggleShowDeleted = function() {
+    showDeleted = !showDeleted;
+    document.getElementById('btn-deleted').classList.toggle('active', showDeleted);
+    loadCurrentSection();
+};
+
+/* ─── Loading/Error states ────────────────────────────────────── */
+function setCrudLoading() {
+    document.getElementById('crud-tbody').innerHTML =
+        `<tr><td colspan="99"><div class="admin-state"><div class="state-icon">⏳</div>Caricamento...</div></td></tr>`;
+}
+function setCrudError(msg) {
+    document.getElementById('crud-tbody').innerHTML =
+        `<tr><td colspan="99"><div class="admin-state"><div class="state-icon">⚠️</div><strong>Errore:</strong> ${msg}</div></td></tr>`;
+}
+
+/* ─── Modal: field rendering ──────────────────────────────────── */
+function buildFormFields(section, row) {
+    const cfg = TABLE_CONFIG[section];
+    return cfg.fields.map(f => {
+        const val = row ? row[f.name] : null;
+        const req = f.required ? 'required' : '';
+
+        if (f.type === 'checkbox') {
+            const checked = val ? 'checked' : '';
+            return `<div class="crud-field">
+                <div class="crud-field-check">
+                    <input type="checkbox" id="f_${f.name}" name="${f.name}" ${checked}>
+                    <label for="f_${f.name}">${f.label}</label>
+                </div>
+            </div>`;
+        }
+
+        if (f.type === 'select-mese') {
+            const opts = MESI.slice(1).map((m, i) =>
+                `<option value="${i+1}" ${val == i+1 ? 'selected' : ''}>${m}</option>`
+            ).join('');
+            return `<div class="crud-field">
+                <label>${f.label}${f.required?' *':''}</label>
+                <select id="f_${f.name}" name="${f.name}" ${req}><option value="">— Seleziona —</option>${opts}</select>
+            </div>`;
+        }
+
+        if (f.type === 'select-utenti') {
+            const opts = LOOKUP.utenti.map(u =>
+                `<option value="${u.id}" ${val == u.id ? 'selected' : ''}>${u.Nome}</option>`
+            ).join('');
+            return `<div class="crud-field">
+                <label>${f.label}${f.required?' *':''}</label>
+                <select id="f_${f.name}" name="${f.name}" ${req}><option value="">— Seleziona utente —</option>${opts}</select>
+            </div>`;
+        }
+
+        if (f.type === 'select-prodotti') {
+            const opts = LOOKUP.prodotti.map(p =>
+                `<option value="${p.id}" ${val == p.id ? 'selected' : ''}>${p.Prodotto}</option>`
+            ).join('');
+            return `<div class="crud-field">
+                <label>${f.label}${f.required?' *':''}</label>
+                <select id="f_${f.name}" name="${f.name}" ${req}><option value="">— Seleziona prodotto —</option>${opts}</select>
+            </div>`;
+        }
+
+        if (f.type === 'textarea') {
+            return `<div class="crud-field">
+                <label>${f.label}</label>
+                <textarea id="f_${f.name}" name="${f.name}" ${req}>${val ?? ''}</textarea>
+            </div>`;
+        }
+
+        // text | number | date | email
+        const attrs = [
+            f.step  ? `step="${f.step}"` : '',
+            f.min   ? `min="${f.min}"` : '',
+            f.max   ? `max="${f.max}"` : '',
+        ].filter(Boolean).join(' ');
+
+        const inputVal = val != null ? `value="${val}"` : '';
+        return `<div class="crud-field">
+            <label>${f.label}${f.required?' *':''}</label>
+            <input type="${f.type}" id="f_${f.name}" name="${f.name}" ${inputVal} ${attrs} ${req}>
+        </div>`;
+    }).join('');
+}
+
+/* ─── Modal: open/close ───────────────────────────────────────── */
+window.openAddModal = function() {
+    const cfg = TABLE_CONFIG[currentSection];
+    currentEditId = null;
+    document.getElementById('crud-modal-title').textContent = `➕ Aggiungi — ${cfg.label}`;
+    document.getElementById('crud-form-fields').innerHTML = buildFormFields(currentSection, null);
+    document.getElementById('crud-modal').classList.add('open');
+};
+
+window.openEditModal = function(id) {
+    const cfg = TABLE_CONFIG[currentSection];
+    const row = currentData.find(r => r.id === id);
+    if (!row) return;
+    currentEditId = id;
+    document.getElementById('crud-modal-title').textContent = `✏️ Modifica — ${cfg.label} #${id}`;
+    document.getElementById('crud-form-fields').innerHTML = buildFormFields(currentSection, row);
+    document.getElementById('crud-modal').classList.add('open');
+};
+
+window.closeModal = function() {
+    document.getElementById('crud-modal').classList.remove('open');
+    currentEditId = null;
+};
+
+/* ─── Save (insert/update) ────────────────────────────────────── */
+window.saveRecord = async function(e) {
+    e.preventDefault();
+    const cfg = TABLE_CONFIG[currentSection];
+    const saveBtn = document.getElementById('crud-save-btn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Salvataggio...';
+
+    // Collect form values
+    const payload = {};
+    cfg.fields.forEach(f => {
+        const el = document.getElementById(`f_${f.name}`);
+        if (!el) return;
+        if (f.type === 'checkbox') {
+            payload[f.name] = el.checked;
+        } else if (f.type === 'number' && el.value !== '') {
+            payload[f.name] = Number(el.value);
+        } else if (el.value !== '') {
+            payload[f.name] = el.value;
+        } else {
+            payload[f.name] = null;
+        }
+    });
+
+    // Auto fields
+    if (cfg.autoFields) {
+        Object.entries(cfg.autoFields).forEach(([k, fn]) => {
+            payload[k] = typeof fn === 'function' ? fn() : fn;
+        });
+    }
+
+    // Utente tracking
+    if (cfg.hasUtenteTracking && SESSION) {
+        if (!currentEditId) {
+            payload['UtenteCreazione'] = SESSION.user.id;
+        }
+        payload['UtenteModifica'] = SESSION.user.id;
+        if (cfg.autoFields?.DataModifica !== undefined) {
+            payload['DataModifica'] = todayISO();
+        }
+    }
+
+    let error;
+    if (currentEditId) {
+        ({ error } = await sb.from(cfg.table).update(payload).eq('id', currentEditId));
+    } else {
+        ({ error } = await sb.from(cfg.table).insert(payload));
+    }
+
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Salva';
+
+    if (error) {
+        if (window.showToast) showToast(`Errore: ${error.message}`, 'error'); else alert(`Errore: ${error.message}`);
+        return;
+    }
+
+    closeModal();
+    // Refresh lookups if we edited Utenti or Prodotti
+    if (currentSection === 'utenti' || currentSection === 'prodotti') await loadLookups();
+    loadCurrentSection();
+};
+
+/* ─── Delete ──────────────────────────────────────────────────── */
+let pendingDeleteId = null;
+
+window.confirmDelete = function(id) {
+    pendingDeleteId = id;
+    const cfg = TABLE_CONFIG[currentSection];
+    document.getElementById('confirm-title').textContent = cfg.softDelete ? 'Conferma eliminazione' : 'Eliminazione definitiva';
+    document.getElementById('confirm-msg').textContent = cfg.softDelete
+        ? 'Il record verrà marcato come eliminato. Potrai ripristinarlo in seguito.'
+        : 'Il record verrà eliminato definitivamente dal database. Operazione irreversibile.';
+    document.getElementById('confirm-ok-btn').textContent = cfg.softDelete ? 'Elimina' : 'Elimina definitivamente';
+    document.getElementById('confirm-dialog').classList.add('open');
+    document.getElementById('confirm-ok-btn').onclick = executeDelete;
+};
+
+async function executeDelete() {
+    const cfg = TABLE_CONFIG[currentSection];
+    const id = pendingDeleteId;
+    closeConfirm();
+
+    let error;
+    if (cfg.softDelete) {
+        const upd = { IsDeleted: true };
+        if (cfg.hasUtenteTracking && SESSION) upd.UtenteDelete = SESSION.user.id;
+        ({ error } = await sb.from(cfg.table).update(upd).eq('id', id));
+    } else {
+        ({ error } = await sb.from(cfg.table).delete().eq('id', id));
+    }
+
+    if (error) { if (window.showToast) showToast(`Errore: ${error.message}`, 'error'); else alert(`Errore: ${error.message}`); return; }
+    if (currentSection === 'utenti' || currentSection === 'prodotti') await loadLookups();
+    loadCurrentSection();
+}
+
+window.restoreRecord = async function(id) {
+    const cfg = TABLE_CONFIG[currentSection];
+    const { error } = await sb.from(cfg.table).update({ IsDeleted: false }).eq('id', id);
+    if (error) { if (window.showToast) showToast(`Errore: ${error.message}`, 'error'); else alert(`Errore: ${error.message}`); return; }
+    if (currentSection === 'utenti' || currentSection === 'prodotti') await loadLookups();
+    loadCurrentSection();
+};
+
+window.closeConfirm = function() {
+    document.getElementById('confirm-dialog').classList.remove('open');
+    pendingDeleteId = null;
+};
+
+/* ─── Auth users (existing logic) ────────────────────────────── */
+window.loadAuthUsers = async function() {
+    const tbody = document.getElementById('auth-tbody');
     tbody.innerHTML = `<tr><td colspan="5"><div class="admin-state"><div class="state-icon">⏳</div>Caricamento...</div></td></tr>`;
 
-    const { data, error } = await supabase.rpc('get_auth_users');
+    const { data, error } = await sb.rpc('get_auth_users');
 
     if (error) {
         const isNotFound = error.message.includes('function') || error.code === 'PGRST202';
@@ -264,84 +1171,73 @@ window.loadUsers = async function () {
             <div class="admin-state">
                 <div class="state-icon">${isNotFound ? '🔧' : '⚠️'}</div>
                 <strong style="color:#c0392b">${isNotFound ? 'Funzione SQL non trovata' : 'Errore'}</strong><br>
-                <code style="font-size:0.8rem;color:#556;background:#f5f5f5;padding:4px 8px;border-radius:4px;display:inline-block;margin:8px 0">
-                    ${error.message}
-                </code><br>
-                ${isNotFound
-                    ? '<span style="color:#556;font-size:0.88rem">Crea la funzione <strong>get_auth_users()</strong> su Supabase → SQL Editor.</span>'
-                    : `<span style="color:#556;font-size:0.88rem">Codice: <code>${error.code}</code> — ${error.details || error.hint || ''}</span>`
-                }
+                <code style="font-size:0.8rem;color:#556;background:#f5f5f5;padding:4px 8px;border-radius:4px;display:inline-block;margin:8px 0">${error.message}</code><br>
+                ${isNotFound ? '<span style="color:#556;font-size:0.88rem">Crea la funzione <strong>get_auth_users()</strong> su Supabase → SQL Editor.</span>' : ''}
             </div>
         </td></tr>`;
         return;
     }
 
-    allUsers = data || [];
-    renderTable(allUsers);
-    updateStats(allUsers);
+    allAuthUsers = data || [];
+    renderAuthTable(allAuthUsers);
+    updateAuthStats(allAuthUsers);
 };
 
-/* ── Verifica identità ───────────────────────────────────────── */
-const { data: { session } } = await supabase.auth.getSession();
-
-if (!session || session.user.email !== ADMIN_EMAIL) {
-    document.getElementById('access-denied').style.display = 'flex';
-} else {
-    document.getElementById('admin-content').style.display = 'block';
-    loadUsers();
-}
-
-function renderTable(users) {
-    const tbody = document.getElementById('users-tbody');
-
-    if (users.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5"><div class="admin-state"><div class="state-icon">👤</div>Nessun utente trovato.</div></td></tr>`;
+function renderAuthTable(users) {
+    const tbody = document.getElementById('auth-tbody');
+    if (!users.length) {
+        tbody.innerHTML = `<tr><td colspan="5"><div class="admin-state"><div class="state-icon">👤</div>Nessun utente.</div></td></tr>`;
         return;
     }
-
     tbody.innerHTML = users.map(u => {
         const confirmed = u.email_confirmed_at
             ? `<span class="badge badge-ok">✓ Confermata</span>`
-            : `<span class="badge badge-pending">In attesa</span>`;
-
-        const registrato  = formatDate(u.created_at);
-        const ultimoAccesso = u.last_sign_in_at ? formatDate(u.last_sign_in_at) : '<span style="color:#bbb">Mai</span>';
+            : `<span class="badge badge-no">In attesa</span>`;
         const shortId = u.id ? u.id.split('-')[0] + '…' : '—';
-
         return `<tr>
-            <td style="font-family:monospace;font-size:0.8rem;color:#99a">${shortId}</td>
-            <td style="font-weight:600">${u.email}</td>
-            <td>${confirmed}</td>
-            <td>${registrato}</td>
-            <td>${ultimoAccesso}</td>
+            <td data-label="ID" style="font-family:monospace;font-size:0.8rem;color:#99a">${shortId}</td>
+            <td data-label="Email" style="font-weight:600">${u.email}</td>
+            <td data-label="Email confermata">${confirmed}</td>
+            <td data-label="Registrato il">${fmtDateTime(u.created_at)}</td>
+            <td data-label="Ultimo accesso">${u.last_sign_in_at ? fmtDateTime(u.last_sign_in_at) : '<span style="color:#bbb">Mai</span>'}</td>
         </tr>`;
     }).join('');
 }
 
-function updateStats(users) {
+function updateAuthStats(users) {
     const now = Date.now();
     const thirtyDays = 30 * 24 * 60 * 60 * 1000;
-    const confirmed = users.filter(u => u.email_confirmed_at).length;
-    const recent    = users.filter(u => u.last_sign_in_at && (now - new Date(u.last_sign_in_at)) < thirtyDays).length;
-
     document.getElementById('stat-total').textContent     = users.length;
-    document.getElementById('stat-confirmed').textContent = confirmed;
-    document.getElementById('stat-recent').textContent    = recent;
+    document.getElementById('stat-confirmed').textContent = users.filter(u => u.email_confirmed_at).length;
+    document.getElementById('stat-recent').textContent    = users.filter(u => u.last_sign_in_at && (now - new Date(u.last_sign_in_at)) < thirtyDays).length;
 }
 
-window.filterTable = function (query) {
-    const q = query.toLowerCase().trim();
-    const filtered = q ? allUsers.filter(u => u.email.toLowerCase().includes(q)) : allUsers;
-    renderTable(filtered);
+window.filterAuthTable = function(q) {
+    const lower = q.toLowerCase().trim();
+    renderAuthTable(lower ? allAuthUsers.filter(u => u.email.toLowerCase().includes(lower)) : allAuthUsers);
 };
 
-function formatDate(iso) {
-    if (!iso) return '—';
-    return new Date(iso).toLocaleString('it-IT', {
-        day: '2-digit', month: '2-digit', year: 'numeric',
-        hour: '2-digit', minute: '2-digit'
-    });
+/* ─── Close modal on overlay click ───────────────────────────── */
+document.getElementById('crud-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('crud-modal')) closeModal();
+});
+document.getElementById('confirm-dialog').addEventListener('click', e => {
+    if (e.target === document.getElementById('confirm-dialog')) closeConfirm();
+});
+
+/* ─── Init (async, separato dal sync per non bloccare window.xxx) */
+async function init() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session || session.user.email !== ADMIN_EMAIL) {
+        document.getElementById('access-denied').style.display = 'flex';
+    } else {
+        SESSION = session;
+        document.getElementById('admin-content').style.display = 'block';
+        await loadLookups();
+        window.loadAuthUsers();
+    }
 }
+init();
 </script>
 
 </body>

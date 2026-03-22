@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Dolce Vita - Profilo Residente</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/navbar.js"></script>
+</head>
+<style>
+    .profilo-wrap {
+        width: 100%;
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 80px 24px 60px;
+        box-sizing: border-box;
+    }
+    .page-title {
+        text-align: center;
+        color: #236093;
+        font-size: clamp(1.4rem, 3vw, 2rem);
+        font-weight: 800;
+        margin: 0 0 6px;
+    }
+    .page-subtitle { text-align: center; color: #667; font-size: 0.9rem; margin-bottom: 24px; }
+
+    .user-selector {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 28px;
+    }
+    .user-selector select {
+        padding: 12px 40px 12px 16px;
+        border: 2px solid #dde5f0;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-family: inherit;
+        color: #213240;
+        background: rgba(255,255,255,0.95);
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%233498db' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        cursor: pointer;
+        min-width: 220px;
+        box-shadow: 0 2px 10px rgba(11,22,40,0.07);
+        transition: border-color 0.2s;
+    }
+    .user-selector select:focus { outline: none; border-color: #3498db; }
+
+    /* KPI strip */
+    .kpi-strip {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin-bottom: 28px;
+    }
+    .kpi-item {
+        flex: 1;
+        min-width: 140px;
+        background: rgba(255,255,255,0.95);
+        border-radius: 12px;
+        padding: 16px 18px;
+        box-shadow: 0 3px 12px rgba(11,22,40,0.07);
+        border-left: 4px solid #3498db;
+        text-align: center;
+    }
+    .kpi-item.red    { border-left-color: #e74c3c; }
+    .kpi-item.green  { border-left-color: #27ae60; }
+    .kpi-item.orange { border-left-color: #f39c12; }
+    .kpi-item .kv { font-size: 1.6rem; font-weight: 900; color: #236093; }
+    .kpi-item.red    .kv { color: #e74c3c; }
+    .kpi-item.green  .kv { color: #27ae60; }
+    .kpi-item.orange .kv { color: #f39c12; }
+    .kpi-item .kl { font-size: 0.75rem; font-weight: 700; color: #778; text-transform: uppercase; letter-spacing: 0.4px; margin-top: 3px; }
+
+    /* Alert debito */
+    .debito-alert {
+        background: rgba(231,76,60,0.08);
+        border: 1px solid rgba(231,76,60,0.3);
+        border-radius: 12px;
+        padding: 14px 18px;
+        margin-bottom: 22px;
+        color: #c0392b;
+        font-size: 0.92rem;
+        font-weight: 600;
+        display: none;
+    }
+
+    /* sections */
+    .section-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #236093;
+        margin: 24px 0 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .section-title::after {
+        content: '';
+        flex: 1;
+        height: 2px;
+        background: linear-gradient(90deg, #3498db22, transparent);
+        border-radius: 2px;
+    }
+
+    .profilo-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.88rem;
+        background: rgba(255,255,255,0.95);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 3px 14px rgba(11,22,40,0.07);
+        margin-bottom: 8px;
+    }
+    .profilo-table thead tr { background: linear-gradient(135deg, #236093, #4a90d9); color: #fff; }
+    .profilo-table th {
+        padding: 11px 14px;
+        text-align: left;
+        font-size: 0.76rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+    .profilo-table td { padding: 10px 14px; border-bottom: 1px solid #f0f4f8; color: #334; }
+    .profilo-table tbody tr:last-child td { border-bottom: none; }
+    .profilo-table tbody tr:hover { background: #f5f9ff; }
+
+    .badge-paid   { background: #eafaf1; color: #1a7a40; padding: 2px 9px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+    .badge-unpaid { background: #fdedec; color: #c0392b; padding: 2px 9px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+
+    .empty-row { text-align: center; color: #aaa; padding: 20px; font-style: italic; }
+
+    #main-content { display: none; }
+    .loading { text-align: center; color: #778; padding: 40px; }
+
+    @media (max-width: 640px) {
+        .profilo-wrap { padding: 76px 12px 40px; }
+    }
+
+    /* Card-view per .profilo-table su mobile */
+    @media (max-width: 580px) {
+        .profilo-table thead { display: none; }
+        .profilo-table tbody tr {
+            display: block;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(11,22,40,0.07);
+            margin-bottom: 10px;
+            padding: 10px 14px;
+            border-left: 4px solid #3498db;
+        }
+        .profilo-table td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid #f0f4f8;
+            font-size: 0.86rem;
+        }
+        .profilo-table td:last-child { border-bottom: none; }
+        .profilo-table td::before {
+            content: attr(data-label);
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #94a3b8;
+            letter-spacing: 0.4px;
+            flex-shrink: 0;
+            margin-right: 8px;
+        }
+        .kpi-strip { gap: 8px; }
+        .kpi-item { min-width: 120px; padding: 12px 14px; }
+        .kpi-item .kv { font-size: 1.3rem; }
+    }
+</style>
+<body>
+
+<nav-main></nav-main>
+
+<div class="profilo-wrap fade-in">
+    <h1 class="page-title">👤 Profilo Residente</h1>
+    <p class="page-subtitle">Storico pagamenti, consumazioni e debito corrente</p>
+
+    <div class="user-selector">
+        <select id="utente-select" onchange="caricaProfilo()">
+            <option value="">— Seleziona un residente —</option>
+        </select>
+    </div>
+
+    <div id="loading-msg" class="loading" style="display:none;">⏳ Caricamento...</div>
+
+    <div id="main-content">
+        <!-- Alert debito -->
+        <div class="debito-alert" id="debito-alert"></div>
+
+        <!-- KPI -->
+        <div class="kpi-strip">
+            <div class="kpi-item red">
+                <div class="kv" id="kpi-debito">—</div>
+                <div class="kl">Debito corrente</div>
+            </div>
+            <div class="kpi-item green">
+                <div class="kv" id="kpi-pagato-anno">—</div>
+                <div class="kl">Pagato quest'anno</div>
+            </div>
+            <div class="kpi-item orange">
+                <div class="kv" id="kpi-consum-nopag">—</div>
+                <div class="kl">Consumazioni non pagate</div>
+            </div>
+            <div class="kpi-item">
+                <div class="kv" id="kpi-consum-tot">—</div>
+                <div class="kl">Consumazioni totali</div>
+            </div>
+        </div>
+
+        <!-- Pagamenti affitto ultimi 6 mesi -->
+        <div class="section-title">🏠 Affitto — ultimi 12 mesi</div>
+        <div style="overflow-x:auto;">
+            <table class="profilo-table">
+                <thead><tr><th>Mese/Anno</th><th>Data Pagamento</th><th>Importo</th><th>Stato</th></tr></thead>
+                <tbody id="tbody-affitti"></tbody>
+            </table>
+        </div>
+
+        <!-- Pagamenti WiFi -->
+        <div class="section-title">📡 WiFi — ultimi 12 mesi</div>
+        <div style="overflow-x:auto;">
+            <table class="profilo-table">
+                <thead><tr><th>Mese/Anno</th><th>Data Pagamento</th><th>Importo</th><th>Stato</th></tr></thead>
+                <tbody id="tbody-wifi"></tbody>
+            </table>
+        </div>
+
+        <!-- Pagamenti Utenze -->
+        <div class="section-title">💡 Utenze — ultimi 12 mesi</div>
+        <div style="overflow-x:auto;">
+            <table class="profilo-table">
+                <thead><tr><th>Mese/Anno</th><th>Data Pagamento</th><th>Importo</th><th>Stato</th></tr></thead>
+                <tbody id="tbody-utenze"></tbody>
+            </table>
+        </div>
+
+        <!-- Consumazioni non pagate -->
+        <div class="section-title">🧾 Consumazioni non ancora pagate</div>
+        <div style="overflow-x:auto;">
+            <table class="profilo-table">
+                <thead><tr><th>Data</th><th>Prodotto</th><th>Qty</th><th>Note</th></tr></thead>
+                <tbody id="tbody-consum-nopag"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+const sb = createClient(
+    'https://tjbsnchbezvhhugkgaxx.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYnNuY2hiZXp2aGh1Z2tnYXh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0OTA4ODAsImV4cCI6MjA3OTA2Njg4MH0.eMDjkjvirN1DrUPysy34TgycmwMkAoMmMuxJ1_o9vzg'
+);
+
+const MESI = ['','Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno',
+              'Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+
+function fmt(n)   { return `€ ${Number(n).toFixed(2)}`; }
+function fmtDate(s) { return s ? new Date(s).toLocaleDateString('it-IT') : '—'; }
+
+let prodottiMap = {};
+
+async function init() {
+    const [{ data: utenti }, { data: prodotti }] = await Promise.all([
+        sb.from('Utenti').select('id,Nome').eq('IsResident', true).eq('IsDeleted', false).order('Nome'),
+        sb.from('ElencoProdotti').select('id,Prodotto').eq('IsDeleted', false),
+    ]);
+
+    prodottiMap = Object.fromEntries((prodotti || []).map(p => [p.id, p.Prodotto]));
+
+    const sel = document.getElementById('utente-select');
+    (utenti || []).forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u.id;
+        opt.textContent = u.Nome;
+        sel.appendChild(opt);
+    });
+
+    // Se c'è un parametro ?utente=X nell'URL
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('utente')) {
+        sel.value = params.get('utente');
+        caricaProfilo();
+    }
+}
+
+window.caricaProfilo = async function() {
+    const utenteId = document.getElementById('utente-select').value;
+    if (!utenteId) { document.getElementById('main-content').style.display = 'none'; return; }
+
+    document.getElementById('loading-msg').style.display = 'block';
+    document.getElementById('main-content').style.display = 'none';
+
+    const now = new Date();
+    const annoCorrente = now.getFullYear();
+
+    // Ultimi 12 mesi di periodi
+    const periodi = [];
+    for (let i = 11; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        periodi.push({ mese: d.getMonth() + 1, anno: d.getFullYear() });
+    }
+
+    const [
+        { data: pagAff },
+        { data: pagWifi },
+        { data: pagUt },
+        { data: affDovuti },
+        { data: wifiDovuti },
+        { data: utDovuti },
+        { data: consumAll },
+    ] = await Promise.all([
+        sb.from('PagamentoAffitti').select('*').eq('UtenteNo', utenteId).eq('IsDeleted', false).order('Anno,Mese'),
+        sb.from('PagamentoWiFi').select('*').eq('UtenteNo', utenteId).eq('IsDeleted', false).order('Anno,Mese'),
+        sb.from('PagamentoUtenze').select('*').eq('UtenteNo', utenteId).eq('IsDeleted', false).order('Anno,Mese'),
+        sb.from('AffittiDaPagare').select('*'),
+        sb.from('WiFiDaPagare').select('*'),
+        sb.from('UtenzeDaPagare').select('*'),
+        sb.from('CassaConsumazioni').select('*').eq('UtenteNo', utenteId).eq('IsDeleted', false).order('DataCreazione', { ascending: false }),
+    ]);
+
+    // Calcola quota individuale con tutte le regole
+    const { data: tuttiUtenti } = await sb.from('Utenti').select('id,AbitaQui,PocoFrequente,EsclusoDaAffitto,EsclusoDaWiFi,EsclusoDaUtenze').eq('IsResident', true).eq('IsDeleted', false);
+    const nUtenti    = (tuttiUtenti || []).length || 1;
+    const utenteInfo = (tuttiUtenti || []).find(u => String(u.id) === String(utenteId));
+    const isAbitaQui    = utenteInfo?.AbitaQui    ?? false;
+    const isPocFreq     = utenteInfo?.PocoFrequente ?? false;
+    const isEsclAff     = utenteInfo?.EsclusoDaAffitto ?? false;
+    const isEsclWifi    = utenteInfo?.EsclusoDaWiFi    ?? false;
+    const isEsclUt      = utenteInfo?.EsclusoDaUtenze  ?? false;
+
+    const QUOTA_AFF_FISSO = 150;
+    const QUOTA_UT_FISSO  = 60;
+    const QUOTA_PF_UT     = 10;
+
+    // Sottoinsiemi per ogni tipo di pagamento
+    const utentiAff  = (tuttiUtenti || []).filter(u => !u.EsclusoDaAffitto);
+    const utentiWifi = (tuttiUtenti || []).filter(u => !u.EsclusoDaWiFi && !u.PocoFrequente);
+    const utentiUt   = (tuttiUtenti || []).filter(u => !u.EsclusoDaUtenze);
+
+    const nAQaff    = utentiAff.filter(u => u.AbitaQui).length;
+    const nNonAQaff = utentiAff.filter(u => !u.AbitaQui).length;
+
+    const nAQut  = utentiUt.filter(u => u.AbitaQui).length;
+    const nPFut  = utentiUt.filter(u => u.PocoFrequente && !u.AbitaQui).length;
+    const nNormUt = utentiUt.filter(u => !u.AbitaQui && !u.PocoFrequente).length;
+
+    // tipo: 'aff' | 'ut' | 'wifi'
+    function getDovuto(list, mese, anno, tipo) {
+        const r = (list || []).find(x => x.Mese == mese && x.Anno == anno);
+        if (!r) return 0;
+        const totale = parseFloat(r.Value) || 0;
+        if (tipo === 'aff') {
+            if (isEsclAff) return 0;
+            if (isAbitaQui) return QUOTA_AFF_FISSO;
+            return nNonAQaff > 0 ? (totale - QUOTA_AFF_FISSO * nAQaff) / nNonAQaff : 0;
+        }
+        if (tipo === 'wifi') {
+            if (isEsclWifi || isPocFreq) return 0;
+            return utentiWifi.length > 0 ? totale / utentiWifi.length : 0;
+        }
+        if (tipo === 'ut') {
+            if (isEsclUt) return 0;
+            if (isAbitaQui) return QUOTA_UT_FISSO;
+            if (isPocFreq)  return QUOTA_PF_UT;
+            return nNormUt > 0 ? (totale - QUOTA_UT_FISSO * nAQut - QUOTA_PF_UT * nPFut) / nNormUt : 0;
+        }
+        return totale / nUtenti;
+    }
+    function getPagato(list, mese, anno) {
+        const r = (list || []).find(x => x.Mese == mese && x.Anno == anno);
+        return r ? parseFloat(r.Value) || 0 : 0;
+    }
+
+    // Debito corrente (mese corrente)
+    const meseC = now.getMonth() + 1;
+    const annoC = now.getFullYear();
+    const dovAff  = getDovuto(affDovuti, meseC, annoC, 'aff');
+    const dovWifi = getDovuto(wifiDovuti, meseC, annoC, 'wifi');
+    const dovUt   = getDovuto(utDovuti, meseC, annoC, 'ut');
+    const pagAffC  = getPagato(pagAff, meseC, annoC);
+    const pagWifiC = getPagato(pagWifi, meseC, annoC);
+    const pagUtC   = getPagato(pagUt, meseC, annoC);
+    const debito = Math.max(0, (dovAff - pagAffC) + (dovWifi - pagWifiC) + (dovUt - pagUtC));
+
+    // Pagato quest'anno
+    const pagatoAnno = [
+        ...(pagAff || []).filter(p => p.Anno == annoCorrente),
+        ...(pagWifi || []).filter(p => p.Anno == annoCorrente),
+        ...(pagUt || []).filter(p => p.Anno == annoCorrente),
+    ].reduce((s, p) => s + (parseFloat(p.Value) || 0), 0);
+
+    // Consumazioni
+    const consumNonPagate = (consumAll || []).filter(c => !c.DataPagamento);
+    const consumTot = (consumAll || []).length;
+
+    // KPI
+    document.getElementById('kpi-debito').textContent    = fmt(debito);
+    document.getElementById('kpi-pagato-anno').textContent = fmt(pagatoAnno);
+    document.getElementById('kpi-consum-nopag').textContent = consumNonPagate.length;
+    document.getElementById('kpi-consum-tot').textContent   = consumTot;
+
+    // Alert debito
+    const alertEl = document.getElementById('debito-alert');
+    if (debito > 0) {
+        alertEl.textContent = `⚠️ Debito corrente di ${fmt(debito)} per ${MESI[meseC]} ${annoC}`;
+        alertEl.style.display = 'block';
+    } else {
+        alertEl.style.display = 'none';
+    }
+
+    // Tabelle pagamenti
+    function renderPagTable(tbodyId, pagList, dovutiList, tipo) {
+        const tbody = document.getElementById(tbodyId);
+        if (!periodi.length) { tbody.innerHTML = '<tr><td colspan="4" class="empty-row">Nessun dato</td></tr>'; return; }
+        tbody.innerHTML = periodi.map(p => {
+            const pagato = getPagato(pagList, p.mese, p.anno);
+            const dovuto = getDovuto(dovutiList, p.mese, p.anno, tipo);
+            const rec = (pagList || []).find(x => x.Mese == p.mese && x.Anno == p.anno);
+            const stato = pagato > 0
+                ? `<span class="badge-paid">✓ Saldato</span>`
+                : (dovuto > 0 ? `<span class="badge-unpaid">Non pagato</span>` : `<span style="color:#bbb;font-size:0.8rem;">—</span>`);
+            return `<tr>
+                <td data-label="Mese/Anno">${MESI[p.mese]} ${p.anno}</td>
+                <td data-label="Data Pagamento">${fmtDate(rec?.DataPagamento)}</td>
+                <td data-label="Importo">${pagato > 0 ? fmt(pagato) : '—'}</td>
+                <td data-label="Stato">${stato}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    renderPagTable('tbody-affitti', pagAff, affDovuti, 'aff');
+    renderPagTable('tbody-wifi', pagWifi, wifiDovuti, 'wifi');
+    renderPagTable('tbody-utenze', pagUt, utDovuti, 'ut');
+
+    // Consumazioni non pagate
+    const tbodyNP = document.getElementById('tbody-consum-nopag');
+    if (!consumNonPagate.length) {
+        tbodyNP.innerHTML = '<tr><td colspan="4" class="empty-row">Nessuna consumazione in sospeso ✓</td></tr>';
+    } else {
+        tbodyNP.innerHTML = consumNonPagate.map(c => `<tr>
+            <td data-label="Data">${fmtDate(c.DataCreazione)}</td>
+            <td data-label="Prodotto">${prodottiMap[c.ProdottoNo] ?? '#' + c.ProdottoNo}</td>
+            <td data-label="Qty">${c.Qty ?? '—'}</td>
+            <td data-label="Note" style="color:#778;font-size:0.85rem;">${c.Note ?? ''}</td>
+        </tr>`).join('');
+    }
+
+    document.getElementById('loading-msg').style.display = 'none';
+    document.getElementById('main-content').style.display = 'block';
+};
+
+init();
+</script>
+
+</body>
+</html>

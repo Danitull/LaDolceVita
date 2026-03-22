@@ -17,6 +17,7 @@ const NAV_LINKS = [
   { href: 'ListinoPrezzi.html',label: 'Listino Prezzi' },
   { href: '#',                 label: 'Acquisti' },
   { href: 'Riepilogo.html',    label: 'Riepilogo' },
+  { href: 'Aiuto.html',        label: '❓ Aiuto' },
 ];
 
 const AFFITTI_TABS = [

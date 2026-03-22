@@ -112,6 +112,9 @@
             }
         }
 
+        /* Classe per nascondere righe filtrate (funziona anche su mobile con !important) */
+        .filtro-nascosto { display: none !important; }
+
         /* Card-view per TabellaRegistro e TabellaProdotti su mobile */
         @media (max-width: 768px) {
             /* Rompe il contesto tabella su tutti i livelli */
@@ -555,7 +558,7 @@ window.filtraProdotti = function(query) {
   const righe = document.querySelectorAll('#TabellaProdotti tbody tr');
   righe.forEach(tr => {
     const nomeProdotto = tr.querySelector('td')?.textContent.toLowerCase() ?? '';
-    tr.style.display = filtro === '' || nomeProdotto.includes(filtro) ? '' : 'none';
+    tr.classList.toggle('filtro-nascosto', filtro !== '' && !nomeProdotto.includes(filtro));
   });
 };
 

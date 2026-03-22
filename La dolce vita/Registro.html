@@ -201,7 +201,10 @@
 <body>
 
 <div style="width: 100vw; height: 7vh; position: absolute;">
-<nav class="top-navbar glass">
+<nav class="top-navbar glass nav-main">
+    <button class="navbar-hamburger" aria-label="Apri menu" onclick="this.classList.toggle('is-active'); this.closest('nav').querySelector('ul').classList.toggle('nav-open');">
+        <span></span><span></span><span></span>
+    </button>
             <ul>
                 <li><a href="index.html">Home</a></li>
                 <li><a href="Affitti.html">Affitto</a></li>
@@ -218,7 +221,7 @@
 </div>
 
     <div id="ModalContainerPanel" style="z-index: 2; display: none; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.5); position: absolute;">
-            <div style="width:70vw; height:70vh; background-color:white; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); border-radius:12px; box-shadow:0 4px 24px rgba(0,0,0,0.15);">
+            <div class="modal-inner-panel">
 
                 <!-- header -->
                 <div style="height: 10%; width: 100%; background-color: #236093; border-radius: 12px 12px 0px 0px; display:flex; justify-content:flex-end; align-items:center; padding:0 12px; box-sizing:border-box;">
@@ -252,9 +255,9 @@
     </div>
 <div class="container">
 <div id="currentDiv" style="width: 100vw; height: 93vh; position: absolute; top: 2vh;">
-    <div style="width: 100%; height: 100%; display: flex; justify-content: space-around; align-items: flex-start; padding: 2vh 0; box-sizing: border-box; gap: 2vh;">
-        <div  style="width: 50%; left: 7vh !important;">
-            <table id="TabellaProdotti" style="overflow-y: scroll;" class="styled-table">
+    <div class="registro-panels" style="width: 100%; height: 100%; display: flex; justify-content: space-around; align-items: flex-start; padding: 2vh 0; box-sizing: border-box; gap: 2vh;">
+        <div class="registro-panel-left table-scroll-wrapper" style="width: 50%;">
+            <table id="TabellaProdotti" class="styled-table">
                 <thead>
                     <tr>
                         <th style="width: 20%;">Prodotto</th>
@@ -269,8 +272,8 @@
                 </tbody>
             </table>
         </div>
-        <div  style="width: 50%;">
-            <table id="Carrello" style="overflow-y: scroll;" class="styled-table">
+        <div class="registro-panel-right table-scroll-wrapper" style="width: 50%;">
+            <table id="Carrello" class="styled-table">
                 <thead>
                     <tr>
                         <th style="width: 40%;">Prodotto</th>

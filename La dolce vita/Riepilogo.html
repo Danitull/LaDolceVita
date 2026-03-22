@@ -182,7 +182,10 @@
 <body>
 
 <div style="width: 100vw; height: 7vh; position: absolute;">
-    <nav class="top-navbar glass">
+    <nav class="top-navbar glass nav-main">
+        <button class="navbar-hamburger" aria-label="Apri menu" onclick="this.classList.toggle('is-active'); this.closest('nav').querySelector('ul').classList.toggle('nav-open');">
+            <span></span><span></span><span></span>
+        </button>
         <ul>
             <li><a href="index.html">Home</a></li>
             <li><a href="Affitti.html">Affitto</a></li>
@@ -257,6 +260,7 @@
 
     <!-- Main table -->
     <div id="tableContainer" style="display:none;">
+        <div class="table-scroll-wrapper">
         <table class="riepilogo-table">
             <thead>
                 <tr>
@@ -281,6 +285,7 @@
                 <!-- populated by JS -->
             </tbody>
         </table>
+        </div>
     </div>
 
     <div id="no-data-msg" style="display:none; text-align:center; color:#999; padding:30px; font-style:italic;">

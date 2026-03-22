@@ -163,7 +163,10 @@
 <body>
 
 <div style="width: 100vw; height: 7vh; position: absolute;">
-<nav class="top-navbar glass">
+<nav class="top-navbar glass nav-main">
+    <button class="navbar-hamburger" aria-label="Apri menu" onclick="this.classList.toggle('is-active'); this.closest('nav').querySelector('ul').classList.toggle('nav-open');">
+        <span></span><span></span><span></span>
+    </button>
             <ul>
                 <li><a href="index.html">Home</a></li>
                 <li><a href="Affitti.html">Affitto</a></li>
@@ -261,8 +264,8 @@
             <section class="styled-table-section">
                 <h2 style="text-align:center; margin-bottom:16px; color:transparent;">.</h2>
             </section>
-        <div  style="width: 100%; left: 7vh !important;">
-            <table id="TabellaProdotti" style="overflow-y: scroll;" class="styled-table">
+        <div class="table-scroll-wrapper" style="width: 100%;">
+            <table id="TabellaProdotti" class="styled-table">
                 <thead>
                     <tr>
                         <th style="width: 40%;">Prodotto</th>

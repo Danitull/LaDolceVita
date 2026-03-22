@@ -163,7 +163,10 @@
 <body>  
 
 <div style="width: 100vw; height: 7vh; position: absolute;">
-<nav class="top-navbar glass">
+<nav class="top-navbar glass nav-main">
+    <button class="navbar-hamburger" aria-label="Apri menu" onclick="this.classList.toggle('is-active'); this.closest('nav').querySelector('ul').classList.toggle('nav-open');">
+        <span></span><span></span><span></span>
+    </button>
             <ul>
                 <li><a href="index.html">Home</a></li>
                 <li><a href="Affitti.html">Affitto</a></li>
@@ -177,17 +180,17 @@
         </nav>
 </div>
 <div style="width: 100vw; margin-top: 7vh; top: 7vh !important; height: 7vh; position: absolute;">
-<nav class="top-navbar glass" style="top: 7vh !important; height: 7vh;">
+<nav class="top-navbar glass nav-tabs" style="top: 7vh !important; height: 7vh;">
             <ul>
-                <li style="width: 31.3vw; background: #3498db; color: #fff; border-radius: 20px;"><a id="a_Affitto" href="Affitti.html">Affitto</a></li>
-                <li style="width: 31.3vw;"><a id="a_WiFi" href="WiFi.html">Wi Fi</a></li>
-                <li style="width: 31.3vw;"><a id="a_Utenze">Utenze</a></li>
+                <li style="width: calc(100% / 3); background: #3498db; color: #fff; border-radius: 20px;"><a id="a_Affitto" href="Affitti.html">Affitto</a></li>
+                <li style="width: calc(100% / 3);"><a id="a_WiFi" href="WiFi.html">Wi Fi</a></li>
+                <li style="width: calc(100% / 3);"><a id="a_Utenze" href="Utenze.html">Utenze</a></li>
             </ul>
         </nav>
 </div>
 
     <div id="ModalContainerPanel" style="z-index: 2; display: none; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.5); position: absolute;">
-            <div style="width:70vw; height:70vh; background-color:white; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); border-radius:12px; box-shadow:0 4px 24px rgba(0,0,0,0.15);">
+            <div class="modal-inner-panel">
                 
                 <!-- header -->
                 <div style="height: 10%; width: 100%; background-color: #236093; border-radius: 12px 12px 0px 0px; display:flex; justify-content:flex-end; align-items:center; padding:0 12px; box-sizing:border-box;">
@@ -298,8 +301,9 @@
     <option value="2030">2030</option>
   </select>
 </div>
+                <div class="table-scroll-wrapper">
                     <table class="styled-table">
-                    <thead> 
+                    <thead>
                         <tr>
                             <th>id</th>
                             <th>Nome</th>
@@ -314,6 +318,7 @@
 
                 </tbody>
             </table>
+            </div>
         </section>
     </div>
     
@@ -321,7 +326,7 @@
                 <button id="open-modal" onclick="document.getElementById('ModalContainerPanel').style.display = 'block'" style="margin-left: 47%; bottom: 16px; right: 16px; width: 65px; height: 65px; border-radius: 50%; background-color: #236093; color: white; border: none; font-size: 24px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); cursor: pointer;">＋</button>
             </section> -->
 </div>
-<div style="position: absolute;right: 7vw; width: 25vw; height: 100vh; vertical-align: center;">
+<div class="summary-table-panel">
             <section>
                 <table  id="TabellaTotale" class="styled-table" style="z-index: 1;right: 0; top:45vh; position: absolute; width: auto; max-width: 400px; min-width: 300px;">
                     <thead> 

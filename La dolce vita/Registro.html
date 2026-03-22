@@ -214,6 +214,21 @@
   background: linear-gradient(to bottom, #0056b3, #003f7f); /* sfumatura più scura al passaggio */
 }
 
+.btn-remove-cart {
+  background: linear-gradient(1deg, #c0392b, #e74c3c);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 18px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(192,57,43,0.3);
+  margin-right: 4px;
+}
+.btn-remove-cart:hover {
+  background: linear-gradient(1deg, #96281b, #c0392b);
+}
+
 .cart-badge {
   display: inline-flex;
   align-items: center;
@@ -656,7 +671,7 @@ async function visualizzaProdotti(Mese, Anno) {
       <td data-label="💰 Prezzo">${prezzoConDecimale}[€]</td>
       <td data-label="📦 Qtà totale">0</td>
       <td data-label="📊 Restante">0</td>
-      <td data-label="➕ Azioni"><button style="padding:4px 8px; margin-top:0px;" id="btn_Table${prodotto.id}">+</button><span class="cart-badge" id="badge_${prodotto.id}" style="display:none;">0</span></td>
+      <td data-label="➕ Azioni"><button class="btn-remove-cart" id="btn_Remove${prodotto.id}" style="display:none;">−</button><button style="padding:4px 8px; margin-top:0px;" id="btn_Table${prodotto.id}">+</button><span class="cart-badge" id="badge_${prodotto.id}" style="display:none;">0</span></td>
     `;
     tbody.appendChild(tr);
     } else {
@@ -676,7 +691,7 @@ async function visualizzaProdotti(Mese, Anno) {
         <td data-label="💰 Prezzo">${prezzoConDecimale}[€]</td>
         <td data-label="📦 Qtà totale">${quantitaTotale}</td>
         <td data-label="📊 Restante">-</td>
-        <td data-label="➕ Azioni"><button style="padding:4px 8px; margin-top:0px;" id="btn_Table${prodotto.id}">+</button><span class="cart-badge" id="badge_${prodotto.id}" style="display:none;">0</span></td>
+        <td data-label="➕ Azioni"><button class="btn-remove-cart" id="btn_Remove${prodotto.id}" style="display:none;">−</button><button style="padding:4px 8px; margin-top:0px;" id="btn_Table${prodotto.id}">+</button><span class="cart-badge" id="badge_${prodotto.id}" style="display:none;">0</span></td>
         `;
     tbody.appendChild(tr);
     }
@@ -696,8 +711,59 @@ async function OnClickSuBtnAggiungiCarrello(ProdottoNo, ProdottoName, Prezzo) {
                 AggiungiElementoAlCarrello(prodotto.id, prodotto.Prodotto, prodotto.Prezzo);
             });
         }
-
+        const btnRemove = document.getElementById(`btn_Remove${prodotto.id}`);
+        if (btnRemove) {
+            btnRemove.addEventListener('click', () => {
+                RimuoviElementoAlCarrello(prodotto.id, prodotto.Prezzo);
+            });
+        }
     });
+}
+
+function RimuoviElementoAlCarrello(ProdottoNo, Prezzo) {
+    const idx = ArrayCarrello.findIndex(item => item.ProdottoNo === ProdottoNo);
+    if (idx === -1) return;
+
+    const rec = ArrayCarrello[idx];
+    rec.Quantita -= 1;
+    rec.Prezzo -= parseFloat(Prezzo);
+    TotaleCarrello -= parseFloat(Prezzo);
+
+    if (rec.Quantita <= 0) {
+        ArrayCarrello.splice(idx, 1);
+    }
+
+    // Aggiorna badge
+    const badge = document.getElementById(`badge_${ProdottoNo}`);
+    const btnRemove = document.getElementById(`btn_Remove${ProdottoNo}`);
+    const newRec = ArrayCarrello.find(item => item.ProdottoNo === ProdottoNo);
+    if (badge) {
+        if (newRec) {
+            badge.textContent = newRec.Quantita;
+        } else {
+            badge.textContent = '0';
+            badge.style.display = 'none';
+            if (btnRemove) btnRemove.style.display = 'none';
+        }
+    }
+
+    // Ricostruisce il carrello
+    ArrayCarrelloTotale = ArrayCarrello;
+    const TabellaCarrello = document.getElementById('Carrello').getElementsByTagName('tbody')[0];
+    TabellaCarrello.innerHTML = '';
+    ArrayCarrello.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td data-label="🛒 Prodotto">${item.ProdottoName}</td>
+            <td data-label="🔢 Quantità">${item.Quantita}</td>
+            <td data-label="💰 Prezzo">${item.Prezzo.toFixed(2)}[€]</td>
+        `;
+        TabellaCarrello.appendChild(tr);
+    });
+    const totStr = (TotaleCarrello > 0 ? TotaleCarrello : 0).toFixed(2);
+    const trTot = document.createElement('tr');
+    trTot.innerHTML = `<td>CONTO TOTALE</td><td>-</td><td>${totStr}€</td>`;
+    TabellaCarrello.appendChild(trTot);
 }
     async function AggiungiElementoAlCarrello(ProdottoNo, ProdottoName, Prezzo) {
         var RecTrovato = ArrayCarrello.find(item => item.ProdottoNo === ProdottoNo) || undefined;
@@ -722,6 +788,8 @@ async function OnClickSuBtnAggiungiCarrello(ProdottoNo, ProdottoName, Prezzo) {
                 badge.textContent = rec.Quantita;
                 badge.style.display = 'inline-flex';
             }
+            const btnRemove = document.getElementById(`btn_Remove${ProdottoNo}`);
+            if (btnRemove) btnRemove.style.display = 'inline-block';
             // console.log('Carrello', ArrayCarrello);
             ArrayCarrelloTotale = ArrayCarrello;
             ArrayCarrello.forEach(item => {
@@ -760,6 +828,7 @@ async function OnClickSuBtnAggiungiCarrello(ProdottoNo, ProdottoName, Prezzo) {
                         TabellaCarrello.innerHTML = "";
                         // Reset tutti i badge
                         document.querySelectorAll('.cart-badge').forEach(b => { b.textContent = '0'; b.style.display = 'none'; });
+                        document.querySelectorAll('.btn-remove-cart').forEach(b => { b.style.display = 'none'; });
                     });
                     document.getElementById("check_Coppone").addEventListener("change", aggiornaBottone);
                     document.getElementById("btn_Pagamento").addEventListener("click", function() {

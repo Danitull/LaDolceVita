@@ -3,58 +3,197 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>La Dolce Vita - VB.NET</title>
+    <title>La Dolce Vita</title>
     <link rel="stylesheet" href="/css/style.css">
     <script src="/js/navbar.js"></script>
 </head>
+<style>
+    .tile-badge {
+        display: inline-block;
+        margin-top: 8px;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        background: rgba(52,152,219,0.12);
+        color: #236093;
+        min-height: 22px;
+    }
+    .tile-badge.alert { background: rgba(231,76,60,0.12); color: #c0392b; }
+    .tile-badge.ok    { background: rgba(39,174,96,0.12);  color: #1a7a40; }
+    .tile-header { display: flex; justify-content: space-between; align-items: flex-start; width: 100%; margin-bottom: 8px; }
+    .tile-cat { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8; background: rgba(148,163,184,0.1); padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+</style>
 <body>
     <header class="hero-header">
         <nav-main></nav-main>
         <div class="hero-content">
-            <section class="tiles-grid" aria-label="Seleziona una sezione">
-                <a class="tile" href="Affitti.html">
-                    <div class="tile-icon">📊</div>
-                    <div  class="tile-title">Affitto</div>
+            <section class="tiles-grid fade-in" aria-label="Seleziona una sezione">
+
+                <a class="tile" href="Affitti.html" aria-label="Vai alla sezione Affitto">
+                    <div class="tile-header">
+                        <div class="tile-icon">🏠</div>
+                        <span class="tile-cat">Pagamenti</span>
+                    </div>
+                    <div class="tile-title">Affitto</div>
                     <div class="tile-desc">Riepilogo degli affitti del locale</div>
+                    <div class="tile-badge" id="badge-affitti">caricamento...</div>
                 </a>
-                <a class="tile" href="ListinoPrezzi.html">
-                    <div class="tile-icon">📅</div>
-                    <div class="tile-title">Listino Prezzi</div>
-                    <div class="tile-desc">Consulta il listino prezzi del locale 'La Dolce Vita'</div>
+
+                <a class="tile" href="FondoCassa.html" aria-label="Vai alla sezione Fondo Cassa">
+                    <div class="tile-header">
+                        <div class="tile-icon">💰</div>
+                        <span class="tile-cat">Finanze</span>
+                    </div>
+                    <div class="tile-title">Fondo Cassa</div>
+                    <div class="tile-desc">Bilancio entrate e uscite mensili</div>
+                    <div class="tile-badge" id="badge-cassa">caricamento...</div>
                 </a>
-                <a class="tile" href="Registro.html">
-                    <div class="tile-icon">🧾</div>
-                    <div class="tile-title">Registro</div>
-                    <div class="tile-desc">Storico e tracciamento delle consumazioni</div>
-                </a>
-                <a class="tile" href="#">
-                    <div class="tile-icon">🛒</div>
+
+                <a class="tile" href="Acquisti.html" aria-label="Vai alla sezione Acquisti">
+                    <div class="tile-header">
+                        <div class="tile-icon">🛒</div>
+                        <span class="tile-cat">Gestione</span>
+                    </div>
                     <div class="tile-title">Acquisti</div>
                     <div class="tile-desc">Registro degli acquisti del locale</div>
+                    <div class="tile-badge" id="badge-acquisti">caricamento...</div>
                 </a>
-                <a class="tile" href="Copponi.html">
-                    <div class="tile-icon">🎟️</div>
+
+                <a class="tile" href="Registro.html" aria-label="Vai alla sezione Registro">
+                    <div class="tile-header">
+                        <div class="tile-icon">🧾</div>
+                        <span class="tile-cat">Gestione</span>
+                    </div>
+                    <div class="tile-title">Registro</div>
+                    <div class="tile-desc">Storico e tracciamento delle consumazioni</div>
+                    <div class="tile-badge" id="badge-consumazioni">caricamento...</div>
+                </a>
+
+                <a class="tile" href="ListinoPrezzi.html" aria-label="Vai alla sezione Listino Prezzi">
+                    <div class="tile-header">
+                        <div class="tile-icon">📅</div>
+                        <span class="tile-cat">Catalogo</span>
+                    </div>
+                    <div class="tile-title">Listino Prezzi</div>
+                    <div class="tile-desc">Consulta il listino prezzi del locale</div>
+                    <div class="tile-badge" id="badge-prodotti">caricamento...</div>
+                </a>
+
+                <a class="tile" href="Copponi.html" aria-label="Vai alla sezione Copponi">
+                    <div class="tile-header">
+                        <div class="tile-icon">🎟️</div>
+                        <span class="tile-cat">Gestione</span>
+                    </div>
                     <div class="tile-title">Copponi</div>
-                    <div class="tile-desc">Storico dei nostri copponi <br>(mvp Dimi)</div>
+                    <div class="tile-desc">Storico dei nostri copponi (mvp Dimi)</div>
+                    <div class="tile-badge" id="badge-copponi">caricamento...</div>
                 </a>
-                <a class="tile" href="Riepilogo.html">
-                    <div class="tile-icon">📋</div>
+
+                <a class="tile" href="Riepilogo.html" aria-label="Vai alla sezione Riepilogo">
+                    <div class="tile-header">
+                        <div class="tile-icon">📋</div>
+                        <span class="tile-cat">Report</span>
+                    </div>
                     <div class="tile-title">Riepilogo</div>
                     <div class="tile-desc">Panoramica di tutti i pagamenti mensili</div>
+                    <div class="tile-badge" id="badge-riepilogo">caricamento...</div>
                 </a>
-                <a class="tile" href="#">
-                    <div class="tile-icon">⚙️</div>
-                    <div class="tile-title">Impostazioni</div>
-                    <div class="tile-desc">Configura il sistema</div>
+
+                <a class="tile" href="Profilo.html" aria-label="Vai alla sezione Profilo">
+                    <div class="tile-header">
+                        <div class="tile-icon">👤</div>
+                        <span class="tile-cat">Utente</span>
+                    </div>
+                    <div class="tile-title">Profilo</div>
+                    <div class="tile-desc">Storico pagamenti per residente</div>
+                    <div class="tile-badge" id="badge-profilo">caricamento...</div>
                 </a>
-                <a class="tile" href="Aiuto.html">
-                    <div class="tile-icon">❓</div>
-                    <div class="tile-title">Aiuto</div>
-                    <div class="tile-desc">Guide e supporto</div>
-                </a>
+
             </section>
         </div>
     </header>
-    <script type="module" src="/js/script.js"></script>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+const sb = createClient(
+    'https://tjbsnchbezvhhugkgaxx.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYnNuY2hiZXp2aGh1Z2tnYXh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0OTA4ODAsImV4cCI6MjA3OTA2Njg4MH0.eMDjkjvirN1DrUPysy34TgycmwMkAoMmMuxJ1_o9vzg'
+);
+
+function setBadge(id, text, type) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = text;
+    el.className = 'tile-badge' + (type ? ' ' + type : '');
+}
+
+async function loadStats() {
+    const now = new Date();
+    const mese = now.getMonth() + 1;
+    const anno = now.getFullYear();
+    const start = `${anno}-${String(mese).padStart(2,'0')}-01`;
+    const lastDay = new Date(anno, mese, 0).getDate();
+    const end = `${anno}-${String(mese).padStart(2,'0')}-${String(lastDay).padStart(2,'0')}`;
+
+    const [
+        { data: utenti },
+        { data: pagAff },
+        { data: pagWifi },
+        { data: pagUt },
+        { data: acquisti },
+        { data: consumNonPagate },
+        { data: prodotti },
+        { count: nCopponi },
+    ] = await Promise.all([
+        sb.from('Utenti').select('id').eq('IsResident', true).eq('IsDeleted', false),
+        sb.from('PagamentoAffitti').select('UtenteNo,Value').eq('Mese', mese).eq('Anno', anno).eq('IsDeleted', false),
+        sb.from('PagamentoWiFi').select('UtenteNo,Value').eq('Mese', mese).eq('Anno', anno).eq('IsDeleted', false),
+        sb.from('PagamentoUtenze').select('UtenteNo,Value').eq('Mese', mese).eq('Anno', anno).eq('IsDeleted', false),
+        sb.from('Acquisti_Spese').select('Prezzo').eq('IsDeleted', false).gte('DataAcquisto', start).lte('DataAcquisto', end),
+        sb.from('CassaConsumazioni').select('id').eq('IsDeleted', false).is('DataPagamento', null),
+        sb.from('ElencoProdotti').select('id').eq('IsDeleted', false),
+        sb.from('CassaConsumazioni').select('id', { count: 'exact', head: true }).eq('IsDeleted', false).not('DataPagamento', 'is', null),
+    ]);
+
+    const nUtenti = (utenti || []).length;
+    const nPaganti = (pagAff || []).length;
+    const nMancanti = nUtenti - nPaganti;
+
+    // Affitti
+    if (nMancanti > 0) setBadge('badge-affitti', `${nMancanti} ancora da saldare`, 'alert');
+    else if (nUtenti > 0) setBadge('badge-affitti', 'Tutti saldati ✓', 'ok');
+    else setBadge('badge-affitti', 'Nessun dato', '');
+
+    // Fondo cassa
+    const entrate = [...(pagAff||[]), ...(pagWifi||[]), ...(pagUt||[])].reduce((s,p) => s + (parseFloat(p.Value)||0), 0);
+    const uscite  = (acquisti||[]).reduce((s,a) => s + (parseFloat(a.Prezzo)||0), 0);
+    const saldo = entrate - uscite;
+    setBadge('badge-cassa', `Saldo: € ${saldo.toFixed(2)}`, saldo >= 0 ? 'ok' : 'alert');
+
+    // Acquisti
+    setBadge('badge-acquisti', `€ ${uscite.toFixed(2)} questo mese`, '');
+
+    // Consumazioni
+    const nConsum = (consumNonPagate||[]).length;
+    if (nConsum > 0) setBadge('badge-consumazioni', `${nConsum} non pagate`, 'alert');
+    else setBadge('badge-consumazioni', 'Tutte pagate ✓', 'ok');
+
+    // Prodotti
+    setBadge('badge-prodotti', `${(prodotti||[]).length} prodotti attivi`, '');
+
+    // Copponi
+    setBadge('badge-copponi', `${nCopponi ?? 0} consumazioni`, '');
+
+    // Riepilogo
+    const tuttiSaldati = Math.min(nPaganti, (pagWifi||[]).length, (pagUt||[]).length);
+    setBadge('badge-riepilogo', `${tuttiSaldati}/${nUtenti} saldati`, tuttiSaldati === nUtenti && nUtenti > 0 ? 'ok' : 'alert');
+
+    // Profilo
+    setBadge('badge-profilo', `${nUtenti} residenti`, '');
+}
+
+loadStats();
+</script>
 </body>
 </html>

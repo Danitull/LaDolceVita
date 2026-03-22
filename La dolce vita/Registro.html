@@ -112,6 +112,44 @@
                 padding: 25px;
             }
         }
+
+        /* Card-view per TabellaRegistro e TabellaProdotti su mobile */
+        @media (max-width: 580px) {
+            #TabellaRegistro thead,
+            #TabellaProdotti thead { display: none; }
+            #TabellaRegistro tbody tr,
+            #TabellaProdotti tbody tr {
+                display: block;
+                background: #fff;
+                border-radius: 10px;
+                box-shadow: 0 2px 8px rgba(11,22,40,0.07);
+                margin-bottom: 10px;
+                padding: 10px 14px;
+                border-left: 4px solid #3498db;
+            }
+            #TabellaRegistro td,
+            #TabellaProdotti td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 5px 0;
+                border-bottom: 1px solid #f0f4f8;
+                font-size: 0.86rem;
+            }
+            #TabellaRegistro td:last-child,
+            #TabellaProdotti td:last-child { border-bottom: none; }
+            #TabellaRegistro td::before,
+            #TabellaProdotti td::before {
+                content: attr(data-label);
+                font-size: 0.72rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                color: #94a3b8;
+                letter-spacing: 0.4px;
+                flex-shrink: 0;
+                margin-right: 8px;
+            }
+        }
         .selezione-container {
   width: 100%;
   max-width: 400px;
@@ -238,7 +276,7 @@
 
         </div>
     </div>
-<div class="container">
+<div class="container fade-in">
 <div id="currentDiv" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; transition: left 0.4s ease;">
     <div style="width: 100%; height: 100%; display: flex; flex-wrap: wrap; justify-content: space-around; align-items: flex-start; padding: 2vh 0; box-sizing: border-box; gap: 2vh; overflow-y: auto;">
         <div class="registro-col">
@@ -393,52 +431,33 @@ async function EventSubmitForm(CarrelloAcquisti) {
         console.log("Utente selezionato:", UtenteNo);
 
         var ChecBox = document.getElementById("check_Coppone");
-        if (ChecBox.checked == true){            
-            var dati = ArrayCarrelloTotale;
-            console.log("Dati estratti dal carrello:", dati);
-            dati.forEach(async (element) => {
-            var ProdottoNo = element.ProdottoNo;
-            var Quantita = element.Quantita;
-            var Prezzo = element.Prezzo;
-
-            const DataCreazione = new Date().toISOString();
-            const DataPagamento = new Date().toISOString();
-
-            // Inserimento nel database
-            const { data, error } = await supabase
-            .from('CassaConsumazioni')            
-            .insert([
-                {   UtenteNo: UtenteNo, 
-                    ProdottoNo: ProdottoNo,
-                    Qty: Quantita,
-                    DataCreazione: DataCreazione, 
-                    DataPagamento: DataPagamento
-                },
-            ]);
-        });
-    } else {
         var dati = ArrayCarrelloTotale;
         console.log("Dati estratti dal carrello:", dati);
-        dati.forEach(async (element) => {
-            var ProdottoNo = element.ProdottoNo;
-            var Quantita = element.Quantita;
-            var Prezzo = element.Prezzo;
-
-            const DataCreazione = new Date().toISOString();
-
-            // Inserimento nel database
-            const { data, error } = await supabase
-            .from('CassaConsumazioni')            
-            .insert([
-                {   UtenteNo: UtenteNo, 
+        const pagaSubito = ChecBox.checked;
+        try {
+            for (const element of dati) {
+                const ProdottoNo = element.ProdottoNo;
+                const Quantita = element.Quantita;
+                const Prezzo = element.Prezzo;
+                const DataCreazione = new Date().toISOString();
+                const record = {
+                    UtenteNo: UtenteNo,
                     ProdottoNo: ProdottoNo,
                     Qty: Quantita,
-                    DataCreazione: DataCreazione
-                },
-            ]);
-        });
-    }
-    alert("Dati salvati con successo!");
+                    Prezzo: Prezzo,
+                    DataCreazione: DataCreazione,
+                };
+                if (pagaSubito) {
+                    record.DataPagamento = DataCreazione;
+                }
+                const { error } = await supabase.from('CassaConsumazioni').insert([record]);
+                if (error) throw error;
+            }
+        } catch (err) {
+            if (window.showToast) showToast('Errore durante il salvataggio: ' + err.message, 'error'); else alert('Errore durante il salvataggio: ' + err.message);
+            return;
+        }
+        if (window.showToast) showToast('Dati salvati con successo!', 'success'); else alert('Dati salvati con successo!');
     const btn = document.getElementById('btn_save');
     const originalText = btn.textContent;
     btn.textContent = 'Salvato!';
@@ -481,11 +500,11 @@ async function visualizzaProdotti(Mese, Anno) {
     if (!Trovato) {
       tr.style.height = '2vh';
       tr.innerHTML = `
-      <td>${prodotto.Prodotto}</td>
-      <td>${prezzoConDecimale}[€]</td>
-      <td>0</td>
-      <td>0</td>
-      <td><button style="padding:4px 8px; margin-top:0px;" id="btn_Table${prodotto.id}">+</button></td>
+      <td data-label="Prodotto">${prodotto.Prodotto}</td>
+      <td data-label="Prezzo">${prezzoConDecimale}[€]</td>
+      <td data-label="Qtà totale">0</td>
+      <td data-label="Restante">0</td>
+      <td data-label="Azioni"><button style="padding:4px 8px; margin-top:0px;" id="btn_Table${prodotto.id}">+</button></td>
     `;
     tbody.appendChild(tr);
     } else {
@@ -501,11 +520,11 @@ async function visualizzaProdotti(Mese, Anno) {
     
         tr.style.height = '2vh';
         tr.innerHTML = `
-        <td>${prodotto.Prodotto}</td>
-        <td>${prezzoConDecimale}[€]</td>
-        <td>${quantitaTotale}</td>
-        <td>-</td>
-        <td><button style="padding:4px 8px; margin-top:0px;" id="btn_Table${prodotto.id}">+</button></td>
+        <td data-label="Prodotto">${prodotto.Prodotto}</td>
+        <td data-label="Prezzo">${prezzoConDecimale}[€]</td>
+        <td data-label="Qtà totale">${quantitaTotale}</td>
+        <td data-label="Restante">-</td>
+        <td data-label="Azioni"><button style="padding:4px 8px; margin-top:0px;" id="btn_Table${prodotto.id}">+</button></td>
         `;
     tbody.appendChild(tr);
     }
@@ -683,8 +702,10 @@ async function caricaRegistroConsumazioni(SelectedDate) {
   tbody.innerHTML = ""; // pulizia
   const ListaProdotti = await ElencoSelect();
   var ListaProdottiMap = {};
+  var ListaProdottiPrezzoMap = {};
   ListaProdotti.forEach(prodotto => {
     ListaProdottiMap[prodotto.id] = prodotto.Prodotto;
+    ListaProdottiPrezzoMap[prodotto.id] = parseFloat(prodotto.Prezzo) || 0;
   });
   var ListaUtenti = await UtentiSelect();
   var ListaUtentiMap = {};
@@ -699,23 +720,43 @@ async function caricaRegistroConsumazioni(SelectedDate) {
     console.log("ProdottoNo:", record.ProdottoNo);
     console.log("UtenteNo:", record.UtenteNo);
       const tr = document.createElement("tr");
-      var prezzoConDecimale = parseFloat(record.Prezzo).toFixed(2);
-      if (prezzoConDecimale === "NaN") {
-        prezzoConDecimale = "0.00";
-      }
-      var dataPagamento = record.DataPagamento ? 'Pagato' : 'Non pagato';
+      const prezzoSalvato = parseFloat(record.Prezzo) || 0;
+      const prezzoFallback = (parseFloat(record.Qty) || 1) * (ListaProdottiPrezzoMap[record.ProdottoNo] || 0);
+      var prezzoConDecimale = (prezzoSalvato > 0 ? prezzoSalvato : prezzoFallback).toFixed(2);
+      const pagato = !!record.DataPagamento;
+      const dataPagDisplay = pagato
+        ? `<span style="color:#27ae60;font-weight:600;">✓ ${new Date(record.DataPagamento).toLocaleDateString('it-IT')}</span>`
+        : `<button onclick="segnaPagata(${record.id}, this)" style="padding:4px 10px;background:#27ae60;color:white;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">💳 Segna pagata</button>`;
     tr.style.height = '2vh';
     tr.innerHTML = `
-      <td>${new Date(record.DataCreazione).toLocaleDateString()}</td>
-      <td>${ListaUtentiMap[record.UtenteNo] || record.UtenteNo}</td>
-      <td>${ListaProdottiMap[record.ProdottoNo] || record.ProdottoNo}</td>
-      <td>${record.Qty}</td>
-      <td>${prezzoConDecimale}[€]</td>
-      <td>${dataPagamento}</td>
+      <td data-label="Data">${new Date(record.DataCreazione).toLocaleDateString('it-IT')}</td>
+      <td data-label="Utente">${ListaUtentiMap[record.UtenteNo] || record.UtenteNo}</td>
+      <td data-label="Prodotto">${ListaProdottiMap[record.ProdottoNo] || record.ProdottoNo}</td>
+      <td data-label="Quantita'">${record.Qty}</td>
+      <td data-label="Prezzo">${prezzoConDecimale}[€]</td>
+      <td data-label="Pagato?">${dataPagDisplay}</td>
     `;
     tbody.appendChild(tr);
   });
 } 
+
+window.segnaPagata = async function(id, btn) {
+  btn.disabled = true;
+  btn.textContent = '...';
+  const oggi = new Date().toISOString().slice(0, 10);
+  const { error } = await supabase
+    .from('CassaConsumazioni')
+    .update({ DataPagamento: oggi })
+    .eq('id', id);
+  if (error) {
+    if (window.showToast) showToast('Errore: ' + error.message, 'error'); else alert('Errore: ' + error.message);
+    btn.disabled = false;
+    btn.textContent = '💳 Segna pagata';
+  } else {
+    const td = btn.parentElement;
+    td.innerHTML = `<span style="color:#27ae60;font-weight:600;">✓ ${new Date(oggi).toLocaleDateString('it-IT')}</span>`;
+  }
+};
 
 document.getElementById("calendar").addEventListener("change", function() {
   const selectedDate = this.value; // formato YYYY-MM-DD

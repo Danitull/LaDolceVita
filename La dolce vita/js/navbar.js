@@ -37,12 +37,13 @@ function getSessionEmail() {
 const NAV_LINKS = [
   { href: 'index.html',        label: 'Home' },
   { href: 'Affitti.html',      label: 'Affitto',               activeFor: ['Affitti.html', 'WiFi.html', 'Utenze.html'] },
-  { href: '#',                 label: 'Fondo cassa' },
+  { href: 'FondoCassa.html',   label: 'Fondo Cassa' },
+  { href: 'Acquisti.html',     label: 'Acquisti' },
   { href: 'Copponi.html',      label: 'Copponi' },
-  { href: 'Registro.html',     label: 'Registro Consumazioni' },
+  { href: 'Registro.html',     label: 'Registro' },
   { href: 'ListinoPrezzi.html',label: 'Listino Prezzi' },
-  { href: '#',                 label: 'Acquisti' },
   { href: 'Riepilogo.html',    label: 'Riepilogo' },
+  { href: 'Profilo.html',      label: '👤 Profilo' },
   { href: 'Aiuto.html',        label: '❓ Aiuto' },
 ];
 
@@ -90,6 +91,24 @@ class NavMain extends HTMLElement {
   <ul>${items}${adminLink}</ul>
   ${userHtml}
 </nav>`;
+
+    // Inietta Three.js background se non già presente
+    if (!document.getElementById('three-bg-script')) {
+      const s = document.createElement('script');
+      s.id = 'three-bg-script';
+      s.type = 'module';
+      s.src = '/js/three-bg.js';
+      document.head.appendChild(s);
+    }
+
+    // Inietta ui.js (toast, confirm, utilità UI)
+    if (!document.getElementById('ui-script')) {
+      const u = document.createElement('script');
+      u.id = 'ui-script';
+      u.type = 'module';
+      u.src = '/js/ui.js';
+      document.head.appendChild(u);
+    }
   }
 }
 

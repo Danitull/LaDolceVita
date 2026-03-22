@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Dolce Vita - Fondo Cassa</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/navbar.js"></script>
+</head>
+<style>
+    .fondo-wrap {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 80px 24px 60px;
+        box-sizing: border-box;
+    }
+    .page-title {
+        text-align: center;
+        color: #236093;
+        font-size: clamp(1.4rem, 3vw, 2rem);
+        font-weight: 800;
+        margin: 0 0 4px;
+    }
+    .page-subtitle {
+        text-align: center;
+        color: #667;
+        font-size: 0.92rem;
+        margin-bottom: 28px;
+    }
+
+    /* KPI cards */
+    .cards-row {
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-bottom: 36px;
+    }
+    .kpi-card {
+        flex: 1;
+        min-width: 200px;
+        max-width: 260px;
+        background: rgba(255,255,255,0.95);
+        border-radius: 16px;
+        padding: 22px 20px;
+        box-shadow: 0 4px 20px rgba(11,22,40,0.08);
+        border-top: 4px solid #3498db;
+        text-align: center;
+    }
+    .kpi-card.green  { border-top-color: #27ae60; }
+    .kpi-card.red    { border-top-color: #e74c3c; }
+    .kpi-card.orange { border-top-color: #f39c12; }
+    .kpi-card.purple { border-top-color: #9b59b6; }
+    .kpi-icon { font-size: 1.8rem; margin-bottom: 8px; }
+    .kpi-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #778;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 6px;
+    }
+    .kpi-value {
+        font-size: 1.75rem;
+        font-weight: 900;
+        color: #236093;
+        line-height: 1.1;
+    }
+    .kpi-card.green  .kpi-value { color: #27ae60; }
+    .kpi-card.red    .kpi-value { color: #e74c3c; }
+    .kpi-card.orange .kpi-value { color: #f39c12; }
+    .kpi-card.purple .kpi-value { color: #9b59b6; }
+    .kpi-sub {
+        font-size: 0.78rem;
+        color: #99a;
+        margin-top: 4px;
+    }
+
+    /* Dettaglio entrate per categoria */
+    .breakdown-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-bottom: 36px;
+    }
+    .breakdown-item {
+        background: rgba(255,255,255,0.9);
+        border-radius: 12px;
+        padding: 14px 20px;
+        box-shadow: 0 2px 10px rgba(11,22,40,0.06);
+        text-align: center;
+        min-width: 150px;
+        flex: 1;
+        max-width: 200px;
+    }
+    .breakdown-label {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #556;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        margin-bottom: 4px;
+    }
+    .breakdown-value {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: #27ae60;
+    }
+    .breakdown-value.red { color: #e74c3c; }
+    .breakdown-value.orange { color: #f39c12; }
+
+    /* Section filter */
+    .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+    .section-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #236093;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .anno-filter {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+        color: #556;
+    }
+    .anno-filter select {
+        padding: 6px 28px 6px 10px;
+        border: 2px solid #dde5f0;
+        border-radius: 8px;
+        font-size: 13px;
+        font-family: inherit;
+        background: rgba(255,255,255,0.92);
+        color: #213240;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%233498db' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 8px center;
+        cursor: pointer;
+    }
+    .anno-filter select:focus { outline: none; border-color: #3498db; }
+
+    /* tables section */
+    .tables-row {
+        display: flex;
+        gap: 24px;
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+    .table-section {
+        flex: 1;
+        min-width: 300px;
+        background: rgba(255,255,255,0.95);
+        border-radius: 14px;
+        box-shadow: 0 4px 16px rgba(11,22,40,0.07);
+        overflow: hidden;
+    }
+    .table-section-header {
+        padding: 14px 18px;
+        font-weight: 700;
+        font-size: 0.92rem;
+        color: #236093;
+        border-bottom: 2px solid #eef2f8;
+    }
+    .fondo-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.88rem;
+    }
+    .fondo-table th {
+        padding: 10px 14px;
+        text-align: left;
+        background: rgba(35,96,147,0.06);
+        font-size: 0.76rem;
+        font-weight: 700;
+        color: #556;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+    .fondo-table td {
+        padding: 10px 14px;
+        border-bottom: 1px solid #f0f4f8;
+        color: #334;
+        vertical-align: middle;
+    }
+    .fondo-table tbody tr:last-child td { border-bottom: none; }
+    .fondo-table tbody tr:hover { background: #f5f9ff; }
+    .no-data {
+        text-align: center;
+        color: #aaa;
+        padding: 24px;
+        font-style: italic;
+        font-size: 0.88rem;
+    }
+    .loading-overlay {
+        text-align: center;
+        padding: 40px;
+        color: #778;
+        font-size: 0.92rem;
+    }
+    .divider {
+        border: none;
+        border-top: 2px solid #eef2f8;
+        margin: 32px 0;
+    }
+    .debiti-section {
+        margin-top: 32px;
+    }
+
+    @media (max-width: 640px) {
+        .fondo-wrap { padding: 76px 12px 40px; }
+        .kpi-card { min-width: 140px; padding: 16px; }
+        .kpi-value { font-size: 1.4rem; }
+        .breakdown-item { min-width: 120px; }
+    }
+
+    /* Card-view per .fondo-table su mobile */
+    @media (max-width: 580px) {
+        .fondo-table thead { display: none; }
+        .fondo-table tbody tr {
+            display: block;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(11,22,40,0.07);
+            margin-bottom: 10px;
+            padding: 10px 14px;
+            border-left: 4px solid #3498db;
+        }
+        .fondo-table td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid #f0f4f8;
+            font-size: 0.86rem;
+        }
+        .fondo-table td:last-child { border-bottom: none; }
+        .fondo-table td::before {
+            content: attr(data-label);
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #94a3b8;
+            letter-spacing: 0.4px;
+            flex-shrink: 0;
+            margin-right: 8px;
+        }
+        .fondo-table tbody tr[style*="background:rgba(39"] td,
+        .fondo-table tbody tr[style*="background:rgba(231"] td,
+        .fondo-table tbody tr[style*="background:rgba(243"] td {
+            display: block;
+            text-align: right;
+        }
+        .fondo-table tbody tr[style*="background:rgba(39"] td::before,
+        .fondo-table tbody tr[style*="background:rgba(231"] td::before,
+        .fondo-table tbody tr[style*="background:rgba(243"] td::before { display: none; }
+        .tables-row { flex-direction: column; }
+        .table-section { min-width: unset; }
+    }
+</style>
+<body>
+
+<nav-main></nav-main>
+
+<div class="fondo-wrap fade-in">
+    <h1 class="page-title">💰 Fondo Cassa</h1>
+    <p class="page-subtitle">Bilancio totale — tutte le entrate e uscite dall'inizio</p>
+
+    <div id="loading-msg" class="loading-overlay">⏳ Caricamento...</div>
+
+    <div id="content" style="display:none;">
+
+        <!-- KPI totali -->
+        <div class="cards-row">
+            <div class="kpi-card green">
+                <div class="kpi-icon">📥</div>
+                <div class="kpi-label">Totale Entrate</div>
+                <div class="kpi-value" id="kpi-entrate">—</div>
+                <div class="kpi-sub">Affitto + WiFi + Utenze + Consumazioni</div>
+            </div>
+            <div class="kpi-card red">
+                <div class="kpi-icon">📤</div>
+                <div class="kpi-label">Totale Uscite</div>
+                <div class="kpi-value" id="kpi-uscite">—</div>
+                <div class="kpi-sub">Acquisti & spese</div>
+            </div>
+            <div class="kpi-card" id="kpi-saldo-card">
+                <div class="kpi-icon">⚖️</div>
+                <div class="kpi-label">Saldo Attuale</div>
+                <div class="kpi-value" id="kpi-saldo">—</div>
+                <div class="kpi-sub">Entrate − Uscite</div>
+            </div>
+            <div class="kpi-card orange">
+                <div class="kpi-icon">⚠️</div>
+                <div class="kpi-label">Debiti Aperti</div>
+                <div class="kpi-value" id="kpi-debiti">—</div>
+                <div class="kpi-sub">Consumazioni non ancora pagate</div>
+            </div>
+        </div>
+
+        <!-- Breakdown entrate per categoria -->
+        <div class="breakdown-row" id="breakdown-row"></div>
+
+        <hr class="divider">
+
+        <!-- Tabelle di dettaglio con filtro anno -->
+        <div class="section-header">
+            <div class="section-title">📋 Dettaglio per anno</div>
+            <div class="anno-filter">
+                <label for="annoSelect">Anno:</label>
+                <select id="annoSelect">
+                    <option value="all">Tutti</option>
+                    <option value="2023">2023</option>
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                    <option value="2026">2026</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="tables-row">
+
+            <!-- Entrate -->
+            <div class="table-section">
+                <div class="table-section-header">📥 Entrate incassate</div>
+                <div style="overflow-x:auto;">
+                    <table class="fondo-table">
+                        <thead>
+                            <tr>
+                                <th>Residente / Dettaglio</th>
+                                <th>Tipo</th>
+                                <th>Mese/Data</th>
+                                <th>Importo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-entrate">
+                            <tr><td colspan="4" class="no-data">Caricamento...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Uscite -->
+            <div class="table-section">
+                <div class="table-section-header">📤 Uscite — Acquisti & Spese</div>
+                <div style="overflow-x:auto;">
+                    <table class="fondo-table">
+                        <thead>
+                            <tr>
+                                <th>Prodotto</th>
+                                <th>Data</th>
+                                <th>Prezzo</th>
+                                <th>Note</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-uscite">
+                            <tr><td colspan="4" class="no-data">Caricamento...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Debiti aperti -->
+        <div class="debiti-section">
+            <div class="section-title" style="margin-bottom:16px;">⚠️ Consumazioni non pagate</div>
+            <div class="table-section">
+                <div style="overflow-x:auto;">
+                    <table class="fondo-table">
+                        <thead>
+                            <tr>
+                                <th>Residente</th>
+                                <th>Prodotto</th>
+                                <th>Data</th>
+                                <th>Importo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-debiti">
+                            <tr><td colspan="4" class="no-data">Caricamento...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+const sb = createClient(
+    'https://tjbsnchbezvhhugkgaxx.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYnNuY2hiZXp2aGh1Z2tnYXh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0OTA4ODAsImV4cCI6MjA3OTA2Njg4MH0.eMDjkjvirN1DrUPysy34TgycmwMkAoMmMuxJ1_o9vzg'
+);
+
+const MESI = ['','Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
+function fmt(n)     { return `€ ${Number(n||0).toFixed(2)}`; }
+function fmtDate(s) { return s ? new Date(s).toLocaleDateString('it-IT') : '—'; }
+function sum(arr, field) { return (arr||[]).reduce((s,r) => s + (parseFloat(r[field])||0), 0); }
+
+// ─── Dati globali (tutti i record, non filtrati per anno) ───────────────────
+let ALL = {};
+
+async function caricaTutto() {
+    document.getElementById('loading-msg').style.display = 'block';
+    document.getElementById('content').style.display = 'none';
+
+    const [
+        { data: utenti },
+        { data: prodotti },
+        { data: pagAff },
+        { data: pagWifi },
+        { data: pagUt },
+        { data: consPagate },
+        { data: consNonPagate },
+        { data: acquisti },
+    ] = await Promise.all([
+        sb.from('Utenti').select('id,Nome').eq('IsDeleted', false),
+        sb.from('ElencoProdotti').select('id,Prodotto').eq('IsDeleted', false),
+        sb.from('PagamentoAffitti').select('*').eq('IsDeleted', false),
+        sb.from('PagamentoWiFi').select('*').eq('IsDeleted', false),
+        sb.from('PagamentoUtenze').select('*').eq('IsDeleted', false),
+        sb.from('CassaConsumazioni').select('*').eq('IsDeleted', false).not('DataPagamento', 'is', null),
+        sb.from('CassaConsumazioni').select('*').eq('IsDeleted', false).is('DataPagamento', null),
+        sb.from('Acquisti_Spese').select('*').eq('IsDeleted', false),
+    ]);
+
+    ALL.utentiMap  = Object.fromEntries((utenti||[]).map(u => [u.id, u.Nome]));
+    ALL.prodottiMap = Object.fromEntries((prodotti||[]).map(p => [p.id, p.Prodotto]));
+    ALL.pagAff       = pagAff       || [];
+    ALL.pagWifi      = pagWifi      || [];
+    ALL.pagUt        = pagUt        || [];
+    ALL.consPagate   = consPagate   || [];
+    ALL.consNonPagate = consNonPagate || [];
+    ALL.acquisti     = acquisti     || [];
+
+    // ─── KPI TOTALI (senza filtro anno) ─────────────────────────────────────
+    const totAff     = sum(ALL.pagAff,  'Value');
+    const totWifi    = sum(ALL.pagWifi, 'Value');
+    const totUt      = sum(ALL.pagUt,   'Value');
+    const totCons    = sum(ALL.consPagate, 'Prezzo');
+    const totEntrate = totAff + totWifi + totUt + totCons;
+    const totUscite  = sum(ALL.acquisti, 'Prezzo');
+    const saldo      = totEntrate - totUscite;
+    const totDebiti  = sum(ALL.consNonPagate, 'Prezzo');
+
+    document.getElementById('kpi-entrate').textContent = fmt(totEntrate);
+    document.getElementById('kpi-uscite').textContent  = fmt(totUscite);
+    document.getElementById('kpi-saldo').textContent   = fmt(saldo);
+    document.getElementById('kpi-debiti').textContent  = fmt(totDebiti);
+    const saldoCard = document.getElementById('kpi-saldo-card');
+    saldoCard.className = 'kpi-card ' + (saldo >= 0 ? 'green' : 'red');
+
+    // ─── Breakdown per categoria ─────────────────────────────────────────────
+    document.getElementById('breakdown-row').innerHTML = `
+        <div class="breakdown-item">
+            <div class="breakdown-label">🏠 Affitti</div>
+            <div class="breakdown-value">${fmt(totAff)}</div>
+            <div class="breakdown-trend" style="font-size:0.7rem;color:#94a3b8;margin-top:2px;">→</div>
+        </div>
+        <div class="breakdown-item">
+            <div class="breakdown-label">📡 WiFi</div>
+            <div class="breakdown-value">${fmt(totWifi)}</div>
+            <div class="breakdown-trend" style="font-size:0.7rem;color:#94a3b8;margin-top:2px;">→</div>
+        </div>
+        <div class="breakdown-item">
+            <div class="breakdown-label">💡 Utenze</div>
+            <div class="breakdown-value">${fmt(totUt)}</div>
+            <div class="breakdown-trend" style="font-size:0.7rem;color:#94a3b8;margin-top:2px;">→</div>
+        </div>
+        <div class="breakdown-item">
+            <div class="breakdown-label">🧾 Consumazioni</div>
+            <div class="breakdown-value">${fmt(totCons)}</div>
+            <div class="breakdown-trend" style="font-size:0.7rem;color:#94a3b8;margin-top:2px;">→</div>
+        </div>
+        <div class="breakdown-item">
+            <div class="breakdown-label">🛒 Acquisti</div>
+            <div class="breakdown-value red">${fmt(totUscite)}</div>
+            <div class="breakdown-trend" style="font-size:0.7rem;color:#94a3b8;margin-top:2px;">→</div>
+        </div>
+        <div class="breakdown-item">
+            <div class="breakdown-label">⚠️ Debiti aperti</div>
+            <div class="breakdown-value orange">${fmt(totDebiti)}</div>
+            <div class="breakdown-trend" style="font-size:0.7rem;color:#94a3b8;margin-top:2px;">→</div>
+        </div>
+    `;
+
+    document.getElementById('loading-msg').style.display = 'none';
+    document.getElementById('content').style.display = 'block';
+
+    renderTabelle('all');
+}
+
+function renderTabelle(annoFiltro) {
+    const anno = annoFiltro === 'all' ? null : parseInt(annoFiltro);
+
+    // ─── Filtra per anno ──────────────────────────────────────────────────
+    const filterPag = r => !anno || r.Anno === anno;
+    const filterDate = r => !anno || (r.DataAcquisto && new Date(r.DataAcquisto).getFullYear() === anno);
+    const filterDateCons = r => !anno || (r.DataCreazione && new Date(r.DataCreazione).getFullYear() === anno);
+
+    const pagAff  = ALL.pagAff.filter(filterPag);
+    const pagWifi = ALL.pagWifi.filter(filterPag);
+    const pagUt   = ALL.pagUt.filter(filterPag);
+    const consPag = ALL.consPagate.filter(filterDateCons);
+    const acq     = ALL.acquisti.filter(filterDate);
+
+    // ─── Tabella entrate ──────────────────────────────────────────────────
+    const pagamenti = [
+        ...pagAff.map(p  => ({ nome: ALL.utentiMap[p.UtenteNo]  ?? '#'+p.UtenteNo, tipo: '🏠 Affitto',        meseAnno: `${MESI[p.Mese]} ${p.Anno}`,              val: parseFloat(p.Value)||0 })),
+        ...pagWifi.map(p => ({ nome: ALL.utentiMap[p.UtenteNo]  ?? '#'+p.UtenteNo, tipo: '📡 WiFi',           meseAnno: `${MESI[p.Mese]} ${p.Anno}`,              val: parseFloat(p.Value)||0 })),
+        ...pagUt.map(p   => ({ nome: ALL.utentiMap[p.UtenteNo]  ?? '#'+p.UtenteNo, tipo: '💡 Utenze',         meseAnno: `${MESI[p.Mese]} ${p.Anno}`,              val: parseFloat(p.Value)||0 })),
+        ...consPag.map(p => ({ nome: ALL.utentiMap[p.UtenteNo]  ?? '#'+p.UtenteNo, tipo: '🧾 Consumazione',   meseAnno: fmtDate(p.DataPagamento),                 val: parseFloat(p.Prezzo)||0 })),
+    ];
+    const totEnt = pagamenti.reduce((s,p) => s + p.val, 0);
+
+    const tbodyEnt = document.getElementById('tbody-entrate');
+    if (!pagamenti.length) {
+        tbodyEnt.innerHTML = '<tr><td colspan="4" class="no-data">Nessun pagamento per l\'anno selezionato</td></tr>';
+    } else {
+        tbodyEnt.innerHTML = pagamenti.map(p => `<tr>
+            <td data-label="Residente" style="font-weight:600;">${p.nome}</td>
+            <td data-label="Tipo">${p.tipo}</td>
+            <td data-label="Mese/Data" style="color:#778;font-size:0.85rem;">${p.meseAnno}</td>
+            <td data-label="Importo" style="font-weight:700;color:#27ae60;">${fmt(p.val)}</td>
+        </tr>`).join('') +
+        `<tr style="background:rgba(39,174,96,0.08);font-weight:700;">
+            <td colspan="3">Totale entrate</td>
+            <td style="color:#27ae60;">${fmt(totEnt)}</td>
+        </tr>`;
+    }
+
+    // ─── Tabella uscite ───────────────────────────────────────────────────
+    const totUsc = sum(acq, 'Prezzo');
+    const tbodyUsc = document.getElementById('tbody-uscite');
+    if (!acq.length) {
+        tbodyUsc.innerHTML = '<tr><td colspan="4" class="no-data">Nessun acquisto per l\'anno selezionato</td></tr>';
+    } else {
+        tbodyUsc.innerHTML = acq.map(a => `<tr>
+            <td data-label="Prodotto" style="font-weight:600;">${ALL.prodottiMap[a.ProdottoNo] ?? '#'+a.ProdottoNo}</td>
+            <td data-label="Data">${fmtDate(a.DataAcquisto)}</td>
+            <td data-label="Prezzo" style="font-weight:700;color:#e74c3c;">${fmt(a.Prezzo||0)}</td>
+            <td data-label="Note" style="color:#778;font-size:0.85rem;">${a.Note ?? ''}</td>
+        </tr>`).join('') +
+        `<tr style="background:rgba(231,76,60,0.06);font-weight:700;">
+            <td colspan="2">Totale uscite</td>
+            <td style="color:#e74c3c;">${fmt(totUsc)}</td>
+            <td></td>
+        </tr>`;
+    }
+
+    // ─── Tabella debiti (sempre tutti, non filtrati per anno) ─────────────
+    const cons = ALL.consNonPagate;
+    const totDeb = sum(cons, 'Prezzo');
+    const tbodyDeb = document.getElementById('tbody-debiti');
+    if (!cons.length) {
+        tbodyDeb.innerHTML = '<tr><td colspan="4" class="no-data" style="color:#27ae60;">✓ Nessun debito aperto</td></tr>';
+    } else {
+        tbodyDeb.innerHTML = cons.map(c => `<tr>
+            <td data-label="Residente" style="font-weight:600;">${ALL.utentiMap[c.UtenteNo] ?? '#'+c.UtenteNo}</td>
+            <td data-label="Prodotto">${ALL.prodottiMap[c.ProdottoNo] ?? '#'+c.ProdottoNo}</td>
+            <td data-label="Data" style="color:#778;font-size:0.85rem;">${fmtDate(c.DataCreazione)}</td>
+            <td data-label="Importo" style="font-weight:700;color:#f39c12;">${fmt(c.Prezzo||0)}</td>
+        </tr>`).join('') +
+        `<tr style="background:rgba(243,156,18,0.08);font-weight:700;">
+            <td colspan="3">Totale debiti aperti</td>
+            <td style="color:#f39c12;">${fmt(totDeb)}</td>
+        </tr>`;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    caricaTutto();
+    document.getElementById('annoSelect').addEventListener('change', e => {
+        renderTabelle(e.target.value);
+    });
+});
+</script>
+
+</body>
+</html>

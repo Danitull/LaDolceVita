@@ -160,6 +160,10 @@
   background: linear-gradient(to bottom, #0056b3, #003f7f); /* sfumatura più scura al passaggio */
 }
 
+@media (max-width: 580px) {
+  .selezione-container { max-width: 100%; padding: 0 4px; }
+  .selezione-container select { font-size: 16px; }
+}
 </style>
 <body>
 
@@ -243,7 +247,7 @@
 
         </div>
     </div>
-<div class="page-content">
+<div class="page-content fade-in">
     <div class="main-table-area">
         <div class="selezione-container">
   <label for="meseSelect">Seleziona Mese</label>
@@ -282,6 +286,7 @@
                     <tr>
                         <th>id</th>
                         <th>Nome</th>
+                        <th id="th_Quota" style="display: none;">Quota</th>
                         <th id="th_DataPagamento" style="display: none;">Data pagamento</th>
                         <th id="th_Saldo" style="display: none;">Saldo</th>
                         <th id="th_Restante" style="display: none;">Restante</th>
@@ -410,10 +415,11 @@ async function PagamentiSelect() {
     tbody.innerHTML = "";
     ListaUtenti.forEach(utente => {    
       const tr = document.createElement("tr");
-      tr.innerHTML = `<td>${utente.id}</td><td>${utente.Nome}</td>`;
+      tr.innerHTML = `<td data-label="ID">${utente.id}</td><td data-label="Nome">${utente.Nome}</td>`;
       tbody.appendChild(tr);
     });
-            document.getElementById('th_DataPagamento').style.display = 'none';
+            document.getElementById('th_Quota').style.display = 'none';
+        document.getElementById('th_DataPagamento').style.display = 'none';
         document.getElementById('th_Saldo').style.display = 'none';
         document.getElementById('th_Restante').style.display = 'none';
         document.getElementById('th_ButtonAdd').style.display = 'none';
@@ -498,11 +504,11 @@ async function caricaUtenti() {
                 // Rimuove tutte le opzioni tranne la prima (placeholder)
                 selectElement.innerHTML = '<option value="">Seleziona un utente...</option>';
                 
-                // Aggiunge gli utenti dal database
-                ListaUtenti.forEach(utente => {
+                // Solo utenti non esclusi e non poco frequenti
+                ListaUtenti.filter(u => !u.EsclusoDaWiFi && !u.PocoFrequente).forEach(utente => {
                     const option = document.createElement('option');
-                    option.value = utente.id; // o utente.nome se preferisci
-                    option.textContent = utente.Nome; // Modifica con il campo corretto del tuo database
+                    option.value = utente.id;
+                    option.textContent = utente.Nome;
                     selectElement.appendChild(option);
                 });
 
@@ -517,47 +523,95 @@ async function caricaUtenti() {
             utente.Saldo = 0;
         }
     });
-    var ValoreAffittoMensile = rec.Value / ListaUtenti.length;
-    var restanteTotale = rec.Value;
-    ListaUtenti.forEach(utente => {
-        restanteTotale -= parseFloat(utente.Saldo) || 0;
-        utente.Restante = (ValoreAffittoMensile - (parseFloat(utente.Saldo) || 0)).toFixed(2);
+    // Separa: attivi = non esclusi e non poco frequenti; esclusi manuali; poco frequenti
+    const attivi   = ListaUtenti.filter(u => !u.EsclusoDaWiFi && !u.PocoFrequente);
+    const esclusManuali = ListaUtenti.filter(u =>  u.EsclusoDaWiFi && !u.PocoFrequente);
+    const pocFreq  = ListaUtenti.filter(u =>  u.PocoFrequente);
+
+    // Split WiFi uguale solo tra gli attivi
+    const quotaWifi = attivi.length > 0 ? rec.Value / attivi.length : 0;
+    attivi.forEach(utente => {
+        utente.QuotaDovuta = quotaWifi;
+        utente.Restante = (quotaWifi - (parseFloat(utente.Saldo) || 0)).toFixed(2);
     });
 
-    // 🔹 Popola la tabella
+    // 🔹 Popola la tabella — utenti attivi
     let totalSaldo = 0;
-ListaUtenti.forEach(utente => {    
-    const tr = document.createElement("tr");
-    tr.style.height = '4vh';
-    tr.innerHTML = `
-      <td>${utente.id}</td>
-      <td>${utente.Nome}</td>
-      <td>${utente.DataPagamento}</td>
-      <td>${utente.Saldo} euro</td>
-      <td>${utente.Restante} euro</td>
-      <td style="padding: 0px 34px;"><button id="btnAdd_ID${utente.id}" class="PlusIconTable">+</button></td>
-    `;
-    tbody.appendChild(tr);
-
-    // 🔹 aggiungi l'evento al bottone
-    const btn = tr.querySelector(`#btnAdd_ID${utente.id}`);
-    btn.addEventListener("click", () => {
-        const mese = document.getElementById('meseSelect').value;
-        const anno = document.getElementById('annoSelect').value;
-        ApriModalConParametri(utente.id, mese, anno);
+    attivi.forEach(utente => {
+        const tr = document.createElement("tr");
+        tr.style.height = '4vh';
+        const pagatoBadge = parseFloat(utente.Restante) <= 0
+            ? `<span style="color:#27ae60;font-weight:700;">✓ Saldato</span>`
+            : `<span style="color:#e74c3c;">${utente.Restante} €</span>`;
+        tr.innerHTML = `
+          <td data-label="ID">${utente.id}</td>
+          <td data-label="Nome">${utente.Nome}</td>
+          <td data-label="Quota" style="font-weight:700;color:#236093;">€ ${utente.QuotaDovuta.toFixed(2)}</td>
+          <td data-label="Data Pagamento">${utente.DataPagamento}</td>
+          <td data-label="Saldo">${utente.Saldo} euro</td>
+          <td data-label="Restante">${pagatoBadge}</td>
+          <td data-label="Azioni" style="padding:0 8px;white-space:nowrap;">
+            <button id="btnAdd_ID${utente.id}" class="PlusIconTable">+</button>
+            <button onclick="toggleEsclusione(${utente.id},'EsclusoDaWiFi',false)" style="margin-left:4px;padding:5px 9px;border:none;border-radius:6px;background:#fee2e2;color:#991b1b;cursor:pointer;font-size:12px;" title="Escludi da WiFi">🚫</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+        const btn = tr.querySelector(`#btnAdd_ID${utente.id}`);
+        btn.addEventListener("click", () => {
+            ApriModalConParametri(utente.id, document.getElementById('meseSelect').value, document.getElementById('annoSelect').value, utente.QuotaDovuta);
+        });
+        totalSaldo += parseFloat(utente.Saldo) || 0;
     });
 
-    totalSaldo += parseFloat(utente.Saldo) || 0;
-});
+    // 🔹 Righe escluse manualmente
+    esclusManuali.forEach(utente => {
+        const tr = document.createElement("tr");
+        tr.style.opacity = '0.4';
+        tr.style.height = '4vh';
+        tr.innerHTML = `
+          <td data-label="ID">${utente.id}</td>
+          <td data-label="Nome">${utente.Nome} <span style="font-size:0.72rem;background:#f1f5f9;color:#94a3b8;padding:2px 5px;border-radius:8px;">escluso</span></td>
+          <td data-label="Quota" style="color:#cbd5e1;">—</td>
+          <td data-label="Data Pagamento" style="color:#cbd5e1;">—</td>
+          <td data-label="Saldo" style="color:#cbd5e1;">—</td>
+          <td data-label="Restante" style="color:#cbd5e1;">—</td>
+          <td data-label="Azioni" style="padding:0 8px;">
+            <button onclick="toggleEsclusione(${utente.id},'EsclusoDaWiFi',true)" style="padding:5px 9px;border:none;border-radius:6px;background:#dcfce7;color:#166534;cursor:pointer;font-size:12px;">✓ Riammetti</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+    });
 
-
+    // 🔹 Poco frequenti — esclusi per regola (no toggle)
+    pocFreq.forEach(utente => {
+        const tr = document.createElement("tr");
+        tr.style.opacity = '0.4';
+        tr.style.height = '4vh';
+        tr.innerHTML = `
+          <td data-label="ID">${utente.id}</td>
+          <td data-label="Nome">${utente.Nome} <span style="font-size:0.72rem;background:#fef3c7;color:#92400e;padding:2px 5px;border-radius:8px;">🌙 poco freq.</span></td>
+          <td data-label="Quota" style="color:#cbd5e1;">N/A</td>
+          <td data-label="Data Pagamento" style="color:#cbd5e1;">—</td>
+          <td data-label="Saldo" style="color:#cbd5e1;">—</td>
+          <td data-label="Restante" style="color:#cbd5e1;">—</td>
+          <td data-label="Azioni" style="color:#94a3b8;font-size:0.8rem;padding:0 8px;">esente per regola</td>
+        `;
+        tbody.appendChild(tr);
+    });
 
     // 🔹 Mostra le colonne
+    document.getElementById('th_Quota').style.display = '';
     document.getElementById('th_DataPagamento').style.display = '';
     document.getElementById('th_Saldo').style.display = '';
     document.getElementById('th_Restante').style.display = '';
-    document.getElementById('th_ButtonAdd').style.display = ''; 
+    document.getElementById('th_ButtonAdd').style.display = '';
 }
+
+window.toggleEsclusione = async function(utenteId, campo, valoreAttuale) {
+    const { error } = await supabase.from('Utenti').update({ [campo]: !valoreAttuale }).eq('id', utenteId);
+    if (error) { if (window.showToast) showToast('Errore: ' + error.message, 'error'); else alert('Errore: ' + error.message); return; }
+    LeggiSelezione();
+};
 
 
         // Gestione submit del form

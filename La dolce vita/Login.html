@@ -133,7 +133,7 @@
 </style>
 <body>
 
-<div class="auth-wrap">
+<div class="auth-wrap fade-in">
     <div class="auth-card">
 
         <div class="auth-logo">
@@ -156,7 +156,12 @@
             </div>
             <div class="auth-field">
                 <label for="password">Password</label>
-                <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password" minlength="6">
+                <div style="position:relative;">
+                    <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password" minlength="6" style="padding-right:40px;">
+                    <button type="button" aria-label="Mostra/nascondi password"
+                        onclick="(function(btn){var inp=document.getElementById('password');inp.type=inp.type==='password'?'text':'password';btn.textContent=inp.type==='password'?'👁':'🙈';})(this)"
+                        style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;font-size:1rem;padding:4px;min-height:auto;min-width:auto;">👁</button>
+                </div>
             </div>
             <button type="submit" class="auth-btn" id="submit-btn">Accedi</button>
         </form>

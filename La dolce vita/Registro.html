@@ -468,6 +468,9 @@
 <div id="currentDiv" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; transition: left 0.4s ease;">
     <div style="width: 100%; height: 100%; display: flex; flex-wrap: wrap; justify-content: space-around; align-items: flex-start; padding: 2vh 0; box-sizing: border-box; gap: 2vh; overflow-y: auto;">
         <div class="registro-col" id="col-prodotti">
+            <div style="margin-bottom: 10px;">
+                <input type="text" id="filtro-prodotti" placeholder="🔍 Cerca prodotto per nome..." oninput="filtraProdotti(this.value)" style="width: 100%; padding: 10px 14px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 15px; box-sizing: border-box; transition: border-color 0.2s;">
+            </div>
             <div class="table-responsive">
             <table id="TabellaProdotti" class="styled-table">
                 <thead>
@@ -546,6 +549,15 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 var ArrayCarrello = [];
 var ArrayCarrelloTotale = [];
 var TotaleCarrello = 0;
+
+window.filtraProdotti = function(query) {
+  const filtro = query.trim().toLowerCase();
+  const righe = document.querySelectorAll('#TabellaProdotti tbody tr');
+  righe.forEach(tr => {
+    const nomeProdotto = tr.querySelector('td')?.textContent.toLowerCase() ?? '';
+    tr.style.display = filtro === '' || nomeProdotto.includes(filtro) ? '' : 'none';
+  });
+};
 
   const supabaseUrl = "https://tjbsnchbezvhhugkgaxx.supabase.co";
   const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYnNuY2hiZXp2aGh1Z2tnYXh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0OTA4ODAsImV4cCI6MjA3OTA2Njg4MH0.eMDjkjvirN1DrUPysy34TgycmwMkAoMmMuxJ1_o9vzg"; // la tua anon key

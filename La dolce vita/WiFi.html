@@ -563,7 +563,13 @@ ListaUtenti.forEach(utente => {
         // Gestione submit del form
         document.getElementById('dataForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                alert('Devi essere loggato per salvare i dati.');
+                window.location.replace('/Login.html');
+                return;
+            }
 
             const ListaUtenti = await UtentiSelect();
             const ListaPagamenti = await PagamentiSelect();

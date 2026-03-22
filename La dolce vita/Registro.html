@@ -378,7 +378,14 @@ async function RegistroConsumazioniSelect() {
 async function EventSubmitForm(CarrelloAcquisti) {
     const form = document.getElementById("dataForm");
     form.addEventListener("submit", async (event) => {
-        event.preventDefault(); // Previene il comportamento predefinito del form
+        event.preventDefault();
+
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+            alert('Devi essere loggato per salvare i dati.');
+            window.location.replace('/Login.html');
+            return;
+        }
 
         const formData = new FormData(form);
         const UtenteNo = formData.get("nome");

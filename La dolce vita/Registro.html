@@ -59,12 +59,11 @@
 
          .button-container {
             display: flex;
-            justify-content: flex-start;
+            justify-content: flex-end;
             gap: 15px;
-            margin-top: 20vh;
+            margin-top: 24px;
             flex-direction: row;
-            position: relative;
-            left: -4vw;
+            flex-wrap: wrap;
         }
 
          .modal-button {
@@ -115,32 +114,48 @@
 
         /* Card-view per TabellaRegistro e TabellaProdotti su mobile */
         @media (max-width: 768px) {
+            /* Rompe il contesto tabella su tutti i livelli */
+            #TabellaRegistro, #TabellaProdotti, #Carrello {
+                display: block !important;
+                width: 100% !important;
+                min-width: 0 !important;
+            }
             #TabellaRegistro thead,
             #TabellaProdotti thead,
-            #Carrello thead { display: none; }
+            #Carrello thead { display: none !important; }
 
+            #TabellaRegistro tbody,
+            #TabellaProdotti tbody,
+            #Carrello tbody {
+                display: block !important;
+                width: 100% !important;
+            }
             #TabellaRegistro tbody tr,
             #TabellaProdotti tbody tr,
             #Carrello tbody tr {
                 display: block !important;
-                height: auto !important;   /* override inline height:2vh */
+                width: 100% !important;
+                height: auto !important;
                 background: #fff;
                 border-radius: 10px;
                 box-shadow: 0 2px 8px rgba(11,22,40,0.10);
                 margin-bottom: 10px;
                 padding: 10px 14px;
                 border-left: 4px solid #3498db;
+                box-sizing: border-box !important;
             }
             #TabellaRegistro td,
             #TabellaProdotti td,
             #Carrello td {
                 display: flex !important;
+                width: 100% !important;
                 justify-content: space-between;
                 align-items: center;
                 padding: 6px 0;
                 border-bottom: 1px solid #f0f4f8;
                 font-size: 0.88rem;
                 height: auto !important;
+                box-sizing: border-box;
             }
             #TabellaRegistro td:last-child,
             #TabellaProdotti td:last-child,
@@ -155,12 +170,21 @@
                 color: #94a3b8;
                 letter-spacing: 0.4px;
                 flex-shrink: 0;
+                min-width: 80px;
                 margin-right: 8px;
             }
             /* Bottone + nelle card prodotti */
             #TabellaProdotti td button {
                 padding: 8px 16px !important;
                 font-size: 1rem !important;
+            }
+            /* Layout pannelli in colonna su mobile */
+            #currentDiv > div {
+                flex-direction: column !important;
+            }
+            .registro-col {
+                width: 100% !important;
+                min-width: 0 !important;
             }
         }
         .selezione-container {
@@ -665,7 +689,6 @@ async function visualizzaProdotti(Mese, Anno) {
     var prezzoConDecimale = parseFloat(prodotto.Prezzo).toFixed(2);
 
     if (!Trovato) {
-      tr.style.height = '2vh';
       tr.innerHTML = `
       <td data-label="🛒 Prodotto">${prodotto.Prodotto}</td>
       <td data-label="💰 Prezzo">${prezzoConDecimale}[€]</td>
@@ -685,8 +708,7 @@ async function visualizzaProdotti(Mese, Anno) {
             }
         });
 
-        tr.style.height = '2vh';
-        tr.innerHTML = `
+          tr.innerHTML = `
         <td data-label="🛒 Prodotto">${prodotto.Prodotto}</td>
         <td data-label="💰 Prezzo">${prezzoConDecimale}[€]</td>
         <td data-label="📦 Qtà totale">${quantitaTotale}</td>

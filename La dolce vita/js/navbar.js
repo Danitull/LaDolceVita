@@ -134,3 +134,57 @@ class NavAffitti extends HTMLElement {
 
 customElements.define('nav-main',     NavMain);
 customElements.define('nav-affitti',  NavAffitti);
+
+/* ── Mobile card-view fix ───────────────────────────────────
+ * CSS display:block !important non riesce a sovrascrivere
+ * display:table del browser né height inline impostato via JS.
+ * Questo observer applica il fix via JS ogni volta che nuove
+ * righe vengono inserite in una .styled-table.
+ * ─────────────────────────────────────────────────────────── */
+(function () {
+  const MOBILE_BP = 580;
+
+  function applyCardViewFix(table) {
+    if (window.innerWidth > MOBILE_BP) return;
+    table.style.display = 'block';
+    table.style.width = '100%';
+    table.style.minWidth = '0';
+    const tbody = table.tBodies[0];
+    if (tbody) {
+      tbody.style.display = 'block';
+      tbody.style.width = '100%';
+      tbody.querySelectorAll('tr').forEach(tr => {
+        tr.style.removeProperty('height');
+      });
+    }
+  }
+
+  function applyAllTables() {
+    document.querySelectorAll('.styled-table').forEach(applyCardViewFix);
+  }
+
+  // Observer: intercetta ogni mutazione nel body
+  const observer = new MutationObserver(mutations => {
+    if (window.innerWidth > MOBILE_BP) return;
+    for (const m of mutations) {
+      if (m.addedNodes.length) {
+        // Controlla se sono state aggiunte righe in una styled-table
+        m.addedNodes.forEach(node => {
+          if (node.nodeType !== 1) return;
+          const table = node.closest ? node.closest('.styled-table') : null;
+          if (table) applyCardViewFix(table);
+          // Oppure se è un nodo genitore che contiene styled-table
+          node.querySelectorAll && node.querySelectorAll('.styled-table').forEach(applyCardViewFix);
+        });
+      }
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    applyAllTables();
+    observer.observe(document.body, { childList: true, subtree: true });
+  });
+
+  // Anche dopo resize
+  window.addEventListener('resize', applyAllTables);
+})();

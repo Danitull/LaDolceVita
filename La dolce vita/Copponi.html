@@ -198,7 +198,7 @@
 
 <nav-main></nav-main>
 
-    <div id="ModalContainerPanel" style="z-index: 2; display: none; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.5); position: absolute;">
+    <div id="ModalContainerPanel" style="z-index: 2000; display: none; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.5); position: fixed; top: 0; left: 0;">
             <div class="modal-inner-panel">
 
                 <!-- header -->
@@ -383,7 +383,6 @@
       const nomeUtente = records.NomeUtente || (utente ? utente.Nome : "Utente sconosciuto");
 
       const tr = document.createElement("tr");
-      tr.style.height = '2vh';
       tr.innerHTML = `
         <td data-label="Utente">${nomeUtente}</td>
         <td data-label="Da Saldare">${totaleDaSaldare.toFixed(2)}[€]</td>

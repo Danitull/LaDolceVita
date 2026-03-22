@@ -388,9 +388,20 @@
 
     /* Card-view per .admin-table su mobile */
     @media (max-width: 580px) {
-        .admin-table thead { display: none; }
+        .admin-table {
+            display: block !important;
+            width: 100% !important;
+            min-width: 0 !important;
+        }
+        .admin-table tbody {
+            display: block !important;
+            width: 100% !important;
+        }
+        .admin-table thead { display: none !important; }
         .admin-table tbody tr {
-            display: block;
+            display: block !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
             background: #fff;
             border-radius: 10px;
             box-shadow: 0 2px 8px rgba(11,22,40,0.07);
@@ -399,7 +410,9 @@
             border-left: 4px solid #3498db;
         }
         .admin-table td {
-            display: flex;
+            display: flex !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
             justify-content: space-between;
             align-items: center;
             padding: 5px 0;

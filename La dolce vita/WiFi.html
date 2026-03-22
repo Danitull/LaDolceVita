@@ -170,7 +170,7 @@
 <nav-main></nav-main>
 <nav-affitti></nav-affitti>
 
-    <div id="ModalContainerPanel" style="z-index: 2; display: none; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.5); position: absolute;">
+    <div id="ModalContainerPanel" style="z-index: 2000; display: none; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.5); position: fixed; top: 0; left: 0;">
             <div class="modal-inner-panel">
                 
                 <!-- header -->
@@ -539,7 +539,6 @@ async function caricaUtenti() {
     let totalSaldo = 0;
     attivi.forEach(utente => {
         const tr = document.createElement("tr");
-        tr.style.height = '4vh';
         const pagatoBadge = parseFloat(utente.Restante) <= 0
             ? `<span style="color:#27ae60;font-weight:700;">✓ Saldato</span>`
             : `<span style="color:#e74c3c;">${utente.Restante} €</span>`;
@@ -567,7 +566,6 @@ async function caricaUtenti() {
     esclusManuali.forEach(utente => {
         const tr = document.createElement("tr");
         tr.style.opacity = '0.4';
-        tr.style.height = '4vh';
         tr.innerHTML = `
           <td data-label="ID">${utente.id}</td>
           <td data-label="Nome">${utente.Nome} <span style="font-size:0.72rem;background:#f1f5f9;color:#94a3b8;padding:2px 5px;border-radius:8px;">escluso</span></td>
@@ -586,7 +584,6 @@ async function caricaUtenti() {
     pocFreq.forEach(utente => {
         const tr = document.createElement("tr");
         tr.style.opacity = '0.4';
-        tr.style.height = '4vh';
         tr.innerHTML = `
           <td data-label="ID">${utente.id}</td>
           <td data-label="Nome">${utente.Nome} <span style="font-size:0.72rem;background:#fef3c7;color:#92400e;padding:2px 5px;border-radius:8px;">🌙 poco freq.</span></td>

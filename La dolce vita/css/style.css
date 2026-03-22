@@ -526,6 +526,7 @@ select {
   border-bottom: 1px solid rgba(30,80,140,0.07);
   vertical-align: middle;
 }
+.styled-table tbody tr { min-height: 44px; }
 .styled-table tbody tr:nth-of-type(even) {
   background: rgba(52,152,219,0.04);
 }
@@ -971,10 +972,24 @@ img { max-width: 100%; height: auto; }
 
 /* ── Card-view tables on mobile ≤ 580px ─────────────────── */
 @media (max-width: 580px) {
-  .styled-table { border-radius: 0; box-shadow: none; background: transparent; }
-  .styled-table thead { display: none; }
+  /* Rompe il contesto tabella su tutti i livelli */
+  .styled-table {
+    display: block !important;
+    width: 100% !important;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+    min-width: 0 !important;
+  }
+  .styled-table thead { display: none !important; }
+  .styled-table tbody {
+    display: block !important;
+    width: 100% !important;
+  }
   .styled-table tbody tr {
-    display: block;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
     background: var(--c-surface-hi) !important;
     border-radius: var(--r-lg) !important;
     margin-bottom: 12px !important;
@@ -982,9 +997,11 @@ img { max-width: 100%; height: auto; }
     box-shadow: var(--sh-sm) !important;
     border-bottom: none !important;
     border-left: 4px solid var(--c-accent) !important;
+    box-sizing: border-box !important;
   }
   .styled-table tbody td {
-    display: flex;
+    display: flex !important;
+    width: 100% !important;
     justify-content: space-between;
     align-items: center;
     padding: 7px 0 !important;
@@ -992,6 +1009,7 @@ img { max-width: 100%; height: auto; }
     font-size: 0.87rem;
     min-height: 38px;
     gap: 8px;
+    box-sizing: border-box;
   }
   .styled-table tbody td:last-child { border-bottom: none !important; }
   .styled-table tbody td::before {
@@ -1002,7 +1020,7 @@ img { max-width: 100%; height: auto; }
     text-transform: uppercase;
     letter-spacing: 0.5px;
     flex-shrink: 0;
-    min-width: 80px;
+    min-width: 90px;
   }
 }
 

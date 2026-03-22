@@ -350,7 +350,7 @@
     const { data } = await supabase
       .from("CategorieProdotti")
       .select("*")
-      .order("Ordine");
+      .order("ordine");
     if (data) data.forEach(c => { categorieMap[c.id] = c; });
     return data || [];
   }
@@ -358,7 +358,7 @@
   async function ElencoSelect() {
     const { data, error } = await supabase
       .from("ElencoProdotti")
-      .select("*, CategorieProdotti(id, Nome, Icona, Colore)")
+      .select("*, CategorieProdotti(id, nome, icona, colore)")
       .eq("IsDeleted", false)
       .order("Prodotto");
     if (error) { console.error("Errore ElencoProdotti:", error); return []; }
@@ -375,7 +375,7 @@
     const bar = document.getElementById('cat-filter-bar');
     const tuttiBtn = `<button class="cat-btn active" data-cat="all" style="border-color:#3498db; color:#3498db;">Tutti</button>`;
     const catBtns = categorie.map(c =>
-      `<button class="cat-btn" data-cat="${c.id}" style="color:${c.Colore};">${c.Icona} ${c.Nome}</button>`
+      `<button class="cat-btn" data-cat="${c.id}" style="color:${c.colore};">${c.icona} ${c.nome}</button>`
     ).join('');
     bar.innerHTML = tuttiBtn + catBtns;
 
@@ -414,7 +414,7 @@
     ListaProdotti.forEach(prodotto => {
       const cat = prodotto.CategorieProdotti;
       const badgeHtml = cat
-        ? `<span class="badge-cat" style="background:${cat.Colore};">${cat.Icona} ${cat.Nome}</span>`
+        ? `<span class="badge-cat" style="background:${cat.colore};">${cat.icona} ${cat.nome}</span>`
         : `<span class="badge-cat" style="background:#bdc3c7;">—</span>`;
 
       const quantitaTotale = ListaAcquistiSpese

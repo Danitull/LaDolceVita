@@ -351,7 +351,7 @@ async function init() {
 
     // Load categorie e prodotti per dropdown raggruppato
     const [{ data: catData }, { data: prodData }] = await Promise.all([
-        sb.from('CategorieProdotti').select('id,Nome,Icona').order('Ordine'),
+        sb.from('CategorieProdotti').select('id,nome,icona').order('ordine'),
         sb.from('ElencoProdotti').select('id,Prodotto,CategoriaId').eq('IsDeleted', false).order('Prodotto'),
     ]);
     prodotti = prodData || [];
@@ -362,7 +362,7 @@ async function init() {
     categorie.forEach(cat => {
         const gruppo = prodotti.filter(p => p.CategoriaId === cat.id);
         if (!gruppo.length) return;
-        optHtml += `<optgroup label="${cat.Icona} ${cat.Nome}">` +
+        optHtml += `<optgroup label="${cat.icona} ${cat.nome}">` +
             gruppo.map(p => `<option value="${p.id}">${p.Prodotto}</option>`).join('') +
             '</optgroup>';
     });

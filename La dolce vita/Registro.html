@@ -576,7 +576,7 @@ window.filtraProdotti = function(query) {
   const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function loadCategorie() {
-  const { data } = await supabase.from("CategorieProdotti").select("*").order("Ordine");
+  const { data } = await supabase.from("CategorieProdotti").select("*").order("ordine");
   return data || [];
 }
 
@@ -586,7 +586,7 @@ function renderFilterBarRegistro(categorie) {
   bar.innerHTML =
     `<button class="cat-btn active" data-cat="all" style="border-color:#3498db; color:#3498db;">Tutti</button>` +
     categorie.map(c =>
-      `<button class="cat-btn" data-cat="${c.id}" style="color:${c.Colore};">${c.Icona} ${c.Nome}</button>`
+      `<button class="cat-btn" data-cat="${c.id}" style="color:${c.colore};">${c.icona} ${c.nome}</button>`
     ).join('');
   bar.addEventListener('click', e => {
     const btn = e.target.closest('.cat-btn');
@@ -601,7 +601,7 @@ function renderFilterBarRegistro(categorie) {
 async function ElencoSelect() {
   const { data, error } = await supabase
     .from("ElencoProdotti")
-    .select("*, CategorieProdotti(id, Nome, Icona, Colore)")
+    .select("*, CategorieProdotti(id, nome, icona, colore)")
     .eq("IsDeleted", false)
     .order("Prodotto");
   if (error) { console.error("Errore ElencoProdotti:", error); return []; }

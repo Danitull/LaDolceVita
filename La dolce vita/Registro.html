@@ -286,8 +286,7 @@
                     <tr>
                         <th style="width: 20%;">Prodotto</th>
                         <th style="width: 10%;">Prezzo</th>
-                        <th style="width: 10%;">Costo</th>
-                        <th style="width: 15%;">Quantita' totale</th>
+                        <th style="width: 20%;">Quantita' totale</th>
                         <th style="width: 10%;">Restante</th>
                         <th style="width: 15%;">Aggiungi a carrello</th>
                     </tr>
@@ -495,14 +494,12 @@ async function visualizzaProdotti(Mese, Anno) {
         }
     });
     var prezzoConDecimale = parseFloat(prodotto.Prezzo).toFixed(2);
-    var costoConDecimale = prodotto.Costo != null ? parseFloat(prodotto.Costo).toFixed(2) + '[€]' : '—';
 
     if (!Trovato) {
       tr.style.height = '2vh';
       tr.innerHTML = `
       <td data-label="Prodotto">${prodotto.Prodotto}</td>
       <td data-label="Prezzo">${prezzoConDecimale}[€]</td>
-      <td data-label="Costo">${costoConDecimale}</td>
       <td data-label="Qtà totale">0</td>
       <td data-label="Restante">0</td>
       <td data-label="Azioni"><button style="padding:4px 8px; margin-top:0px;" id="btn_Table${prodotto.id}">+</button></td>
@@ -523,7 +520,6 @@ async function visualizzaProdotti(Mese, Anno) {
         tr.innerHTML = `
         <td data-label="Prodotto">${prodotto.Prodotto}</td>
         <td data-label="Prezzo">${prezzoConDecimale}[€]</td>
-        <td data-label="Costo">${costoConDecimale}</td>
         <td data-label="Qtà totale">${quantitaTotale}</td>
         <td data-label="Restante">-</td>
         <td data-label="Azioni"><button style="padding:4px 8px; margin-top:0px;" id="btn_Table${prodotto.id}">+</button></td>

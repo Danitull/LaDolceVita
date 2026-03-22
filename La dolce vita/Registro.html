@@ -473,6 +473,7 @@
 <div id="currentDiv" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; transition: left 0.4s ease;">
     <div style="width: 100%; height: 100%; display: flex; flex-wrap: wrap; justify-content: space-around; align-items: flex-start; padding: 2vh 0; box-sizing: border-box; gap: 2vh; overflow-y: auto;">
         <div class="registro-col" id="col-prodotti">
+            <div id="cat-filter-bar-registro" class="cat-filter-bar"></div>
             <div style="margin-bottom: 10px;">
                 <input type="text" id="filtro-prodotti" placeholder="🔍 Cerca prodotto per nome..." oninput="filtraProdotti(this.value)" style="width: 100%; padding: 10px 14px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 15px; box-sizing: border-box; transition: border-color 0.2s;">
             </div>
@@ -555,12 +556,16 @@ var ArrayCarrello = [];
 var ArrayCarrelloTotale = [];
 var TotaleCarrello = 0;
 
+let filtroCategoria = null;
+
 window.filtraProdotti = function(query) {
   const filtro = query.trim().toLowerCase();
-  const righe = document.querySelectorAll('#TabellaProdotti tbody tr');
-  righe.forEach(tr => {
+  document.querySelectorAll('#TabellaProdotti tbody tr').forEach(tr => {
     const nomeProdotto = tr.querySelector('td')?.textContent.toLowerCase() ?? '';
-    tr.classList.toggle('filtro-nascosto', filtro !== '' && !nomeProdotto.includes(filtro));
+    const catId = tr.dataset.catId ? parseInt(tr.dataset.catId) : null;
+    const matchTesto = filtro === '' || nomeProdotto.includes(filtro);
+    const matchCat = filtroCategoria === null || catId === filtroCategoria;
+    tr.classList.toggle('filtro-nascosto', !(matchTesto && matchCat));
   });
 };
 
@@ -570,13 +575,36 @@ window.filtraProdotti = function(query) {
   // Inizializza il client con la chiave anon
   const supabase = createClient(supabaseUrl, supabaseKey);
 
+async function loadCategorie() {
+  const { data } = await supabase.from("CategorieProdotti").select("*").order("Ordine");
+  return data || [];
+}
+
+function renderFilterBarRegistro(categorie) {
+  const bar = document.getElementById('cat-filter-bar-registro');
+  if (!bar) return;
+  bar.innerHTML =
+    `<button class="cat-btn active" data-cat="all" style="border-color:#3498db; color:#3498db;">Tutti</button>` +
+    categorie.map(c =>
+      `<button class="cat-btn" data-cat="${c.id}" style="color:${c.Colore};">${c.Icona} ${c.Nome}</button>`
+    ).join('');
+  bar.addEventListener('click', e => {
+    const btn = e.target.closest('.cat-btn');
+    if (!btn) return;
+    bar.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filtroCategoria = btn.dataset.cat === 'all' ? null : parseInt(btn.dataset.cat);
+    filtraProdotti(document.getElementById('filtro-prodotti').value);
+  });
+}
+
 async function ElencoSelect() {
-    const { data, error } = await supabase.from("ElencoProdotti").select("*");
-      if (error) {
-    console.error("Errore:", error);
-    return;
-  }
-  console.log("Dati ottenuti:", data);
+  const { data, error } = await supabase
+    .from("ElencoProdotti")
+    .select("*, CategorieProdotti(id, Nome, Icona, Colore)")
+    .eq("IsDeleted", false)
+    .order("Prodotto");
+  if (error) { console.error("Errore ElencoProdotti:", error); return []; }
   return data;
 }
 async function UtentiSelect() {
@@ -609,8 +637,10 @@ async function RegistroConsumazioniSelect() {
     return data;
 }
 
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", async () => {
     setTodayDate();
+    const categorie = await loadCategorie();
+    renderFilterBarRegistro(categorie);
     // caricaRegistroConsumazioni();
     visualizzaProdotti();
     caricaUtentiStart();
@@ -696,6 +726,8 @@ async function visualizzaProdotti(Mese, Anno) {
 
   ListaProdotti.forEach(prodotto => {
     const tr = document.createElement("tr");
+    const cat = prodotto.CategorieProdotti;
+    tr.dataset.catId = cat ? cat.id : '';
         Trovato = false;
 
     ListaAcquistiSpese.find(acquisto => {

@@ -112,9 +112,6 @@
             }
         }
 
-        /* Classe per nascondere righe filtrate (funziona anche su mobile con !important) */
-        .filtro-nascosto { display: none !important; }
-
         /* Card-view per TabellaRegistro e TabellaProdotti su mobile */
         @media (max-width: 768px) {
             /* Rompe il contesto tabella su tutti i livelli */
@@ -189,6 +186,11 @@
                 width: 100% !important;
                 min-width: 0 !important;
             }
+        }
+        /* Filtro prodotti: deve stare DOPO la media query per vincere su display:block !important */
+        #TabellaProdotti tbody tr.filtro-nascosto,
+        #TabellaRegistro tbody tr.filtro-nascosto {
+            display: none !important;
         }
         .selezione-container {
   width: 100%;

@@ -1037,3 +1037,38 @@ img { max-width: 100%; height: auto; }
 @media (max-width: 768px) {
   .table-responsive::after, .table-scroll-wrapper::after { display: block; }
 }
+
+
+/* ── Filtro categorie prodotti ───────────────────────────── */
+.cat-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.cat-btn {
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 2px solid transparent;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: #f0f4f8;
+  color: #555;
+  transition: all 0.2s;
+  line-height: 1.4;
+}
+.cat-btn.active,
+.cat-btn:hover {
+  border-color: currentColor;
+  background: white;
+}
+.badge-cat {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: white;
+  white-space: nowrap;
+}

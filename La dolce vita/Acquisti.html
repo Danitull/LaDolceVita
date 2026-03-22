@@ -349,12 +349,29 @@ async function init() {
     const { data: { session } } = await sb.auth.getSession();
     sessionUser = session?.user || null;
 
-    // Load prodotti for dropdown
-    const { data } = await sb.from('ElencoProdotti').select('id,Prodotto').eq('IsDeleted', false).order('Prodotto');
-    prodotti = data || [];
+    // Load categorie e prodotti per dropdown raggruppato
+    const [{ data: catData }, { data: prodData }] = await Promise.all([
+        sb.from('CategorieProdotti').select('id,Nome,Icona').order('Ordine'),
+        sb.from('ElencoProdotti').select('id,Prodotto,CategoriaId').eq('IsDeleted', false).order('Prodotto'),
+    ]);
+    prodotti = prodData || [];
+    const categorie = catData || [];
     const sel = document.getElementById('f-prodotto');
-    sel.innerHTML = '<option value="">— Seleziona prodotto —</option>' +
-        prodotti.map(p => `<option value="${p.id}">${p.Prodotto}</option>`).join('');
+    const prodSenzaCat = prodotti.filter(p => !p.CategoriaId);
+    let optHtml = '<option value="">— Seleziona prodotto —</option>';
+    categorie.forEach(cat => {
+        const gruppo = prodotti.filter(p => p.CategoriaId === cat.id);
+        if (!gruppo.length) return;
+        optHtml += `<optgroup label="${cat.Icona} ${cat.Nome}">` +
+            gruppo.map(p => `<option value="${p.id}">${p.Prodotto}</option>`).join('') +
+            '</optgroup>';
+    });
+    if (prodSenzaCat.length) {
+        optHtml += `<optgroup label="📦 Altro">` +
+            prodSenzaCat.map(p => `<option value="${p.id}">${p.Prodotto}</option>`).join('') +
+            '</optgroup>';
+    }
+    sel.innerHTML = optHtml;
 
     // Set current month/year
     const now = new Date();

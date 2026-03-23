@@ -601,11 +601,12 @@ async function loadLookups() {
     LOOKUP.utenti    = u.data || [];
     LOOKUP.prodotti  = p.data || [];
     if (c.error) console.error('loadLookups – CategorieProdotti:', c.error.message);
+    const _clean = v => (v && v !== 'undefined') ? v : null;
     LOOKUP.categorie = (c.data || []).map(x => ({
         id:     x.id,
-        nome:   x.nome   ?? x.Nome   ?? '',
-        icona:  x.icona  ?? x.Icona  ?? '📦',
-        colore: x.colore ?? x.Colore ?? '#95a5a6',
+        nome:   _clean(x.nome)   ?? _clean(x.Nome)   ?? '',
+        icona:  _clean(x.icona)  ?? _clean(x.Icona)  ?? '📦',
+        colore: _clean(x.colore) ?? _clean(x.Colore) ?? '#95a5a6',
         ordine: x.ordine ?? x.Ordine ?? 99,
     }));
 }
@@ -690,7 +691,7 @@ const TABLE_CONFIG = {
             { key: 'id',     label: 'ID' },
             { key: 'icona',  label: 'Icona' },
             { key: 'nome',   label: 'Nome' },
-            { key: 'colore', label: 'Colore', render: v => v ? `<span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:${v};vertical-align:middle;"></span> ${v}` : '—' },
+            { key: 'colore', label: 'Colore', render: v => (v && v !== 'undefined') ? `<span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:${v};vertical-align:middle;"></span> ${v}` : '—' },
             { key: 'ordine', label: 'Ordine' },
         ],
         fields: [
@@ -934,11 +935,12 @@ window.loadCurrentSection = async function() {
 
     // Normalizza i nomi colonna per la sezione categorie (PostgreSQL lowercase vs PascalCase)
     if (currentSection === 'categorie') {
+        const _c = v => (v && v !== 'undefined') ? v : null;
         currentData = (data || []).map(r => ({
             ...r,
-            nome:   r.nome   ?? r.Nome   ?? '',
-            icona:  r.icona  ?? r.Icona  ?? '📦',
-            colore: r.colore ?? r.Colore ?? '#95a5a6',
+            nome:   _c(r.nome)   ?? _c(r.Nome)   ?? '',
+            icona:  _c(r.icona)  ?? _c(r.Icona)  ?? '📦',
+            colore: _c(r.colore) ?? _c(r.Colore) ?? null,
             ordine: r.ordine ?? r.Ordine ?? 99,
         }));
     } else {

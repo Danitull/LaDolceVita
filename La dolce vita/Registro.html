@@ -698,6 +698,8 @@ async function EventSubmitForm(CarrelloAcquisti) {
                     ProdottoNo: ProdottoNo,
                     Qty: Quantita,
                     DataCreazione: DataCreazione,
+                    Prezzo: element.Prezzo,
+                    Pagato: pagaSubito,
                 };
                 if (pagaSubito) {
                     record.DataPagamento = DataCreazione;
@@ -732,14 +734,18 @@ async function EventSubmitForm(CarrelloAcquisti) {
 //     console.log("ApriModalConParametri → Utente:", UtenteNo, "Mese:", meseDaUsare, "Anno:", annoDaUsare);
 // }
 async function visualizzaProdotti(Mese, Anno) {
-  const ListaProdotti = await ElencoSelect();
+  const [ListaProdotti, ListaAcquistiSpese, cassaRes] = await Promise.all([
+      ElencoSelect(),
+      AcquistiSpeseSelect(),
+      supabase.from('CassaConsumazioni').select('ProdottoNo,Qty').eq('IsDeleted', false),
+  ]);
+  const ListaConsumazioni = cassaRes.data || [];
   var Trovato = false;
-  const ListaAcquistiSpese = await AcquistiSpeseSelect();
 
   const tbody = document.getElementById('TabellaProdotti').getElementsByTagName('tbody')[0];
   tbody.innerHTML = ""; // pulizia
 
-  ListaProdotti.forEach(prodotto => {
+  ListaProdotti.filter(p => p.Disponibile !== false).forEach(prodotto => {
     const tr = document.createElement("tr");
     tr.dataset.catId = prodotto.CategoriaId ?? '';
         Trovato = false;
@@ -752,11 +758,12 @@ async function visualizzaProdotti(Mese, Anno) {
     var prezzoConDecimale = parseFloat(prodotto.Prezzo).toFixed(2);
 
     if (!Trovato) {
+      const consumed0 = ListaConsumazioni.filter(c => c.ProdottoNo === prodotto.id).reduce((s, c) => s + (parseInt(c.Qty)||0), 0);
       tr.innerHTML = `
       <td data-label="🛒 Prodotto">${prodotto.Prodotto}</td>
       <td data-label="💰 Prezzo">${prezzoConDecimale}[€]</td>
       <td data-label="📦 Qtà totale">0</td>
-      <td data-label="📊 Restante">0</td>
+      <td data-label="📊 Restante">${Math.max(0, -consumed0)}</td>
       <td data-label="➕ Azioni"><button class="btn-remove-cart" id="btn_Remove${prodotto.id}" style="display:none;">−</button><button style="padding:4px 8px; margin-top:0px;" id="btn_Table${prodotto.id}">+</button><span class="cart-badge" id="badge_${prodotto.id}" style="display:none;">0</span></td>
     `;
     tbody.appendChild(tr);
@@ -771,11 +778,12 @@ async function visualizzaProdotti(Mese, Anno) {
             }
         });
 
+          const consumed = ListaConsumazioni.filter(c => c.ProdottoNo === prodotto.id).reduce((s, c) => s + (parseInt(c.Qty)||0), 0);
           tr.innerHTML = `
         <td data-label="🛒 Prodotto">${prodotto.Prodotto}</td>
         <td data-label="💰 Prezzo">${prezzoConDecimale}[€]</td>
         <td data-label="📦 Qtà totale">${quantitaTotale}</td>
-        <td data-label="📊 Restante">-</td>
+        <td data-label="📊 Restante">${Math.max(0, quantitaTotale - consumed)}</td>
         <td data-label="➕ Azioni"><button class="btn-remove-cart" id="btn_Remove${prodotto.id}" style="display:none;">−</button><button style="padding:4px 8px; margin-top:0px;" id="btn_Table${prodotto.id}">+</button><span class="cart-badge" id="badge_${prodotto.id}" style="display:none;">0</span></td>
         `;
     tbody.appendChild(tr);

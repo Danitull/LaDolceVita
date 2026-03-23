@@ -317,13 +317,14 @@
             <table id="TabellaProdotti" class="styled-table">
                 <thead>
                     <tr>
-                        <th style="width: 26%;">Prodotto</th>
-                        <th style="width: 16%;">Categoria</th>
-                        <th style="width: 11%;">Prezzo</th>
-                        <th style="width: 11%;">Costo</th>
-                        <th style="width: 12%;">Qtà totale</th>
-                        <th style="width: 12%;">Restante</th>
-                        <th style="width: 12%;">Disponibile</th>
+                        <th style="width: 24%;">Prodotto</th>
+                        <th style="width: 14%;">Categoria</th>
+                        <th style="width: 10%;">Prezzo</th>
+                        <th style="width: 10%;">Costo</th>
+                        <th style="width: 11%;">Qtà totale</th>
+                        <th style="width: 11%;">Restante</th>
+                        <th style="width: 10%;">Soglia ⚠️</th>
+                        <th style="width: 10%;">Disponibile</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -409,6 +410,13 @@
     });
   }
 
+  window.aggiornaSoglia = async function(id, valore) {
+    const soglia = valore !== '' ? parseFloat(valore) : null;
+    const { error } = await supabase.from('ElencoProdotti').update({ SogliaMinima: soglia }).eq('id', id);
+    if (error) { console.error('Errore soglia:', error); return; }
+    await visualizzaProdotti();
+  };
+
   window.toggleDisponibile = async function(id, current) {
     const nuovoValore = !current;
     const { error } = await supabase.from('ElencoProdotti').update({ Disponibile: nuovoValore }).eq('id', id);
@@ -446,18 +454,28 @@
         .filter(c => c.ProdottoNo === prodotto.id)
         .reduce((sum, c) => sum + (parseInt(c.Qty) || 0), 0);
       const restante = Math.max(0, quantitaTotale - totalConsumed);
+      const soglia = parseFloat(prodotto.SogliaMinima) || 0;
+      const sogliaAlert = soglia > 0 && restante < soglia;
+      const restanteHtml = sogliaAlert
+        ? `<span style="color:#e74c3c;font-weight:700;">⚠️ ${restante}</span>`
+        : `${restante}`;
       const disponibile = prodotto.Disponibile !== false;
       const dispBtn = `<button onclick="toggleDisponibile(${prodotto.id}, ${disponibile})" style="padding:4px 12px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;background:${disponibile ? '#27ae60' : '#e74c3c'};color:white;">${disponibile ? '✓ Sì' : '✗ No'}</button>`;
+      const sogliaInput = `<input type="number" min="0" step="1" value="${soglia||''}" placeholder="—"
+        onchange="aggiornaSoglia(${prodotto.id}, this.value)"
+        style="width:60px;padding:3px 6px;border:1px solid #dde5f0;border-radius:6px;font-size:12px;font-family:inherit;text-align:center;">`;
 
       const tr = document.createElement("tr");
       tr.dataset.catId = prodotto.CategoriaId ?? '';
+      if (sogliaAlert) tr.style.background = 'rgba(231,76,60,0.05)';
       tr.innerHTML = `
         <td data-label="Prodotto">${prodotto.Prodotto}</td>
         <td data-label="Categoria">${badgeHtml}</td>
         <td data-label="Prezzo">${parseFloat(prodotto.Prezzo).toFixed(2)} €</td>
         <td data-label="Costo">${prodotto.Costo != null ? parseFloat(prodotto.Costo).toFixed(2) + ' €' : '—'}</td>
         <td data-label="Qtà totale">${quantitaTotale}</td>
-        <td data-label="Restante">${restante}</td>
+        <td data-label="Restante">${restanteHtml}</td>
+        <td data-label="Soglia ⚠️">${sogliaInput}</td>
         <td data-label="Disponibile">${dispBtn}</td>
       `;
       tbody.appendChild(tr);

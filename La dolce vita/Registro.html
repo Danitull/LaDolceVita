@@ -192,6 +192,88 @@
         #TabellaRegistro tbody tr.filtro-nascosto {
             display: none !important;
         }
+        /* ── Registro: filtri laterali ── */
+        .reg-filters {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-width: 160px;
+            flex: 0 0 auto;
+        }
+        .reg-filters .rf-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #556;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 2px;
+        }
+        .reg-filters input[type="date"],
+        .reg-filters select {
+            padding: 8px 10px;
+            border: 2px solid #dde5f0;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: inherit;
+            background: rgba(255,255,255,0.9);
+            color: #213240;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .reg-filters .check-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #334;
+            cursor: pointer;
+        }
+        .btn-show-all {
+            padding: 6px 10px;
+            background: #eef2f8;
+            border: 1px solid #dde5f0;
+            border-radius: 7px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            color: #446;
+        }
+        .btn-show-all:hover { background: #dde5f0; }
+        /* ── Registro: toolbar ── */
+        .reg-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .btn-bulk-pay {
+            padding: 7px 14px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: opacity 0.2s;
+        }
+        .btn-bulk-pay:hover { opacity: 0.85; }
+        .btn-csv {
+            padding: 7px 14px;
+            background: #f0f4f8;
+            color: #334;
+            border: 1px solid #dde5f0;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .btn-csv:hover { background: #e0e8f0; }
         .selezione-container {
   width: 100%;
   max-width: 400px;
@@ -515,24 +597,39 @@
 <div id="newDiv" style="width: 100%; height: 100%; left: 100%; position: absolute; top: 0; transition: left 0.4s ease;">
   <div style="width: 100%; height: 100%; display: flex; flex-wrap: wrap; padding: 2vh; box-sizing: border-box; gap: 2vh; overflow-y: auto;">
 
-    <!-- Colonna sinistra: calendario -->
-    <div style="min-width: 160px; flex: 0 0 auto; display: flex; justify-content: center; align-items: flex-start; flex-direction: column; gap: 1vh;">
-      <label for="calendar">Seleziona giorno:</label>
-      <input type="date" id="calendar" style="padding: 0.5em; font-size: 1em;">
+    <!-- Colonna sinistra: filtri -->
+    <div class="reg-filters">
+      <span class="rf-label">Giorno</span>
+      <input type="date" id="calendar">
+      <button class="btn-show-all" onclick="mostraTuttiReg()">Tutti i giorni</button>
+      <span class="rf-label" style="margin-top:6px;">Utente</span>
+      <select id="filtro-utente-reg" onchange="aggiornaFiltriRegistro()">
+        <option value="">Tutti gli utenti</option>
+      </select>
+      <label class="check-label" style="margin-top:6px;">
+        <input type="checkbox" id="solo-non-pagate" onchange="aggiornaFiltriRegistro()">
+        Solo non pagate
+      </label>
     </div>
 
-    <!-- Colonna destra: tabella -->
-    <div style="flex: 1; min-width: 280px; display: flex; justify-content: center; align-items: flex-start;">
+    <!-- Colonna destra: toolbar + tabella -->
+    <div style="flex: 1; min-width: 280px; display: flex; flex-direction: column;">
+      <div class="reg-toolbar">
+        <button class="btn-bulk-pay" onclick="segnaPagateBulk()">💳 Segna pagate (<span id="sel-count">0</span>)</button>
+        <button class="btn-csv" onclick="esportaCSVRegistro()">📥 CSV</button>
+      </div>
       <div class="table-responsive" style="width: 100%;">
       <table id="TabellaRegistro" class="styled-table" style="width: 100%;">
         <thead>
           <tr>
-            <th style="width: 30%;">Data</th>
-            <th style="width: 30%;">Utente</th>
-            <th style="width: 30%;">Prodotto</th>
-            <th style="width: 20%;">Quantita' totale</th>
-            <th style="width: 10%;">Prezzo</th>
-            <th style="width: 10%;">Pagato?</th>
+            <th style="width:32px;"><input type="checkbox" id="check-all-reg" onchange="toggleSelectAllReg(this)"></th>
+            <th>Data</th>
+            <th>Utente</th>
+            <th>Prodotto</th>
+            <th>Qtà</th>
+            <th>Prezzo</th>
+            <th>Pagato?</th>
+            <th>Azioni</th>
           </tr>
         </thead>
         <tbody>
@@ -547,7 +644,48 @@
 
   <button id="SlideButton" class="slide-btn">➡</button>
 </div>
-    
+
+<!-- MODAL MODIFICA CONSUMAZIONE -->
+<div id="ModalEditCons" style="z-index:3000; display:none; width:100vw; height:100vh; background:rgba(0,0,0,0.55); position:fixed; top:0; left:0;">
+    <div class="modal-inner-panel">
+        <div style="height:56px; background:#236093; border-radius:12px 12px 0 0; display:flex; justify-content:space-between; align-items:center; padding:0 18px;">
+            <h2 style="color:white; margin:0; font-size:1.1rem;">✏️ Modifica Consumazione</h2>
+            <button onclick="document.getElementById('ModalEditCons').style.display='none'" style="background:none;border:none;color:white;font-size:1.3rem;font-weight:bold;cursor:pointer;">✕</button>
+        </div>
+        <div style="padding:20px 24px 16px;">
+            <form id="formEditCons">
+                <input type="hidden" id="ec-id">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Utente *</label>
+                        <select id="ec-utente" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Prodotto *</label>
+                        <select id="ec-prodotto" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Quantità *</label>
+                        <input type="number" id="ec-qty" min="1" step="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Data</label>
+                        <input type="date" id="ec-data">
+                    </div>
+                    <div class="form-group" style="grid-column:1/-1;">
+                        <label>Note</label>
+                        <input type="text" id="ec-note" placeholder="Opzionale...">
+                    </div>
+                </div>
+                <div class="button-container">
+                    <button type="button" class="btn-reset modal-button" onclick="document.getElementById('ModalEditCons').style.display='none'">Annulla</button>
+                    <button type="submit" class="btn-save modal-button">Aggiorna</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 </body>
     <!-- <script type="module" src="/js/script.js"></script> -->
 <script type="module">
@@ -557,6 +695,14 @@ var ArrayCarrelloTotale = [];
 var TotaleCarrello = 0;
 
 let filtroCategoria = null;
+
+// ── Stato registro consumazioni ───────────────────────────────────────────────
+let filtroUtenteReg = null;
+let soloNonPagateReg = false;
+let datiRegistroCorrente = [];
+let listaProdottiMapGlobal = {};
+let listaProdottiPrezzoGlobal = {};
+let listaUtentiMapGlobal = {};
 
 window.filtraProdotti = function(query) {
   const filtro = query.trim().toLowerCase();
@@ -656,11 +802,11 @@ async function RegistroConsumazioniSelect() {
     setTodayDate();
     const categorie = await loadCategorie();
     renderFilterBarRegistro(categorie);
-    // caricaRegistroConsumazioni();
     visualizzaProdotti();
     caricaUtentiStart();
     EventSubmitForm();
-    // Inizializza tab mobile: mostra currentDiv
+    popolaFiltroUtente();
+    popolaSelectEdit();
     if (window.innerWidth <= 768) {
       document.getElementById('currentDiv').classList.add('mob-active');
     }
@@ -756,14 +902,17 @@ async function visualizzaProdotti(Mese, Anno) {
         }
     });
     var prezzoConDecimale = parseFloat(prodotto.Prezzo).toFixed(2);
+    const soglia = parseFloat(prodotto.SogliaMinima) || 0;
 
     if (!Trovato) {
       const consumed0 = ListaConsumazioni.filter(c => c.ProdottoNo === prodotto.id).reduce((s, c) => s + (parseInt(c.Qty)||0), 0);
+      const restante0 = Math.max(0, -consumed0);
+      const restanteHtml0 = (soglia > 0 && restante0 < soglia) ? `<span style="color:#e74c3c;font-weight:700;">⚠️ ${restante0}</span>` : `${restante0}`;
       tr.innerHTML = `
       <td data-label="🛒 Prodotto">${prodotto.Prodotto}</td>
       <td data-label="💰 Prezzo">${prezzoConDecimale}[€]</td>
       <td data-label="📦 Qtà totale">0</td>
-      <td data-label="📊 Restante">${Math.max(0, -consumed0)}</td>
+      <td data-label="📊 Restante">${restanteHtml0}</td>
       <td data-label="➕ Azioni"><button class="btn-remove-cart" id="btn_Remove${prodotto.id}" style="display:none;">−</button><button style="padding:4px 8px; margin-top:0px;" id="btn_Table${prodotto.id}">+</button><span class="cart-badge" id="badge_${prodotto.id}" style="display:none;">0</span></td>
     `;
     tbody.appendChild(tr);
@@ -779,11 +928,13 @@ async function visualizzaProdotti(Mese, Anno) {
         });
 
           const consumed = ListaConsumazioni.filter(c => c.ProdottoNo === prodotto.id).reduce((s, c) => s + (parseInt(c.Qty)||0), 0);
+          const restante = Math.max(0, quantitaTotale - consumed);
+          const restanteHtml = (soglia > 0 && restante < soglia) ? `<span style="color:#e74c3c;font-weight:700;">⚠️ ${restante}</span>` : `${restante}`;
           tr.innerHTML = `
         <td data-label="🛒 Prodotto">${prodotto.Prodotto}</td>
         <td data-label="💰 Prezzo">${prezzoConDecimale}[€]</td>
         <td data-label="📦 Qtà totale">${quantitaTotale}</td>
-        <td data-label="📊 Restante">${Math.max(0, quantitaTotale - consumed)}</td>
+        <td data-label="📊 Restante">${restanteHtml}</td>
         <td data-label="➕ Azioni"><button class="btn-remove-cart" id="btn_Remove${prodotto.id}" style="display:none;">−</button><button style="padding:4px 8px; margin-top:0px;" id="btn_Table${prodotto.id}">+</button><span class="cart-badge" id="badge_${prodotto.id}" style="display:none;">0</span></td>
         `;
     tbody.appendChild(tr);
@@ -1038,55 +1189,65 @@ function RimuoviElementoAlCarrello(ProdottoNo, Prezzo) {
     }
   }
 async function caricaRegistroConsumazioni(SelectedDate) {
-  const ListaRegistro = await RegistroConsumazioniSelect();
-  
+  let query = supabase.from("CassaConsumazioni").select("*").eq("IsDeleted", false).order("DataCreazione", { ascending: false });
+  if (SelectedDate && !filtroUtenteReg) {
+    query = query.eq("DataCreazione", SelectedDate);
+  }
+  if (filtroUtenteReg) {
+    query = query.eq("UtenteNo", parseInt(filtroUtenteReg));
+  }
+  if (soloNonPagateReg) {
+    query = query.is("DataPagamento", null);
+  }
+  const { data, error } = await query;
+  if (error) { console.error("Errore:", error); return; }
+  datiRegistroCorrente = data || [];
 
-  const ListaRegistroFiltered = ListaRegistro.filter(record => {
-    const recordDate = new Date(record.DataCreazione);
-    const selectedDateObj = new Date(SelectedDate);
-    return recordDate.toDateString() === selectedDateObj.toDateString();
+  const [ListaProdotti, ListaUtenti] = await Promise.all([ElencoSelect(), UtentiSelect()]);
+  listaProdottiMapGlobal = {};
+  listaProdottiPrezzoGlobal = {};
+  listaUtentiMapGlobal = {};
+  ListaProdotti.forEach(p => {
+    listaProdottiMapGlobal[p.id] = p.Prodotto;
+    listaProdottiPrezzoGlobal[p.id] = parseFloat(p.Prezzo) || 0;
   });
+  ListaUtenti.forEach(u => { listaUtentiMapGlobal[u.id] = u.Nome; });
+
   const tbody = document.getElementById('TabellaRegistro').getElementsByTagName('tbody')[0];
-  tbody.innerHTML = ""; // pulizia
-  const ListaProdotti = await ElencoSelect();
-  var ListaProdottiMap = {};
-  var ListaProdottiPrezzoMap = {};
-  ListaProdotti.forEach(prodotto => {
-    ListaProdottiMap[prodotto.id] = prodotto.Prodotto;
-    ListaProdottiPrezzoMap[prodotto.id] = parseFloat(prodotto.Prezzo) || 0;
-  });
-  var ListaUtenti = await UtentiSelect();
-  var ListaUtentiMap = {};
-  ListaUtenti.forEach(utente => {
-    ListaUtentiMap[utente.id] = utente.Nome;
-  });
-  
-  ListaRegistroFiltered.forEach(record => {
-    console.log("Record:", record);
-    console.log("DataCreazione:", record.DataCreazione);
-    console.log("DataPagamento:", record.DataPagamento);
-    console.log("ProdottoNo:", record.ProdottoNo);
-    console.log("UtenteNo:", record.UtenteNo);
-      const tr = document.createElement("tr");
-      const prezzoSalvato = parseFloat(record.Prezzo) || 0;
-      const prezzoFallback = (parseFloat(record.Qty) || 1) * (ListaProdottiPrezzoMap[record.ProdottoNo] || 0);
-      var prezzoConDecimale = (prezzoSalvato > 0 ? prezzoSalvato : prezzoFallback).toFixed(2);
-      const pagato = !!record.DataPagamento;
-      const dataPagDisplay = pagato
-        ? `<span style="color:#27ae60;font-weight:600;">✓ ${new Date(record.DataPagamento).toLocaleDateString('it-IT')}</span>`
-        : `<button onclick="segnaPagata(${record.id}, this)" style="padding:4px 10px;background:#27ae60;color:white;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">💳 Segna pagata</button>`;
-    tr.style.height = '2vh';
+  tbody.innerHTML = "";
+
+  if (!datiRegistroCorrente.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#999;padding:28px;font-style:italic;">Nessuna consumazione trovata.</td></tr>';
+    aggiornaContatoreBulk();
+    return;
+  }
+
+  datiRegistroCorrente.forEach(record => {
+    const tr = document.createElement("tr");
+    const prezzoSalvato = parseFloat(record.Prezzo) || 0;
+    const prezzoFallback = (parseFloat(record.Qty) || 1) * (listaProdottiPrezzoGlobal[record.ProdottoNo] || 0);
+    const prezzoConDecimale = (prezzoSalvato > 0 ? prezzoSalvato : prezzoFallback).toFixed(2);
+    const pagato = !!record.DataPagamento;
+    const dataPagDisplay = pagato
+      ? `<span style="color:#27ae60;font-weight:600;font-size:12px;">✓ ${new Date(record.DataPagamento).toLocaleDateString('it-IT')}</span>`
+      : `<button onclick="segnaPagata(${record.id}, this)" style="padding:3px 8px;background:#27ae60;color:white;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">💳</button>`;
     tr.innerHTML = `
+      <td data-label="☐"><input type="checkbox" class="reg-check" data-id="${record.id}"${pagato ? ' disabled style="opacity:0.3"' : ''} onchange="aggiornaContatoreBulk()"></td>
       <td data-label="📅 Data">${new Date(record.DataCreazione).toLocaleDateString('it-IT')}</td>
-      <td data-label="👤 Utente">${ListaUtentiMap[record.UtenteNo] || record.UtenteNo}</td>
-      <td data-label="🛒 Prodotto">${ListaProdottiMap[record.ProdottoNo] || record.ProdottoNo}</td>
-      <td data-label="🔢 Quantità">${record.Qty}</td>
-      <td data-label="💰 Prezzo">${prezzoConDecimale}[€]</td>
+      <td data-label="👤 Utente">${listaUtentiMapGlobal[record.UtenteNo] || '#'+record.UtenteNo}</td>
+      <td data-label="🛒 Prodotto">${listaProdottiMapGlobal[record.ProdottoNo] || '#'+record.ProdottoNo}</td>
+      <td data-label="🔢 Qtà">${record.Qty}</td>
+      <td data-label="💰 Prezzo">${prezzoConDecimale}€</td>
       <td data-label="💳 Pagato?">${dataPagDisplay}</td>
+      <td data-label="Azioni" style="white-space:nowrap;">
+        <button onclick="apriModalEditCons(${record.id})" style="padding:3px 8px;background:#3498db;color:white;border:none;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;">✏️</button>
+        <button onclick="eliminaConsumazione(${record.id})" style="padding:3px 8px;background:#e74c3c;color:white;border:none;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;margin-left:3px;">🗑</button>
+      </td>
     `;
     tbody.appendChild(tr);
   });
-} 
+  aggiornaContatoreBulk();
+}
 
 window.segnaPagata = async function(id, btn) {
   btn.disabled = true;
@@ -1094,7 +1255,7 @@ window.segnaPagata = async function(id, btn) {
   const oggi = new Date().toISOString().slice(0, 10);
   const { error } = await supabase
     .from('CassaConsumazioni')
-    .update({ DataPagamento: oggi })
+    .update({ DataPagamento: oggi, Pagato: true })
     .eq('id', id);
   if (error) {
     if (window.showToast) showToast('Errore: ' + error.message, 'error'); else alert('Errore: ' + error.message);
@@ -1107,11 +1268,153 @@ window.segnaPagata = async function(id, btn) {
 };
 
 document.getElementById("calendar").addEventListener("change", function() {
-  const selectedDate = this.value; // formato YYYY-MM-DD
-  caricaRegistroConsumazioni(selectedDate);
-  console.log("Hai selezionato:", selectedDate);
-  // Qui puoi filtrare o caricare i dati della tabella in base alla data
+  filtroUtenteReg = document.getElementById('filtro-utente-reg').value || null;
+  caricaRegistroConsumazioni(this.value);
 });
+
+// ── Filtri registro ───────────────────────────────────────────────────────────
+window.aggiornaFiltriRegistro = function() {
+  filtroUtenteReg = document.getElementById('filtro-utente-reg').value || null;
+  soloNonPagateReg = document.getElementById('solo-non-pagate').checked;
+  const date = filtroUtenteReg ? null : document.getElementById('calendar').value;
+  caricaRegistroConsumazioni(date);
+};
+
+window.mostraTuttiReg = function() {
+  document.getElementById('calendar').value = '';
+  filtroUtenteReg = document.getElementById('filtro-utente-reg').value || null;
+  soloNonPagateReg = document.getElementById('solo-non-pagate').checked;
+  caricaRegistroConsumazioni(null);
+};
+
+// ── Bulk pagamento ────────────────────────────────────────────────────────────
+window.aggiornaContatoreBulk = function() {
+  const count = document.querySelectorAll('.reg-check:checked').length;
+  const el = document.getElementById('sel-count');
+  if (el) el.textContent = count;
+};
+
+window.toggleSelectAllReg = function(masterCheck) {
+  document.querySelectorAll('.reg-check:not(:disabled)').forEach(cb => { cb.checked = masterCheck.checked; });
+  aggiornaContatoreBulk();
+};
+
+window.segnaPagateBulk = async function() {
+  const ids = [...document.querySelectorAll('.reg-check:checked')].map(cb => parseInt(cb.dataset.id));
+  if (!ids.length) {
+    if (window.showToast) showToast('Seleziona almeno una consumazione.', 'warning');
+    else alert('Seleziona almeno una consumazione.');
+    return;
+  }
+  const ok = window.showConfirm
+    ? await showConfirm(`Segnare ${ids.length} consumazioni come pagate?`)
+    : confirm(`Segnare ${ids.length} consumazioni come pagate?`);
+  if (!ok) return;
+  const oggi = new Date().toISOString().slice(0, 10);
+  const { error } = await supabase.from('CassaConsumazioni')
+    .update({ DataPagamento: oggi, Pagato: true })
+    .in('id', ids);
+  if (error) { if (window.showToast) showToast('Errore: ' + error.message, 'error'); else alert('Errore: ' + error.message); return; }
+  if (window.showToast) showToast(`${ids.length} consumazioni segnate come pagate!`, 'success');
+  const date = filtroUtenteReg ? null : document.getElementById('calendar').value;
+  caricaRegistroConsumazioni(date);
+};
+
+// ── Modifica consumazione ─────────────────────────────────────────────────────
+window.apriModalEditCons = function(id) {
+  const r = datiRegistroCorrente.find(x => x.id === id);
+  if (!r) return;
+  document.getElementById('ec-id').value = id;
+  document.getElementById('ec-utente').value = r.UtenteNo ?? '';
+  document.getElementById('ec-prodotto').value = r.ProdottoNo ?? '';
+  document.getElementById('ec-qty').value = r.Qty ?? 1;
+  document.getElementById('ec-data').value = r.DataCreazione ?? '';
+  document.getElementById('ec-note').value = r.Note ?? '';
+  document.getElementById('ModalEditCons').style.display = 'block';
+};
+
+document.getElementById('formEditCons').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const id = parseInt(document.getElementById('ec-id').value);
+  const prodottoNo = parseInt(document.getElementById('ec-prodotto').value);
+  const qty = parseInt(document.getElementById('ec-qty').value);
+  const prezzo = qty * (listaProdottiPrezzoGlobal[prodottoNo] || 0);
+  const payload = {
+    UtenteNo: parseInt(document.getElementById('ec-utente').value),
+    ProdottoNo: prodottoNo,
+    Qty: qty,
+    Prezzo: prezzo || null,
+    DataCreazione: document.getElementById('ec-data').value || null,
+    Note: document.getElementById('ec-note').value || null,
+  };
+  const btn = this.querySelector('[type="submit"]');
+  btn.disabled = true; btn.textContent = 'Aggiornando...';
+  const { error } = await supabase.from('CassaConsumazioni').update(payload).eq('id', id);
+  btn.disabled = false; btn.textContent = 'Aggiorna';
+  if (error) { if (window.showToast) showToast('Errore: ' + error.message, 'error'); else alert('Errore: ' + error.message); return; }
+  document.getElementById('ModalEditCons').style.display = 'none';
+  if (window.showToast) showToast('Consumazione aggiornata!', 'success');
+  const date = filtroUtenteReg ? null : document.getElementById('calendar').value;
+  caricaRegistroConsumazioni(date);
+});
+
+window.eliminaConsumazione = async function(id) {
+  const ok = window.showConfirm
+    ? await showConfirm('Eliminare questa consumazione?')
+    : confirm('Eliminare questa consumazione?');
+  if (!ok) return;
+  const { error } = await supabase.from('CassaConsumazioni').update({ IsDeleted: true }).eq('id', id);
+  if (error) { if (window.showToast) showToast('Errore: ' + error.message, 'error'); else alert('Errore: ' + error.message); return; }
+  const date = filtroUtenteReg ? null : document.getElementById('calendar').value;
+  caricaRegistroConsumazioni(date);
+};
+
+// ── Popola selects del modal edit ─────────────────────────────────────────────
+async function popolaSelectEdit() {
+  const [listaProd, listaUt] = await Promise.all([ElencoSelect(), UtentiSelect()]);
+  const selU = document.getElementById('ec-utente');
+  selU.innerHTML = '<option value="">— Utente —</option>' +
+    listaUt.filter(u => !u.IsDeleted).map(u => `<option value="${u.id}">${u.Nome}</option>`).join('');
+  const selP = document.getElementById('ec-prodotto');
+  selP.innerHTML = '<option value="">— Prodotto —</option>' +
+    listaProd.map(p => `<option value="${p.id}">${p.Prodotto}</option>`).join('');
+}
+
+async function popolaFiltroUtente() {
+  const listaUt = await UtentiSelect();
+  const sel = document.getElementById('filtro-utente-reg');
+  listaUt.filter(u => !u.IsDeleted).forEach(u => {
+    const opt = document.createElement('option');
+    opt.value = u.id;
+    opt.textContent = u.Nome;
+    sel.appendChild(opt);
+  });
+}
+
+// ── Export CSV ────────────────────────────────────────────────────────────────
+window.esportaCSVRegistro = function() {
+  if (!datiRegistroCorrente.length) {
+    if (window.showToast) showToast('Nessun dato da esportare.', 'warning');
+    return;
+  }
+  const rows = [['Data', 'Utente', 'Prodotto', 'Qty', 'Prezzo', 'Pagato', 'Data Pagamento']];
+  datiRegistroCorrente.forEach(r => {
+    rows.push([
+      r.DataCreazione || '',
+      listaUtentiMapGlobal[r.UtenteNo] || r.UtenteNo,
+      listaProdottiMapGlobal[r.ProdottoNo] || r.ProdottoNo,
+      r.Qty,
+      r.Prezzo ?? '',
+      r.DataPagamento ? 'Sì' : 'No',
+      r.DataPagamento || '',
+    ]);
+  });
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent(csv);
+  a.download = `consumazioni_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+};
 
 // Funzione che imposta la data odierna nel calendario
   function setTodayDate() {

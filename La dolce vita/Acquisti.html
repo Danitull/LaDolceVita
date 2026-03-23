@@ -295,6 +295,7 @@
 
         <div class="toolbar">
             <button class="add-btn" onclick="apriModalNuovo()">+ Aggiungi acquisto</button>
+            <button class="add-btn" onclick="esportaCSVAcquisti()" style="background:#f0f4f8;color:#334;border:1px solid #dde5f0;box-shadow:none;">📥 CSV</button>
         </div>
 
         <div class="table-responsive">
@@ -515,6 +516,27 @@ document.getElementById('dataForm').addEventListener('submit', async function(e)
     document.getElementById('ModalContainerPanel').style.display = 'none';
     carica();
 });
+
+window.esportaCSVAcquisti = function() {
+    if (!acquisti.length) { if (window.showToast) showToast('Nessun dato da esportare.', 'warning'); return; }
+    const rows = [['Data', 'Prodotto', 'Qty', 'Confezioni', 'Prezzo €', 'Note']];
+    acquisti.forEach(r => {
+        const prod = prodotti.find(p => p.id === r.ProdottoNo);
+        rows.push([
+            r.DataAcquisto || '',
+            prod ? prod.Prodotto : '#'+r.ProdottoNo,
+            r.Qty ?? '',
+            r.Confezioni ?? '',
+            r.Prezzo ?? '',
+            r.Note || '',
+        ]);
+    });
+    const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = 'data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent(csv);
+    a.download = `acquisti_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+};
 
 init();
 </script>

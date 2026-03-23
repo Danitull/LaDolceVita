@@ -596,12 +596,19 @@ async function loadLookups() {
     const [u, p, c] = await Promise.all([
         sb.from('Utenti').select('id,Nome').eq('IsDeleted', false).order('Nome'),
         sb.from('ElencoProdotti').select('id,Prodotto').eq('IsDeleted', false).order('Prodotto'),
-        sb.from('CategorieProdotti').select('id,Nome,Icona,Colore').order('Ordine'),
+        sb.from('CategorieProdotti').select('*'),
     ]);
     LOOKUP.utenti    = u.data || [];
     LOOKUP.prodotti  = p.data || [];
-    LOOKUP.categorie = c.data || [];
     if (c.error) console.error('loadLookups – CategorieProdotti:', c.error.message);
+    const _clean = v => (v && v !== 'undefined') ? v : null;
+    LOOKUP.categorie = (c.data || []).map(x => ({
+        id:     x.id,
+        nome:   _clean(x.nome)   ?? _clean(x.Nome)   ?? '',
+        icona:  _clean(x.icona)  ?? _clean(x.Icona)  ?? '📦',
+        colore: _clean(x.colore) ?? _clean(x.Colore) ?? '#95a5a6',
+        ordine: x.ordine ?? x.Ordine ?? 99,
+    }));
 }
 
 function utenteName(id) {
@@ -661,7 +668,7 @@ const TABLE_CONFIG = {
             { key: 'Prodotto',    label: 'Prodotto' },
             { key: 'CategoriaId', label: 'Categoria', render: v => {
                 const c = LOOKUP.categorie?.find(x => x.id === v);
-                return c ? `<span style="display:inline-block;padding:2px 8px;border-radius:10px;background:${c.Colore};color:#fff;font-size:0.78rem;font-weight:700;">${c.Icona} ${c.Nome}</span>` : '—';
+                return c ? `<span style="display:inline-block;padding:2px 8px;border-radius:10px;background:${c.colore};color:#fff;font-size:0.78rem;font-weight:700;">${c.icona} ${c.nome}</span>` : '—';
             }},
             { key: 'Prezzo',      label: 'Prezzo', render: v => `€ ${Number(v).toFixed(2)}` },
             { key: 'Costo',       label: 'Costo',  render: v => v != null ? `€ ${Number(v).toFixed(2)}` : '—' },
@@ -682,16 +689,16 @@ const TABLE_CONFIG = {
         softDelete: false,
         cols: [
             { key: 'id',     label: 'ID' },
-            { key: 'Icona',  label: 'Icona' },
-            { key: 'Nome',   label: 'Nome' },
-            { key: 'Colore', label: 'Colore', render: v => `<span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:${v};vertical-align:middle;"></span> ${v}` },
-            { key: 'Ordine', label: 'Ordine' },
+            { key: 'icona',  label: 'Icona' },
+            { key: 'nome',   label: 'Nome' },
+            { key: 'colore', label: 'Colore', render: v => (v && v !== 'undefined') ? `<span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:${v};vertical-align:middle;"></span> ${v}` : '—' },
+            { key: 'ordine', label: 'Ordine' },
         ],
         fields: [
-            { name: 'Nome',   label: 'Nome',   type: 'text', required: true },
-            { name: 'Icona',  label: 'Icona (emoji)', type: 'text', required: true },
-            { name: 'Colore', label: 'Colore hex (es. #f39c12)', type: 'text', required: true },
-            { name: 'Ordine', label: 'Ordine visualizzazione', type: 'number', min: '1', step: '1' },
+            { name: 'nome',   label: 'Nome',   type: 'text', required: true },
+            { name: 'icona',  label: 'Icona (emoji)', type: 'text', required: true },
+            { name: 'colore', label: 'Colore hex (es. #f39c12)', type: 'text', required: true },
+            { name: 'ordine', label: 'Ordine visualizzazione', type: 'number', min: '1', step: '1' },
         ],
     },
 
@@ -926,7 +933,19 @@ window.loadCurrentSection = async function() {
     const { data, error } = await query;
     if (error) { setCrudError(error.message); return; }
 
-    currentData = data || [];
+    // Normalizza i nomi colonna per la sezione categorie (PostgreSQL lowercase vs PascalCase)
+    if (currentSection === 'categorie') {
+        const _c = v => (v && v !== 'undefined') ? v : null;
+        currentData = (data || []).map(r => ({
+            ...r,
+            nome:   _c(r.nome)   ?? _c(r.Nome)   ?? '',
+            icona:  _c(r.icona)  ?? _c(r.Icona)  ?? '📦',
+            colore: _c(r.colore) ?? _c(r.Colore) ?? null,
+            ordine: r.ordine ?? r.Ordine ?? 99,
+        }));
+    } else {
+        currentData = data || [];
+    }
     renderCrudRows(currentSection, currentData);
 };
 
@@ -1047,7 +1066,7 @@ function buildFormFields(section, row) {
 
         if (f.type === 'select-categorie') {
             const opts = LOOKUP.categorie.map(c =>
-                `<option value="${c.id}" ${val == c.id ? 'selected' : ''}>${c.Icona} ${c.Nome}</option>`
+                `<option value="${c.id}" ${val == c.id ? 'selected' : ''}>${c.icona} ${c.nome}</option>`
             ).join('');
             return `<div class="crud-field">
                 <label>${f.label}${f.required?' *':''}</label>

@@ -228,6 +228,9 @@
 
     <h1 class="page-title">📋 Riepilogo Generale</h1>
     <p class="page-subtitle">Panoramica di tutti i pagamenti (Affitto · WiFi · Utenze) per il mese selezionato</p>
+    <div style="text-align:right; max-width:1100px; margin:0 auto 8px; padding:0 5%;">
+        <button id="btn-csv-riepilogo" onclick="esportaCSVRiepilogo()" style="display:none;padding:7px 16px;background:#f0f4f8;color:#334;border:1px solid #dde5f0;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">📥 Esporta CSV</button>
+    </div>
 
     <div class="selezione-container">
         <label for="meseSelect">Seleziona Mese</label>
@@ -427,6 +430,7 @@ async function aggiorna() {
     let grandSaldato = 0;
     let residentiSaldati = 0;
 
+    _csvRiepilogoRows = [['Residente','Aff. Saldato','Aff. Restante','WiFi Saldato','WiFi Restante','Ut. Saldato','Ut. Restante','Tot. Saldato','Tot. Restante']];
     const tbody = document.getElementById("riepilogoTbody");
     tbody.innerHTML = "";
 
@@ -466,6 +470,14 @@ async function aggiorna() {
         if (fullySaldato) residentiSaldati++;
 
         const rowClass = fullySaldato ? "row-fully-paid" : (parziallySaldato ? "row-partially-paid" : "row-unpaid");
+
+        _csvRiepilogoRows.push([
+            utente.Nome,
+            pagatoAffitto.toFixed(2), restanteAffitto.toFixed(2),
+            pagatoWifi.toFixed(2), restanteWifi.toFixed(2),
+            pagatoUtenze.toFixed(2), restanteUtenze.toFixed(2),
+            totSaldato.toFixed(2), totRestante.toFixed(2),
+        ]);
 
         const tr = document.createElement("tr");
         tr.className = rowClass;
@@ -507,6 +519,7 @@ async function aggiorna() {
 
     document.getElementById("summaryCards").style.display = "flex";
     document.getElementById("tableContainer").style.display = "block";
+    document.getElementById("btn-csv-riepilogo").style.display = "inline-block";
 
     // ── Chart
     renderChart(
@@ -520,6 +533,19 @@ async function aggiorna() {
     );
     document.getElementById("chart-section").style.display = "block";
 }
+
+let _csvRiepilogoRows = [];
+
+window.esportaCSVRiepilogo = function() {
+    if (!_csvRiepilogoRows.length) return;
+    const csv = _csvRiepilogoRows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = 'data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent(csv);
+    const meseEl = document.getElementById('meseSelect');
+    const annoEl = document.getElementById('annoSelect');
+    a.download = `riepilogo_${meseEl.value}_${annoEl.value}.csv`;
+    a.click();
+};
 
 let chartInstance = null;
 function renderChart(totSald, totRest, affSald, affRest, wifiSald, wifiRest, utSald, utRest) {

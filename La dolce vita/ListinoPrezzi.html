@@ -317,12 +317,14 @@
             <table id="TabellaProdotti" class="styled-table">
                 <thead>
                     <tr>
-                        <th style="width: 30%;">Prodotto</th>
-                        <th style="width: 18%;">Categoria</th>
-                        <th style="width: 12%;">Prezzo</th>
-                        <th style="width: 12%;">Costo</th>
-                        <th style="width: 14%;">Qtà totale</th>
-                        <th style="width: 14%;">Restante</th>
+                        <th style="width: 24%;">Prodotto</th>
+                        <th style="width: 14%;">Categoria</th>
+                        <th style="width: 10%;">Prezzo</th>
+                        <th style="width: 10%;">Costo</th>
+                        <th style="width: 11%;">Qtà totale</th>
+                        <th style="width: 11%;">Restante</th>
+                        <th style="width: 10%;">Soglia ⚠️</th>
+                        <th style="width: 10%;">Disponibile</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -343,22 +345,34 @@
 
   const supabase = createClient(supabaseUrl, supabaseKey);
 
-  let categorieMap = {};       // id → { Nome, Icona, Colore }
+  let categorieMap = {};       // id → categoria normalizzata
   let filtroCategoria = null;  // null = tutte
 
+  // Gestisce sia colonne lowercase (nome) che PascalCase (Nome)
+  function normalizeCat(c) {
+    if (!c) return null;
+    return {
+      id:     c.id,
+      nome:   c.nome   ?? c.Nome   ?? '',
+      icona:  c.icona  ?? c.Icona  ?? '📦',
+      colore: c.colore ?? c.Colore ?? '#95a5a6',
+    };
+  }
+
   async function loadCategorie() {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("CategorieProdotti")
-      .select("*")
-      .order("Ordine");
-    if (data) data.forEach(c => { categorieMap[c.id] = c; });
-    return data || [];
+      .select("*");
+    if (error) { console.error("Errore CategorieProdotti:", error); return []; }
+    const norm = (data || []).map(normalizeCat);
+    norm.forEach(c => { categorieMap[c.id] = c; });
+    return norm;
   }
 
   async function ElencoSelect() {
     const { data, error } = await supabase
       .from("ElencoProdotti")
-      .select("*, CategorieProdotti(id, Nome, Icona, Colore)")
+      .select("*")
       .eq("IsDeleted", false)
       .order("Prodotto");
     if (error) { console.error("Errore ElencoProdotti:", error); return []; }
@@ -375,7 +389,7 @@
     const bar = document.getElementById('cat-filter-bar');
     const tuttiBtn = `<button class="cat-btn active" data-cat="all" style="border-color:#3498db; color:#3498db;">Tutti</button>`;
     const catBtns = categorie.map(c =>
-      `<button class="cat-btn" data-cat="${c.id}" style="color:${c.Colore};">${c.Icona} ${c.Nome}</button>`
+      `<button class="cat-btn" data-cat="${c.id}" style="color:${c.colore};">${c.icona} ${c.nome}</button>`
     ).join('');
     bar.innerHTML = tuttiBtn + catBtns;
 
@@ -396,6 +410,20 @@
     });
   }
 
+  window.aggiornaSoglia = async function(id, valore) {
+    const soglia = valore !== '' ? parseFloat(valore) : null;
+    const { error } = await supabase.from('ElencoProdotti').update({ SogliaMinima: soglia }).eq('id', id);
+    if (error) { console.error('Errore soglia:', error); return; }
+    await visualizzaProdotti();
+  };
+
+  window.toggleDisponibile = async function(id, current) {
+    const nuovoValore = !current;
+    const { error } = await supabase.from('ElencoProdotti').update({ Disponibile: nuovoValore }).eq('id', id);
+    if (error) { console.error('Errore toggleDisponibile:', error); return; }
+    await visualizzaProdotti();
+  };
+
   document.addEventListener("DOMContentLoaded", async () => {
     const [categorie] = await Promise.all([loadCategorie()]);
     renderFilterBar(categorie);
@@ -403,33 +431,52 @@
   });
 
   async function visualizzaProdotti() {
-    const [ListaProdotti, ListaAcquistiSpese] = await Promise.all([
+    const [ListaProdotti, ListaAcquistiSpese, cassaRes] = await Promise.all([
       ElencoSelect(),
       AcquistiSpeseSelect(),
+      supabase.from('CassaConsumazioni').select('ProdottoNo,Qty').eq('IsDeleted', false),
     ]);
+    const ListaConsumazioni = cassaRes.data || [];
 
     const tbody = document.getElementById('TabellaProdotti').getElementsByTagName('tbody')[0];
     tbody.innerHTML = "";
 
     ListaProdotti.forEach(prodotto => {
-      const cat = prodotto.CategorieProdotti;
+      const cat = normalizeCat(categorieMap[prodotto.CategoriaId] ?? null);
       const badgeHtml = cat
-        ? `<span class="badge-cat" style="background:${cat.Colore};">${cat.Icona} ${cat.Nome}</span>`
+        ? `<span class="badge-cat" style="background:${cat.colore};">${cat.icona} ${cat.nome}</span>`
         : `<span class="badge-cat" style="background:#bdc3c7;">—</span>`;
 
       const quantitaTotale = ListaAcquistiSpese
         .filter(a => a.ProdottoNo === prodotto.id)
         .reduce((sum, a) => sum + (parseInt(a.Qty) || 0) * (parseInt(a.Confezioni) || 0), 0);
+      const totalConsumed = ListaConsumazioni
+        .filter(c => c.ProdottoNo === prodotto.id)
+        .reduce((sum, c) => sum + (parseInt(c.Qty) || 0), 0);
+      const restante = Math.max(0, quantitaTotale - totalConsumed);
+      const soglia = parseFloat(prodotto.SogliaMinima) || 0;
+      const sogliaAlert = soglia > 0 && restante < soglia;
+      const restanteHtml = sogliaAlert
+        ? `<span style="color:#e74c3c;font-weight:700;">⚠️ ${restante}</span>`
+        : `${restante}`;
+      const disponibile = prodotto.Disponibile !== false;
+      const dispBtn = `<button onclick="toggleDisponibile(${prodotto.id}, ${disponibile})" style="padding:4px 12px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;background:${disponibile ? '#27ae60' : '#e74c3c'};color:white;">${disponibile ? '✓ Sì' : '✗ No'}</button>`;
+      const sogliaInput = `<input type="number" min="0" step="1" value="${soglia||''}" placeholder="—"
+        onchange="aggiornaSoglia(${prodotto.id}, this.value)"
+        style="width:60px;padding:3px 6px;border:1px solid #dde5f0;border-radius:6px;font-size:12px;font-family:inherit;text-align:center;">`;
 
       const tr = document.createElement("tr");
-      tr.dataset.catId = cat ? cat.id : '';
+      tr.dataset.catId = prodotto.CategoriaId ?? '';
+      if (sogliaAlert) tr.style.background = 'rgba(231,76,60,0.05)';
       tr.innerHTML = `
         <td data-label="Prodotto">${prodotto.Prodotto}</td>
         <td data-label="Categoria">${badgeHtml}</td>
         <td data-label="Prezzo">${parseFloat(prodotto.Prezzo).toFixed(2)} €</td>
         <td data-label="Costo">${prodotto.Costo != null ? parseFloat(prodotto.Costo).toFixed(2) + ' €' : '—'}</td>
         <td data-label="Qtà totale">${quantitaTotale}</td>
-        <td data-label="Restante">-</td>
+        <td data-label="Restante">${restanteHtml}</td>
+        <td data-label="Soglia ⚠️">${sogliaInput}</td>
+        <td data-label="Disponibile">${dispBtn}</td>
       `;
       tbody.appendChild(tr);
     });

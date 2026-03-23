@@ -225,6 +225,68 @@
         .breakdown-item { min-width: 120px; }
     }
 
+    /* ── FAB button ── */
+    .fab-btn {
+        position: fixed;
+        bottom: 28px;
+        right: 28px;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #236093, #3498db);
+        color: white;
+        font-size: 1.8rem;
+        line-height: 1;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 18px rgba(52,152,219,0.45);
+        z-index: 100;
+        transition: transform 0.2s, box-shadow 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .fab-btn:hover { transform: scale(1.1); box-shadow: 0 8px 26px rgba(52,152,219,0.5); }
+
+    /* ── Modal movimenti manuali ── */
+    .mov-form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 18px;
+        margin-bottom: 20px;
+    }
+    .mov-form-group { display: flex; flex-direction: column; }
+    .mov-form-group label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #556;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        margin-bottom: 6px;
+    }
+    .mov-form-group input,
+    .mov-form-group select {
+        padding: 10px 13px;
+        border: 2px solid #e0e0e0;
+        border-radius: 9px;
+        font-size: 14px;
+        font-family: inherit;
+        background: white;
+        color: #333;
+        transition: border-color 0.2s;
+    }
+    .mov-form-group input:focus,
+    .mov-form-group select:focus { outline: none; border-color: #3498db; }
+
+    /* ── Chart mensile ── */
+    .chart-section {
+        background: rgba(255,255,255,0.95);
+        border-radius: 14px;
+        box-shadow: 0 4px 16px rgba(11,22,40,0.07);
+        padding: 24px;
+        margin-top: 8px;
+    }
+
     /* Card-view per .fondo-table su mobile */
     @media (max-width: 580px) {
         .fondo-table thead { display: none; }
@@ -395,15 +457,87 @@
             </div>
         </div>
 
+        <!-- Movimenti manuali -->
+        <hr class="divider">
+        <div class="section-header">
+            <div class="section-title">🗂 Movimenti manuali</div>
+        </div>
+        <div class="table-section">
+            <div style="overflow-x:auto;">
+                <table class="fondo-table">
+                    <thead>
+                        <tr><th>Data</th><th>Tipo</th><th>Importo</th><th>Note</th><th></th></tr>
+                    </thead>
+                    <tbody id="tbody-manuali">
+                        <tr><td colspan="5" class="no-data">Nessun movimento manuale</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Grafico mensile -->
+        <hr class="divider">
+        <div class="section-header">
+            <div class="section-title">📈 Andamento mensile (ultimi 12 mesi)</div>
+        </div>
+        <div class="chart-section">
+            <canvas id="chartMensile" height="110"></canvas>
+        </div>
+
+    </div>
+</div>
+
+<!-- FAB -->
+<button class="fab-btn" onclick="apriModalMovimento()" title="Aggiungi movimento manuale">＋</button>
+
+<!-- MODAL MOVIMENTO MANUALE -->
+<div id="ModalMovimento" style="z-index:2000; display:none; width:100vw; height:100vh; background:rgba(0,0,0,0.55); position:fixed; top:0; left:0;">
+    <div class="modal-inner-panel">
+        <div style="height:56px; background:#236093; border-radius:12px 12px 0 0; display:flex; justify-content:space-between; align-items:center; padding:0 18px;">
+            <h2 style="color:white; margin:0; font-size:1.1rem;" id="mov-title">➕ Aggiungi Movimento</h2>
+            <button onclick="chiudiModalMov()" style="background:none;border:none;color:white;font-size:1.3rem;font-weight:bold;cursor:pointer;">✕</button>
+        </div>
+        <div style="padding:20px 24px 16px;">
+            <form id="formMovimento">
+                <input type="hidden" id="mov-id">
+                <div class="mov-form-grid">
+                    <div class="mov-form-group">
+                        <label>Tipo *</label>
+                        <select id="mov-tipo" required>
+                            <option value="entrata">📥 Entrata</option>
+                            <option value="uscita">📤 Uscita</option>
+                        </select>
+                    </div>
+                    <div class="mov-form-group">
+                        <label>Importo (€) *</label>
+                        <input type="number" id="mov-importo" step="0.01" min="0" required placeholder="0.00">
+                    </div>
+                    <div class="mov-form-group">
+                        <label>Data *</label>
+                        <input type="date" id="mov-data" required>
+                    </div>
+                    <div class="mov-form-group" style="grid-column:1/-1;">
+                        <label>Note</label>
+                        <input type="text" id="mov-note" placeholder="Descrizione del movimento...">
+                    </div>
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:16px;">
+                    <button type="button" onclick="chiudiModalMov()" style="padding:10px 24px;background:#f0f0f0;color:#666;border:none;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Annulla</button>
+                    <button type="submit" id="mov-btn-submit" style="padding:10px 24px;background:linear-gradient(135deg,#236093,#3498db);color:white;border:none;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Salva</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import Chart from 'https://esm.sh/chart.js@4/auto';
 const sb = createClient(
     'https://tjbsnchbezvhhugkgaxx.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYnNuY2hiZXp2aGh1Z2tnYXh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0OTA4ODAsImV4cCI6MjA3OTA2Njg4MH0.eMDjkjvirN1DrUPysy34TgycmwMkAoMmMuxJ1_o9vzg'
 );
+let chartMensileInstance = null;
 
 const MESI = ['','Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
 function fmt(n)     { return `€ ${Number(n||0).toFixed(2)}`; }
@@ -426,6 +560,7 @@ async function caricaTutto() {
         { data: consPagate },
         { data: consNonPagate },
         { data: acquisti },
+        { data: movManuali },
     ] = await Promise.all([
         sb.from('Utenti').select('id,Nome').eq('IsDeleted', false),
         sb.from('ElencoProdotti').select('id,Prodotto').eq('IsDeleted', false),
@@ -435,6 +570,7 @@ async function caricaTutto() {
         sb.from('CassaConsumazioni').select('*').eq('IsDeleted', false).not('DataPagamento', 'is', null),
         sb.from('CassaConsumazioni').select('*').eq('IsDeleted', false).is('DataPagamento', null),
         sb.from('Acquisti_Spese').select('*').eq('IsDeleted', false),
+        sb.from('FondoCassa').select('*').eq('isdeleted', false).order('data', { ascending: false }),
     ]);
 
     ALL.utentiMap  = Object.fromEntries((utenti||[]).map(u => [u.id, u.Nome]));
@@ -445,14 +581,17 @@ async function caricaTutto() {
     ALL.consPagate   = consPagate   || [];
     ALL.consNonPagate = consNonPagate || [];
     ALL.acquisti     = acquisti     || [];
+    ALL.movManuali   = movManuali   || [];
 
     // ─── KPI TOTALI (senza filtro anno) ─────────────────────────────────────
     const totAff     = sum(ALL.pagAff,  'Value');
     const totWifi    = sum(ALL.pagWifi, 'Value');
     const totUt      = sum(ALL.pagUt,   'Value');
     const totCons    = sum(ALL.consPagate, 'Prezzo');
-    const totEntrate = totAff + totWifi + totUt + totCons;
-    const totUscite  = sum(ALL.acquisti, 'Prezzo');
+    const totManEnt  = ALL.movManuali.filter(m => m.tipo === 'entrata').reduce((s,m) => s + (parseFloat(m.importo)||0), 0);
+    const totManUsc  = ALL.movManuali.filter(m => m.tipo === 'uscita').reduce((s,m) => s + (parseFloat(m.importo)||0), 0);
+    const totEntrate = totAff + totWifi + totUt + totCons + totManEnt;
+    const totUscite  = sum(ALL.acquisti, 'Prezzo') + totManUsc;
     const saldo      = totEntrate - totUscite;
     const totDebiti  = sum(ALL.consNonPagate, 'Prezzo');
 
@@ -501,6 +640,8 @@ async function caricaTutto() {
     document.getElementById('content').style.display = 'block';
 
     renderTabelle('all');
+    renderManuali();
+    renderChartMensile();
 }
 
 function renderTabelle(annoFiltro) {
@@ -580,6 +721,127 @@ function renderTabelle(annoFiltro) {
         </tr>`;
     }
 }
+
+function renderManuali() {
+    const tbody = document.getElementById('tbody-manuali');
+    if (!ALL.movManuali.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="no-data">Nessun movimento manuale registrato</td></tr>';
+        return;
+    }
+    tbody.innerHTML = ALL.movManuali.map(m => `<tr>
+        <td data-label="Data">${fmtDate(m.data)}</td>
+        <td data-label="Tipo">${m.tipo === 'entrata' ? '📥 Entrata' : '📤 Uscita'}</td>
+        <td data-label="Importo" style="font-weight:700;color:${m.tipo==='entrata'?'#27ae60':'#e74c3c'};">${fmt(m.importo)}</td>
+        <td data-label="Note" style="color:#778;font-size:0.85rem;">${m.note || '—'}</td>
+        <td style="white-space:nowrap;">
+            <button onclick="apriModalModifica(${m.id})" style="padding:3px 8px;background:#3498db;color:white;border:none;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;">✏️</button>
+            <button onclick="eliminaMovimento(${m.id})" style="padding:3px 8px;background:#e74c3c;color:white;border:none;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;margin-left:3px;">🗑</button>
+        </td>
+    </tr>`).join('');
+}
+
+function renderChartMensile() {
+    const MESI_LABEL = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
+    const now = new Date();
+    const mesi = [];
+    for (let i = 11; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        mesi.push({ anno: d.getFullYear(), mese: d.getMonth() + 1, label: `${MESI_LABEL[d.getMonth()]} ${d.getFullYear()}` });
+    }
+    const entrate = mesi.map(({ anno, mese }) => {
+        const aff  = ALL.pagAff.filter(p => p.Anno === anno && p.Mese === mese).reduce((s,p) => s+(parseFloat(p.Value)||0), 0);
+        const wifi = ALL.pagWifi.filter(p => p.Anno === anno && p.Mese === mese).reduce((s,p) => s+(parseFloat(p.Value)||0), 0);
+        const ut   = ALL.pagUt.filter(p => p.Anno === anno && p.Mese === mese).reduce((s,p) => s+(parseFloat(p.Value)||0), 0);
+        const cons = ALL.consPagate.filter(p => p.DataPagamento && new Date(p.DataPagamento).getFullYear()===anno && new Date(p.DataPagamento).getMonth()+1===mese).reduce((s,p) => s+(parseFloat(p.Prezzo)||0), 0);
+        const man  = ALL.movManuali.filter(m => m.tipo==='entrata' && m.data && new Date(m.data).getFullYear()===anno && new Date(m.data).getMonth()+1===mese).reduce((s,m) => s+(parseFloat(m.importo)||0), 0);
+        return aff + wifi + ut + cons + man;
+    });
+    const uscite = mesi.map(({ anno, mese }) => {
+        const acq = ALL.acquisti.filter(a => a.DataAcquisto && new Date(a.DataAcquisto).getFullYear()===anno && new Date(a.DataAcquisto).getMonth()+1===mese).reduce((s,a) => s+(parseFloat(a.Prezzo)||0), 0);
+        const man = ALL.movManuali.filter(m => m.tipo==='uscita' && m.data && new Date(m.data).getFullYear()===anno && new Date(m.data).getMonth()+1===mese).reduce((s,m) => s+(parseFloat(m.importo)||0), 0);
+        return acq + man;
+    });
+
+    const ctx = document.getElementById('chartMensile').getContext('2d');
+    if (chartMensileInstance) chartMensileInstance.destroy();
+    chartMensileInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: mesi.map(m => m.label),
+            datasets: [
+                { label: 'Entrate', data: entrate, backgroundColor: 'rgba(39,174,96,0.72)', borderRadius: 5 },
+                { label: 'Uscite',  data: uscite,  backgroundColor: 'rgba(231,76,60,0.62)',  borderRadius: 5 },
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'top' } },
+            scales: {
+                y: { beginAtZero: true, ticks: { callback: v => '€' + v.toFixed(0) } }
+            }
+        }
+    });
+}
+
+// ── Movimenti manuali: modal ──────────────────────────────────────────────────
+window.apriModalMovimento = function() {
+    document.getElementById('mov-id').value = '';
+    document.getElementById('mov-title').textContent = '➕ Aggiungi Movimento';
+    document.getElementById('mov-btn-submit').textContent = 'Salva';
+    document.getElementById('formMovimento').reset();
+    document.getElementById('mov-data').value = new Date().toISOString().slice(0,10);
+    document.getElementById('ModalMovimento').style.display = 'block';
+};
+
+window.apriModalModifica = function(id) {
+    const m = ALL.movManuali.find(x => x.id === id);
+    if (!m) return;
+    document.getElementById('mov-id').value = id;
+    document.getElementById('mov-title').textContent = '✏️ Modifica Movimento';
+    document.getElementById('mov-btn-submit').textContent = 'Aggiorna';
+    document.getElementById('mov-tipo').value = m.tipo;
+    document.getElementById('mov-importo').value = m.importo;
+    document.getElementById('mov-data').value = m.data || '';
+    document.getElementById('mov-note').value = m.note || '';
+    document.getElementById('ModalMovimento').style.display = 'block';
+};
+
+window.chiudiModalMov = function() {
+    document.getElementById('ModalMovimento').style.display = 'none';
+};
+
+document.getElementById('formMovimento').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const { data: { session } } = await sb.auth.getSession();
+    const editId = document.getElementById('mov-id').value;
+    const payload = {
+        tipo:    document.getElementById('mov-tipo').value,
+        importo: parseFloat(document.getElementById('mov-importo').value),
+        data:    document.getElementById('mov-data').value,
+        note:    document.getElementById('mov-note').value || null,
+    };
+    const btn = document.getElementById('mov-btn-submit');
+    btn.disabled = true; btn.textContent = 'Salvataggio...';
+    let error;
+    if (editId) {
+        ({ error } = await sb.from('FondoCassa').update(payload).eq('id', parseInt(editId)));
+    } else {
+        if (session) payload.utentecreazione = session.user.id;
+        ({ error } = await sb.from('FondoCassa').insert(payload));
+    }
+    btn.disabled = false; btn.textContent = editId ? 'Aggiorna' : 'Salva';
+    if (error) { alert('Errore: ' + error.message); return; }
+    chiudiModalMov();
+    caricaTutto();
+});
+
+window.eliminaMovimento = async function(id) {
+    const ok = confirm('Eliminare questo movimento?');
+    if (!ok) return;
+    const { error } = await sb.from('FondoCassa').update({ isdeleted: true }).eq('id', id);
+    if (error) { alert('Errore: ' + error.message); return; }
+    caricaTutto();
+};
 
 document.addEventListener('DOMContentLoaded', () => {
     caricaTutto();

@@ -373,16 +373,29 @@
     const { data, error } = await supabase
       .from("ElencoProdotti")
       .select("*")
-      .eq("IsDeleted", false)
-      .order("Prodotto");
+      .eq("isdeleted", false)
+      .order("prodotto");
     if (error) { console.error("Errore ElencoProdotti:", error); return []; }
-    return data;
+    return (data || []).map(p => ({
+      ...p,
+      Prodotto:     p.Prodotto     ?? p.prodotto     ?? '',
+      Prezzo:       p.Prezzo       ?? p.prezzo       ?? 0,
+      Costo:        p.Costo        ?? p.costo        ?? null,
+      CategoriaId:  p.CategoriaId  ?? p.categoriaid  ?? null,
+      Disponibile:  p.Disponibile  ?? p.disponibile  ?? true,
+      SogliaMinima: p.SogliaMinima ?? p.sogliaminima ?? 0,
+    }));
   }
 
   async function AcquistiSpeseSelect() {
     const { data, error } = await supabase.from("Acquisti_Spese").select("*");
     if (error) { console.error("Errore Acquisti_Spese:", error); return []; }
-    return data;
+    return (data || []).map(a => ({
+      ...a,
+      ProdottoNo: a.ProdottoNo ?? a.prodottono ?? null,
+      Qty:        a.Qty        ?? a.qty        ?? 0,
+      Confezioni: a.Confezioni ?? a.confezioni ?? 0,
+    }));
   }
 
   function renderFilterBar(categorie) {
@@ -412,14 +425,14 @@
 
   window.aggiornaSoglia = async function(id, valore) {
     const soglia = valore !== '' ? parseFloat(valore) : null;
-    const { error } = await supabase.from('ElencoProdotti').update({ SogliaMinima: soglia }).eq('id', id);
+    const { error } = await supabase.from('ElencoProdotti').update({ sogliaminima: soglia }).eq('id', id);
     if (error) { console.error('Errore soglia:', error); return; }
     await visualizzaProdotti();
   };
 
   window.toggleDisponibile = async function(id, current) {
     const nuovoValore = !current;
-    const { error } = await supabase.from('ElencoProdotti').update({ Disponibile: nuovoValore }).eq('id', id);
+    const { error } = await supabase.from('ElencoProdotti').update({ disponibile: nuovoValore }).eq('id', id);
     if (error) { console.error('Errore toggleDisponibile:', error); return; }
     await visualizzaProdotti();
   };
@@ -434,9 +447,13 @@
     const [ListaProdotti, ListaAcquistiSpese, cassaRes] = await Promise.all([
       ElencoSelect(),
       AcquistiSpeseSelect(),
-      supabase.from('CassaConsumazioni').select('ProdottoNo,Qty').eq('IsDeleted', false),
+      supabase.from('CassaConsumazioni').select('*').eq('isdeleted', false),
     ]);
-    const ListaConsumazioni = cassaRes.data || [];
+    const ListaConsumazioni = (cassaRes.data || []).map(c => ({
+      ...c,
+      ProdottoNo: c.ProdottoNo ?? c.prodottono ?? null,
+      Qty:        c.Qty        ?? c.qty        ?? 0,
+    }));
 
     const tbody = document.getElementById('TabellaProdotti').getElementsByTagName('tbody')[0];
     tbody.innerHTML = "";

@@ -552,7 +552,7 @@
         </div>
     </div>
 <div class="container fade-in">
-<div id="currentDiv" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; transition: left 0.4s ease;">
+<div id="currentDiv" class="mob-active" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; transition: left 0.4s ease;">
     <div style="width: 100%; height: 100%; display: flex; flex-wrap: wrap; justify-content: space-around; align-items: flex-start; padding: 2vh 0; box-sizing: border-box; gap: 2vh; overflow-y: auto;">
         <div class="registro-col" id="col-prodotti">
             <div id="cat-filter-bar-registro" class="cat-filter-bar"></div>
@@ -687,6 +687,35 @@
 </div>
 
 </body>
+<!-- switchMobTab in script normale: disponibile subito, senza aspettare il modulo -->
+<script>
+window.switchMobTab = function(tab) {
+  var currentDiv = document.getElementById('currentDiv');
+  var newDiv     = document.getElementById('newDiv');
+  var colProdotti = document.getElementById('col-prodotti');
+  var colCarrello = document.getElementById('col-carrello');
+  if (!currentDiv || !newDiv) return;
+
+  document.querySelectorAll('.mob-tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  var btn = document.querySelector('.mob-tab-btn[data-tab="' + tab + '"]');
+  if (btn) btn.classList.add('active');
+
+  currentDiv.classList.remove('mob-active');
+  newDiv.classList.remove('mob-active');
+  if (colProdotti) colProdotti.classList.remove('mob-hidden');
+  if (colCarrello) colCarrello.classList.remove('mob-hidden');
+
+  if (tab === 'prodotti') {
+    currentDiv.classList.add('mob-active');
+    if (colCarrello) colCarrello.classList.add('mob-hidden');
+  } else if (tab === 'carrello') {
+    currentDiv.classList.add('mob-active');
+    if (colProdotti) colProdotti.classList.add('mob-hidden');
+  } else if (tab === 'registro') {
+    newDiv.classList.add('mob-active');
+  }
+};
+</script>
     <!-- <script type="module" src="/js/script.js"></script> -->
 <script type="module">
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -807,18 +836,24 @@ async function RegistroConsumazioniSelect() {
 }
 
   document.addEventListener("DOMContentLoaded", async () => {
-    setTodayDate();
-    const categorie = await loadCategorie();
-    renderFilterBarRegistro(categorie);
-    visualizzaProdotti();
-    caricaUtentiStart();
-    EventSubmitForm();
-    popolaFiltroUtente();
-    popolaSelectEdit();
-    if (window.innerWidth <= 768) {
-      document.getElementById('currentDiv').classList.add('mob-active');
+    try {
+      setTodayDate();
+      const categorie = await loadCategorie();
+      renderFilterBarRegistro(categorie);
+      visualizzaProdotti();
+      caricaUtentiStart();
+      EventSubmitForm();
+      popolaFiltroUtente();
+      popolaSelectEdit();
+    } catch(e) {
+      console.error("Errore inizializzazione Registro:", e);
+    } finally {
+      // Garantisce che il pannello prodotti sia visibile su mobile anche in caso di errori JS
+      if (window.innerWidth <= 768) {
+        document.getElementById('currentDiv').classList.add('mob-active');
+      }
     }
-});
+  });
 
 
 async function EventSubmitForm(CarrelloAcquisti) {
@@ -1173,33 +1208,7 @@ function RimuoviElementoAlCarrello(ProdottoNo, Prezzo) {
     }
   }
 
-  window.switchMobTab = function switchMobTab(tab) {
-    const currentDiv = document.getElementById('currentDiv');
-    const newDiv = document.getElementById('newDiv');
-    const colProdotti = document.getElementById('col-prodotti');
-    const colCarrello = document.getElementById('col-carrello');
-
-    // Aggiorna tab attivo
-    document.querySelectorAll('.mob-tab-btn').forEach(b => b.classList.remove('active'));
-    const btn = document.querySelector(`.mob-tab-btn[data-tab="${tab}"]`);
-    if (btn) btn.classList.add('active');
-
-    // Reset visibilità pannelli
-    currentDiv.classList.remove('mob-active');
-    newDiv.classList.remove('mob-active');
-    colProdotti.classList.remove('mob-hidden');
-    colCarrello.classList.remove('mob-hidden');
-
-    if (tab === 'prodotti') {
-      currentDiv.classList.add('mob-active');
-      colCarrello.classList.add('mob-hidden');
-    } else if (tab === 'carrello') {
-      currentDiv.classList.add('mob-active');
-      colProdotti.classList.add('mob-hidden');
-    } else if (tab === 'registro') {
-      newDiv.classList.add('mob-active');
-    }
-  }
+  // switchMobTab è definito in <script> normale sopra il modulo
 async function caricaRegistroConsumazioni(SelectedDate) {
   let query = supabase.from("CassaConsumazioni").select("*").eq("isdeleted", false).order("datacreazione", { ascending: false });
   if (SelectedDate && !filtroUtenteReg) {

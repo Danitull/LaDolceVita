@@ -343,22 +343,34 @@
 
   const supabase = createClient(supabaseUrl, supabaseKey);
 
-  let categorieMap = {};       // id → { Nome, Icona, Colore }
+  let categorieMap = {};       // id → categoria normalizzata
   let filtroCategoria = null;  // null = tutte
 
+  // Gestisce sia colonne lowercase (nome) che PascalCase (Nome)
+  function normalizeCat(c) {
+    if (!c) return null;
+    return {
+      id:     c.id,
+      nome:   c.nome   ?? c.Nome   ?? '',
+      icona:  c.icona  ?? c.Icona  ?? '📦',
+      colore: c.colore ?? c.Colore ?? '#95a5a6',
+    };
+  }
+
   async function loadCategorie() {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("CategorieProdotti")
-      .select("*")
-      .order("ordine");
-    if (data) data.forEach(c => { categorieMap[c.id] = c; });
-    return data || [];
+      .select("*");
+    if (error) { console.error("Errore CategorieProdotti:", error); return []; }
+    const norm = (data || []).map(normalizeCat);
+    norm.forEach(c => { categorieMap[c.id] = c; });
+    return norm;
   }
 
   async function ElencoSelect() {
     const { data, error } = await supabase
       .from("ElencoProdotti")
-      .select("*, CategorieProdotti(id, nome, icona, colore)")
+      .select("*")
       .eq("IsDeleted", false)
       .order("Prodotto");
     if (error) { console.error("Errore ElencoProdotti:", error); return []; }
@@ -412,7 +424,7 @@
     tbody.innerHTML = "";
 
     ListaProdotti.forEach(prodotto => {
-      const cat = prodotto.CategorieProdotti;
+      const cat = normalizeCat(categorieMap[prodotto.CategoriaId] ?? null);
       const badgeHtml = cat
         ? `<span class="badge-cat" style="background:${cat.colore};">${cat.icona} ${cat.nome}</span>`
         : `<span class="badge-cat" style="background:#bdc3c7;">—</span>`;
@@ -422,7 +434,7 @@
         .reduce((sum, a) => sum + (parseInt(a.Qty) || 0) * (parseInt(a.Confezioni) || 0), 0);
 
       const tr = document.createElement("tr");
-      tr.dataset.catId = cat ? cat.id : '';
+      tr.dataset.catId = prodotto.CategoriaId ?? '';
       tr.innerHTML = `
         <td data-label="Prodotto">${prodotto.Prodotto}</td>
         <td data-label="Categoria">${badgeHtml}</td>

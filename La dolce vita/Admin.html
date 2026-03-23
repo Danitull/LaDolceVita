@@ -596,12 +596,18 @@ async function loadLookups() {
     const [u, p, c] = await Promise.all([
         sb.from('Utenti').select('id,Nome').eq('IsDeleted', false).order('Nome'),
         sb.from('ElencoProdotti').select('id,Prodotto').eq('IsDeleted', false).order('Prodotto'),
-        sb.from('CategorieProdotti').select('id,nome,icona,colore,ordine').order('ordine'),
+        sb.from('CategorieProdotti').select('*'),
     ]);
     LOOKUP.utenti    = u.data || [];
     LOOKUP.prodotti  = p.data || [];
-    LOOKUP.categorie = c.data || [];
     if (c.error) console.error('loadLookups – CategorieProdotti:', c.error.message);
+    LOOKUP.categorie = (c.data || []).map(x => ({
+        id:     x.id,
+        nome:   x.nome   ?? x.Nome   ?? '',
+        icona:  x.icona  ?? x.Icona  ?? '📦',
+        colore: x.colore ?? x.Colore ?? '#95a5a6',
+        ordine: x.ordine ?? x.Ordine ?? 99,
+    }));
 }
 
 function utenteName(id) {
@@ -926,7 +932,18 @@ window.loadCurrentSection = async function() {
     const { data, error } = await query;
     if (error) { setCrudError(error.message); return; }
 
-    currentData = data || [];
+    // Normalizza i nomi colonna per la sezione categorie (PostgreSQL lowercase vs PascalCase)
+    if (currentSection === 'categorie') {
+        currentData = (data || []).map(r => ({
+            ...r,
+            nome:   r.nome   ?? r.Nome   ?? '',
+            icona:  r.icona  ?? r.Icona  ?? '📦',
+            colore: r.colore ?? r.Colore ?? '#95a5a6',
+            ordine: r.ordine ?? r.Ordine ?? 99,
+        }));
+    } else {
+        currentData = data || [];
+    }
     renderCrudRows(currentSection, currentData);
 };
 

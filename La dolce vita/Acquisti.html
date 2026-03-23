@@ -351,11 +351,16 @@ async function init() {
 
     // Load categorie e prodotti per dropdown raggruppato
     const [{ data: catData }, { data: prodData }] = await Promise.all([
-        sb.from('CategorieProdotti').select('id,nome,icona').order('ordine'),
+        sb.from('CategorieProdotti').select('*'),
         sb.from('ElencoProdotti').select('id,Prodotto,CategoriaId').eq('IsDeleted', false).order('Prodotto'),
     ]);
     prodotti = prodData || [];
-    const categorie = catData || [];
+    // Normalizza nomi colonne (lowercase o PascalCase)
+    const categorie = (catData || []).map(c => ({
+        id:    c.id,
+        nome:  c.nome  ?? c.Nome  ?? '',
+        icona: c.icona ?? c.Icona ?? '📦',
+    }));
     const sel = document.getElementById('f-prodotto');
     const prodSenzaCat = prodotti.filter(p => !p.CategoriaId);
     let optHtml = '<option value="">— Seleziona prodotto —</option>';

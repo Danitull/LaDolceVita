@@ -575,9 +575,24 @@ window.filtraProdotti = function(query) {
   // Inizializza il client con la chiave anon
   const supabase = createClient(supabaseUrl, supabaseKey);
 
+let categorieMapRegistro = {};
+
+function normalizeCat(c) {
+  if (!c) return null;
+  return {
+    id:     c.id,
+    nome:   c.nome   ?? c.Nome   ?? '',
+    icona:  c.icona  ?? c.Icona  ?? '📦',
+    colore: c.colore ?? c.Colore ?? '#95a5a6',
+  };
+}
+
 async function loadCategorie() {
-  const { data } = await supabase.from("CategorieProdotti").select("*").order("ordine");
-  return data || [];
+  const { data, error } = await supabase.from("CategorieProdotti").select("*");
+  if (error) { console.error("Errore CategorieProdotti:", error); return []; }
+  const norm = (data || []).map(normalizeCat);
+  norm.forEach(c => { categorieMapRegistro[c.id] = c; });
+  return norm;
 }
 
 function renderFilterBarRegistro(categorie) {
@@ -601,7 +616,7 @@ function renderFilterBarRegistro(categorie) {
 async function ElencoSelect() {
   const { data, error } = await supabase
     .from("ElencoProdotti")
-    .select("*, CategorieProdotti(id, nome, icona, colore)")
+    .select("*")
     .eq("IsDeleted", false)
     .order("Prodotto");
   if (error) { console.error("Errore ElencoProdotti:", error); return []; }
@@ -726,8 +741,7 @@ async function visualizzaProdotti(Mese, Anno) {
 
   ListaProdotti.forEach(prodotto => {
     const tr = document.createElement("tr");
-    const cat = prodotto.CategorieProdotti;
-    tr.dataset.catId = cat ? cat.id : '';
+    tr.dataset.catId = prodotto.CategoriaId ?? '';
         Trovato = false;
 
     ListaAcquistiSpese.find(acquisto => {

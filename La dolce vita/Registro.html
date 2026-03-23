@@ -112,26 +112,70 @@
             }
         }
 
-        /* Card-view per TabellaRegistro e TabellaProdotti su mobile */
+        /* ── Sezioni categoria prodotti ── */
+        .cat-section {
+            margin-bottom: 14px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            background: white;
+        }
+        .cat-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 16px;
+            background: #f0f4f8;
+            border-left: 4px solid #3498db;
+            font-weight: 700;
+            font-size: 0.93rem;
+            color: #334;
+            cursor: pointer;
+            user-select: none;
+        }
+        .cat-section-header:hover { background: #e6edf5; }
+        .cat-count {
+            background: #3498db;
+            color: white;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            margin-left: 8px;
+        }
+        .cat-section-toggle {
+            font-size: 0.75rem;
+            color: #889;
+            margin-left: 6px;
+        }
+        .prodotto-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-bottom: 1px solid #f0f4f8;
+        }
+        .prodotto-row:last-child { border-bottom: none; }
+        .prod-nome  { flex: 1; font-weight: 600; font-size: 0.88rem; color: #213240; }
+        .prod-prezzo { font-size: 0.82rem; color: #667eea; font-weight: 700; min-width: 48px; text-align: right; }
+        .prod-restante { font-size: 0.8rem; color: #556; min-width: 36px; text-align: center; }
+        .prod-actions { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+
+        /* Card-view solo per TabellaRegistro e Carrello su mobile */
         @media (max-width: 768px) {
-            /* Rompe il contesto tabella su tutti i livelli */
-            #TabellaRegistro, #TabellaProdotti, #Carrello {
+            #TabellaRegistro, #Carrello {
                 display: block !important;
                 width: 100% !important;
                 min-width: 0 !important;
             }
             #TabellaRegistro thead,
-            #TabellaProdotti thead,
             #Carrello thead { display: none !important; }
 
             #TabellaRegistro tbody,
-            #TabellaProdotti tbody,
             #Carrello tbody {
                 display: block !important;
                 width: 100% !important;
             }
             #TabellaRegistro tbody tr,
-            #TabellaProdotti tbody tr,
             #Carrello tbody tr {
                 display: block !important;
                 width: 100% !important;
@@ -145,7 +189,6 @@
                 box-sizing: border-box !important;
             }
             #TabellaRegistro td,
-            #TabellaProdotti td,
             #Carrello td {
                 display: flex !important;
                 width: 100% !important;
@@ -158,10 +201,8 @@
                 box-sizing: border-box;
             }
             #TabellaRegistro td:last-child,
-            #TabellaProdotti td:last-child,
             #Carrello td:last-child { border-bottom: none; }
             #TabellaRegistro td::before,
-            #TabellaProdotti td::before,
             #Carrello td::before {
                 content: attr(data-label);
                 font-size: 0.72rem;
@@ -173,11 +214,6 @@
                 min-width: 80px;
                 margin-right: 8px;
             }
-            /* Bottone + nelle card prodotti */
-            #TabellaProdotti td button {
-                padding: 8px 16px !important;
-                font-size: 1rem !important;
-            }
             /* Layout pannelli in colonna su mobile */
             #currentDiv > div {
                 flex-direction: column !important;
@@ -186,9 +222,17 @@
                 width: 100% !important;
                 min-width: 0 !important;
             }
+            /* Prodotto-row su mobile: nome sopra, dettagli sotto */
+            .prodotto-row {
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            .prod-nome { min-width: 100%; }
+            .prod-prezzo, .prod-restante { flex: 1; }
         }
-        /* Filtro prodotti: deve stare DOPO la media query per vincere su display:block !important */
-        #TabellaProdotti tbody tr.filtro-nascosto,
+        /* Filtro testo sui prodotti */
+        .prodotto-row.filtro-nascosto { display: none !important; }
+        /* Filtro testo sul registro */
         #TabellaRegistro tbody tr.filtro-nascosto {
             display: none !important;
         }
@@ -555,25 +599,11 @@
 <div id="currentDiv" class="mob-active" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; transition: left 0.4s ease;">
     <div style="width: 100%; height: 100%; display: flex; flex-wrap: wrap; justify-content: space-around; align-items: flex-start; padding: 2vh 0; box-sizing: border-box; gap: 2vh; overflow-y: auto;">
         <div class="registro-col" id="col-prodotti">
-            <div id="cat-filter-bar-registro" class="cat-filter-bar"></div>
             <div style="margin-bottom: 10px;">
                 <input type="text" id="filtro-prodotti" placeholder="🔍 Cerca prodotto per nome..." oninput="filtraProdotti(this.value)" style="width: 100%; padding: 10px 14px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 15px; box-sizing: border-box; transition: border-color 0.2s;">
             </div>
-            <div class="table-responsive">
-            <table id="TabellaProdotti" class="styled-table">
-                <thead>
-                    <tr>
-                        <th style="width: 20%;">Prodotto</th>
-                        <th style="width: 10%;">Prezzo</th>
-                        <th style="width: 20%;">Quantita' totale</th>
-                        <th style="width: 10%;">Restante</th>
-                        <th style="width: 15%;">Aggiungi a carrello</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Le righe della tabella verranno inserite qui dinamicamente -->
-                </tbody>
-            </table>
+            <div id="prodotti-categorie">
+                <!-- Prodotti raggruppati per categoria, generati da JS -->
             </div>
         </div>
         <div class="registro-col" id="col-carrello">
@@ -735,12 +765,14 @@ let listaUtentiMapGlobal = {};
 
 window.filtraProdotti = function(query) {
   const filtro = query.trim().toLowerCase();
-  document.querySelectorAll('#TabellaProdotti tbody tr').forEach(tr => {
-    const nomeProdotto = tr.querySelector('td')?.textContent.toLowerCase() ?? '';
-    const catId = tr.dataset.catId ? parseInt(tr.dataset.catId) : null;
-    const matchTesto = filtro === '' || nomeProdotto.includes(filtro);
-    const matchCat = filtroCategoria === null || catId === filtroCategoria;
-    tr.classList.toggle('filtro-nascosto', !(matchTesto && matchCat));
+  document.querySelectorAll('.prodotto-row').forEach(row => {
+    const nome = row.querySelector('.prod-nome')?.textContent.toLowerCase() ?? '';
+    row.classList.toggle('filtro-nascosto', filtro !== '' && !nome.includes(filtro));
+  });
+  // Nasconde sezioni vuote
+  document.querySelectorAll('.cat-section').forEach(sec => {
+    const visibili = [...sec.querySelectorAll('.prodotto-row')].some(r => !r.classList.contains('filtro-nascosto'));
+    sec.style.display = visibili ? '' : 'none';
   });
 };
 
@@ -770,23 +802,7 @@ async function loadCategorie() {
   return norm;
 }
 
-function renderFilterBarRegistro(categorie) {
-  const bar = document.getElementById('cat-filter-bar-registro');
-  if (!bar) return;
-  bar.innerHTML =
-    `<button class="cat-btn active" data-cat="all" style="border-color:#3498db; color:#3498db;">Tutti</button>` +
-    categorie.map(c =>
-      `<button class="cat-btn" data-cat="${c.id}" style="color:${c.colore};">${c.icona} ${c.nome}</button>`
-    ).join('');
-  bar.addEventListener('click', e => {
-    const btn = e.target.closest('.cat-btn');
-    if (!btn) return;
-    bar.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    filtroCategoria = btn.dataset.cat === 'all' ? null : parseInt(btn.dataset.cat);
-    filtraProdotti(document.getElementById('filtro-prodotti').value);
-  });
-}
+function renderFilterBarRegistro() { /* sostituita dalla vista a categorie */ }
 
 async function ElencoSelect() {
   const { data, error } = await supabase
@@ -922,94 +938,124 @@ async function EventSubmitForm(CarrelloAcquisti) {
 
 //     console.log("ApriModalConParametri → Utente:", UtenteNo, "Mese:", meseDaUsare, "Anno:", annoDaUsare);
 // }
-async function visualizzaProdotti(Mese, Anno) {
+async function visualizzaProdotti() {
+  const container = document.getElementById('prodotti-categorie');
+  if (container) container.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Caricamento prodotti...</p>';
+
   const [ListaProdotti, ListaAcquistiSpese, cassaRes] = await Promise.all([
-      ElencoSelect(),
-      AcquistiSpeseSelect(),
-      supabase.from('CassaConsumazioni').select('*').eq('isdeleted', false),
+    ElencoSelect(),
+    AcquistiSpeseSelect(),
+    supabase.from('CassaConsumazioni').select('*').eq('isdeleted', false),
   ]);
   const ListaConsumazioni = (cassaRes.data || []).map(c => ({
-    ...c,
     ProdottoNo: c.ProdottoNo ?? c.prodottono ?? null,
     Qty:        c.Qty        ?? c.qty        ?? 0,
   }));
-  var Trovato = false;
 
-  const tbody = document.getElementById('TabellaProdotti').getElementsByTagName('tbody')[0];
-  tbody.innerHTML = ""; // pulizia
+  if (!container) return;
+  container.innerHTML = '';
 
-  ListaProdotti.filter(p => p.Disponibile !== false).forEach(prodotto => {
-    const tr = document.createElement("tr");
-    tr.dataset.catId = prodotto.CategoriaId ?? '';
-        Trovato = false;
+  const prodottiDisponibili = ListaProdotti.filter(p => p.Disponibile !== false);
 
-    ListaAcquistiSpese.find(acquisto => {
-        if (acquisto.ProdottoNo === prodotto.id) {
-            Trovato = true;
-        }
-    });
-    var prezzoConDecimale = parseFloat(prodotto.Prezzo).toFixed(2);
-    const soglia = parseFloat(prodotto.SogliaMinima) || 0;
+  if (!prodottiDisponibili.length) {
+    container.innerHTML = '<p style="text-align:center;color:#999;padding:24px;font-style:italic;">Nessun prodotto disponibile.</p>';
+    document.getElementById("SlideButton").addEventListener("click", slideDiv);
+    return;
+  }
 
-    if (!Trovato) {
-      const consumed0 = ListaConsumazioni.filter(c => c.ProdottoNo === prodotto.id).reduce((s, c) => s + (parseInt(c.Qty)||0), 0);
-      const restante0 = Math.max(0, -consumed0);
-      const restanteHtml0 = (soglia > 0 && restante0 < soglia) ? `<span style="color:#e74c3c;font-weight:700;">⚠️ ${restante0}</span>` : `${restante0}`;
-      tr.innerHTML = `
-      <td data-label="🛒 Prodotto">${prodotto.Prodotto}</td>
-      <td data-label="💰 Prezzo">${prezzoConDecimale}[€]</td>
-      <td data-label="📦 Qtà totale">0</td>
-      <td data-label="📊 Restante">${restanteHtml0}</td>
-      <td data-label="➕ Azioni"><button class="btn-remove-cart" id="btn_Remove${prodotto.id}" style="display:none;">−</button><button style="padding:4px 8px; margin-top:0px;" id="btn_Table${prodotto.id}">+</button><span class="cart-badge" id="badge_${prodotto.id}" style="display:none;">0</span></td>
-    `;
-    tbody.appendChild(tr);
-    } else {
-        var quantitaTotale = 0;
-        var restante = 0;
-
-        ListaAcquistiSpese.forEach(acquisto => {
-            if (acquisto.ProdottoNo === prodotto.id) {
-                quantitaTotale += parseInt(acquisto.Qty) * parseInt(acquisto.Confezioni) || 0;
-                // restante += parseInt(acquisto.Restante) || 0;
-            }
-        });
-
-          const consumed = ListaConsumazioni.filter(c => c.ProdottoNo === prodotto.id).reduce((s, c) => s + (parseInt(c.Qty)||0), 0);
-          const restante = Math.max(0, quantitaTotale - consumed);
-          const restanteHtml = (soglia > 0 && restante < soglia) ? `<span style="color:#e74c3c;font-weight:700;">⚠️ ${restante}</span>` : `${restante}`;
-          tr.innerHTML = `
-        <td data-label="🛒 Prodotto">${prodotto.Prodotto}</td>
-        <td data-label="💰 Prezzo">${prezzoConDecimale}[€]</td>
-        <td data-label="📦 Qtà totale">${quantitaTotale}</td>
-        <td data-label="📊 Restante">${restanteHtml}</td>
-        <td data-label="➕ Azioni"><button class="btn-remove-cart" id="btn_Remove${prodotto.id}" style="display:none;">−</button><button style="padding:4px 8px; margin-top:0px;" id="btn_Table${prodotto.id}">+</button><span class="cart-badge" id="badge_${prodotto.id}" style="display:none;">0</span></td>
-        `;
-    tbody.appendChild(tr);
-    }
-
+  // Raggruppa per categoria; senza categoria → Altro (id=6)
+  const gruppi = {};
+  prodottiDisponibili.forEach(p => {
+    const catId = p.CategoriaId ?? 6;
+    if (!gruppi[catId]) gruppi[catId] = [];
+    gruppi[catId].push(p);
   });
-  OnClickSuBtnAggiungiCarrello();
-  document.getElementById("SlideButton").addEventListener("click", slideDiv);
-} 
 
+  // Ordina: prima le categorie con nome, Altro (6) in fondo
+  const catIds = Object.keys(gruppi).map(Number).sort((a, b) => {
+    if (a === 6) return 1;
+    if (b === 6) return -1;
+    const nA = (categorieMapRegistro[a]?.nome ?? '').toLowerCase();
+    const nB = (categorieMapRegistro[b]?.nome ?? '').toLowerCase();
+    return nA.localeCompare(nB);
+  });
 
-async function OnClickSuBtnAggiungiCarrello(ProdottoNo, ProdottoName, Prezzo) {
-    const ListaProdotti = await ElencoSelect();
-    ListaProdotti.forEach(prodotto => {
-        const button = document.getElementById(`btn_Table${prodotto.id}`);
-        if (button) {
-            button.addEventListener('click', () => {
-                AggiungiElementoAlCarrello(prodotto.id, prodotto.Prodotto, prodotto.Prezzo);
-            });
-        }
-        const btnRemove = document.getElementById(`btn_Remove${prodotto.id}`);
-        if (btnRemove) {
-            btnRemove.addEventListener('click', () => {
-                RimuoviElementoAlCarrello(prodotto.id, prodotto.Prezzo);
-            });
-        }
+  catIds.forEach(catId => {
+    const cat = categorieMapRegistro[catId] || { nome: 'Altro', icona: '📦', colore: '#95a5a6' };
+    const prodotti = gruppi[catId];
+
+    const section = document.createElement('div');
+    section.className = 'cat-section';
+    section.dataset.catId = catId;
+
+    // Header cliccabile per collassare
+    const header = document.createElement('div');
+    header.className = 'cat-section-header';
+    header.style.borderLeftColor = cat.colore;
+    header.innerHTML = `
+      <span>${cat.icona} ${cat.nome} <span class="cat-count">${prodotti.length}</span></span>
+      <span class="cat-section-toggle">▲</span>`;
+    header.addEventListener('click', () => {
+      const body = section.querySelector('.cat-section-body');
+      const toggle = header.querySelector('.cat-section-toggle');
+      const collapsed = body.style.display === 'none';
+      body.style.display = collapsed ? '' : 'none';
+      toggle.textContent = collapsed ? '▲' : '▼';
     });
+    section.appendChild(header);
+
+    const body = document.createElement('div');
+    body.className = 'cat-section-body';
+
+    prodotti.forEach(prodotto => {
+      let quantitaTotale = 0;
+      let inAcquisti = false;
+      ListaAcquistiSpese.forEach(a => {
+        if (a.ProdottoNo === prodotto.id) {
+          inAcquisti = true;
+          quantitaTotale += (parseInt(a.Qty) || 0) * (parseInt(a.Confezioni) || 0);
+        }
+      });
+      const consumed = ListaConsumazioni
+        .filter(c => c.ProdottoNo === prodotto.id)
+        .reduce((s, c) => s + (parseInt(c.Qty) || 0), 0);
+      const restante = inAcquisti ? Math.max(0, quantitaTotale - consumed) : Math.max(0, -consumed);
+      const soglia   = parseFloat(prodotto.SogliaMinima) || 0;
+      const restanteHtml = (soglia > 0 && restante < soglia)
+        ? `<span style="color:#e74c3c;font-weight:700;" title="Sotto soglia">⚠️ ${restante}</span>`
+        : `${restante}`;
+      const prezzo = parseFloat(prodotto.Prezzo).toFixed(2);
+
+      const row = document.createElement('div');
+      row.className = 'prodotto-row';
+      row.dataset.prodId = prodotto.id;
+      row.innerHTML = `
+        <span class="prod-nome">${prodotto.Prodotto}</span>
+        <span class="prod-prezzo">${prezzo}€</span>
+        <span class="prod-restante" title="Restante">${restanteHtml}</span>
+        <div class="prod-actions">
+          <button class="btn-remove-cart" id="btn_Remove${prodotto.id}" style="display:none;">−</button>
+          <button class="PlusIconTable" id="btn_Table${prodotto.id}" style="padding:6px 14px;margin:0;">+</button>
+          <span class="cart-badge" id="badge_${prodotto.id}" style="display:none;">0</span>
+        </div>`;
+
+      row.querySelector(`#btn_Table${prodotto.id}`).addEventListener('click', () =>
+        AggiungiElementoAlCarrello(prodotto.id, prodotto.Prodotto, prodotto.Prezzo));
+      row.querySelector(`#btn_Remove${prodotto.id}`).addEventListener('click', () =>
+        RimuoviElementoAlCarrello(prodotto.id, prodotto.Prezzo));
+
+      body.appendChild(row);
+    });
+
+    section.appendChild(body);
+    container.appendChild(section);
+  });
+
+  document.getElementById("SlideButton").addEventListener("click", slideDiv);
 }
+
+
+// OnClickSuBtnAggiungiCarrello rimossa: eventi ora attaccati inline in visualizzaProdotti
 
 function RimuoviElementoAlCarrello(ProdottoNo, Prezzo) {
     const idx = ArrayCarrello.findIndex(item => item.ProdottoNo === ProdottoNo);

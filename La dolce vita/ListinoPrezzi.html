@@ -373,8 +373,8 @@
     const { data, error } = await supabase
       .from("ElencoProdotti")
       .select("*")
-      .eq("isdeleted", false)
-      .order("prodotto");
+      .eq("IsDeleted", false)
+      .order("Prodotto");
     if (error) { console.error("Errore ElencoProdotti:", error); return []; }
     return (data || []).map(p => ({
       ...p,
@@ -425,14 +425,14 @@
 
   window.aggiornaSoglia = async function(id, valore) {
     const soglia = valore !== '' ? parseFloat(valore) : null;
-    const { error } = await supabase.from('ElencoProdotti').update({ sogliaminima: soglia }).eq('id', id);
+    const { error } = await supabase.from('ElencoProdotti').update({ SogliaMinima: soglia }).eq('id', id);
     if (error) { console.error('Errore soglia:', error); return; }
     await visualizzaProdotti();
   };
 
   window.toggleDisponibile = async function(id, current) {
     const nuovoValore = !current;
-    const { error } = await supabase.from('ElencoProdotti').update({ disponibile: nuovoValore }).eq('id', id);
+    const { error } = await supabase.from('ElencoProdotti').update({ Disponibile: nuovoValore }).eq('id', id);
     if (error) { console.error('Errore toggleDisponibile:', error); return; }
     await visualizzaProdotti();
   };
@@ -447,7 +447,7 @@
     const [ListaProdotti, ListaAcquistiSpese, cassaRes] = await Promise.all([
       ElencoSelect(),
       AcquistiSpeseSelect(),
-      supabase.from('CassaConsumazioni').select('*').eq('isdeleted', false),
+      supabase.from('CassaConsumazioni').select('*').eq('IsDeleted', false),
     ]);
     const ListaConsumazioni = (cassaRes.data || []).map(c => ({
       ...c,

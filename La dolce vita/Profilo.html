@@ -271,17 +271,17 @@ let prodottiMap = {};
 
 async function init() {
     const [{ data: utenti }, { data: prodotti }] = await Promise.all([
-        sb.from('Utenti').select('id,nome').eq('isresident', true).eq('isdeleted', false).order('nome'),
-        sb.from('ElencoProdotti').select('id,prodotto').eq('isdeleted', false),
+        sb.from('Utenti').select('id,Nome').eq('IsResident', true).eq('IsDeleted', false).order('Nome'),
+        sb.from('ElencoProdotti').select('id,Prodotto').eq('IsDeleted', false),
     ]);
 
-    prodottiMap = Object.fromEntries((prodotti || []).map(p => [p.id, p.prodotto ?? p.Prodotto ?? '']));
+    prodottiMap = Object.fromEntries((prodotti || []).map(p => [p.id, p.Prodotto ?? '']));
 
     const sel = document.getElementById('utente-select');
     (utenti || []).forEach(u => {
         const opt = document.createElement('option');
         opt.value = u.id;
-        opt.textContent = u.nome ?? u.Nome;
+        opt.textContent = u.Nome;
         sel.appendChild(opt);
     });
 
@@ -319,46 +319,46 @@ window.caricaProfilo = async function() {
         { data: utDovuti },
         { data: consumAll },
     ] = await Promise.all([
-        sb.from('PagamentoAffitti').select('*').eq('utenteno', utenteId).eq('isdeleted', false).order('anno,mese'),
-        sb.from('PagamentoWiFi').select('*').eq('utenteno', utenteId).eq('isdeleted', false).order('anno,mese'),
-        sb.from('PagamentoUtenze').select('*').eq('utenteno', utenteId).eq('isdeleted', false).order('anno,mese'),
+        sb.from('PagamentoAffitti').select('*').eq('UtenteNo', utenteId).eq('IsDeleted', false).order('Anno').order('Mese'),
+        sb.from('PagamentoWiFi').select('*').eq('UtenteNo', utenteId).eq('IsDeleted', false).order('Anno').order('Mese'),
+        sb.from('PagamentoUtenze').select('*').eq('UtenteNo', utenteId).eq('IsDeleted', false).order('Anno').order('Mese'),
         sb.from('AffittiDaPagare').select('*'),
         sb.from('WiFiDaPagare').select('*'),
         sb.from('UtenzeDaPagare').select('*'),
-        sb.from('CassaConsumazioni').select('*').eq('utenteno', utenteId).eq('isdeleted', false).order('datacreazione', { ascending: false }),
+        sb.from('CassaConsumazioni').select('*').eq('UtenteNo', utenteId).eq('IsDeleted', false).order('DataCreazione', { ascending: false }),
     ]);
 
     // Calcola quota individuale con tutte le regole
-    const { data: tuttiUtenti } = await sb.from('Utenti').select('id,abitaqui,pocofrequente,esclusodaaffitto,esclusodawifi,esclusodautenze').eq('isresident', true).eq('isdeleted', false);
+    const { data: tuttiUtenti } = await sb.from('Utenti').select('id,AbitaQui,PocoFrequente,EsclusoDaAffitto,EsclusoDaWiFi,EsclusoDaUtenze').eq('IsResident', true).eq('IsDeleted', false);
     const nUtenti    = (tuttiUtenti || []).length || 1;
     const utenteInfo = (tuttiUtenti || []).find(u => String(u.id) === String(utenteId));
-    const isAbitaQui    = utenteInfo?.abitaqui          ?? false;
-    const isPocFreq     = utenteInfo?.pocofrequente      ?? false;
-    const isEsclAff     = utenteInfo?.esclusodaaffitto   ?? false;
-    const isEsclWifi    = utenteInfo?.esclusodawifi      ?? false;
-    const isEsclUt      = utenteInfo?.esclusodautenze    ?? false;
+    const isAbitaQui    = utenteInfo?.AbitaQui          ?? false;
+    const isPocFreq     = utenteInfo?.PocoFrequente      ?? false;
+    const isEsclAff     = utenteInfo?.EsclusoDaAffitto   ?? false;
+    const isEsclWifi    = utenteInfo?.EsclusoDaWiFi      ?? false;
+    const isEsclUt      = utenteInfo?.EsclusoDaUtenze    ?? false;
 
     const QUOTA_AFF_FISSO = 150;
     const QUOTA_UT_FISSO  = 60;
     const QUOTA_PF_UT     = 10;
 
     // Sottoinsiemi per ogni tipo di pagamento
-    const utentiAff  = (tuttiUtenti || []).filter(u => !u.esclusodaaffitto);
-    const utentiWifi = (tuttiUtenti || []).filter(u => !u.esclusodawifi && !u.pocofrequente);
-    const utentiUt   = (tuttiUtenti || []).filter(u => !u.esclusodautenze);
+    const utentiAff  = (tuttiUtenti || []).filter(u => !u.EsclusoDaAffitto);
+    const utentiWifi = (tuttiUtenti || []).filter(u => !u.EsclusoDaWiFi && !u.PocoFrequente);
+    const utentiUt   = (tuttiUtenti || []).filter(u => !u.EsclusoDaUtenze);
 
-    const nAQaff    = utentiAff.filter(u => u.abitaqui).length;
-    const nNonAQaff = utentiAff.filter(u => !u.abitaqui).length;
+    const nAQaff    = utentiAff.filter(u => u.AbitaQui).length;
+    const nNonAQaff = utentiAff.filter(u => !u.AbitaQui).length;
 
-    const nAQut  = utentiUt.filter(u => u.abitaqui).length;
-    const nPFut  = utentiUt.filter(u => u.pocofrequente && !u.abitaqui).length;
-    const nNormUt = utentiUt.filter(u => !u.abitaqui && !u.pocofrequente).length;
+    const nAQut  = utentiUt.filter(u => u.AbitaQui).length;
+    const nPFut  = utentiUt.filter(u => u.PocoFrequente && !u.AbitaQui).length;
+    const nNormUt = utentiUt.filter(u => !u.AbitaQui && !u.PocoFrequente).length;
 
     // tipo: 'aff' | 'ut' | 'wifi'
     function getDovuto(list, mese, anno, tipo) {
-        const r = (list || []).find(x => x.mese == mese && x.anno == anno);
+        const r = (list || []).find(x => x.Mese == mese && x.Anno == anno);
         if (!r) return 0;
-        const totale = parseFloat(r.value) || 0;
+        const totale = parseFloat(r.Value) || 0;
         if (tipo === 'aff') {
             if (isEsclAff) return 0;
             if (isAbitaQui) return QUOTA_AFF_FISSO;
@@ -377,8 +377,8 @@ window.caricaProfilo = async function() {
         return totale / nUtenti;
     }
     function getPagato(list, mese, anno) {
-        const r = (list || []).find(x => x.mese == mese && x.anno == anno);
-        return r ? parseFloat(r.value) || 0 : 0;
+        const r = (list || []).find(x => x.Mese == mese && x.Anno == anno);
+        return r ? parseFloat(r.Value) || 0 : 0;
     }
 
     // Debito corrente (mese corrente)
@@ -394,13 +394,13 @@ window.caricaProfilo = async function() {
 
     // Pagato quest'anno
     const pagatoAnno = [
-        ...(pagAff || []).filter(p => p.anno == annoCorrente),
-        ...(pagWifi || []).filter(p => p.anno == annoCorrente),
-        ...(pagUt || []).filter(p => p.anno == annoCorrente),
-    ].reduce((s, p) => s + (parseFloat(p.value) || 0), 0);
+        ...(pagAff || []).filter(p => p.Anno == annoCorrente),
+        ...(pagWifi || []).filter(p => p.Anno == annoCorrente),
+        ...(pagUt || []).filter(p => p.Anno == annoCorrente),
+    ].reduce((s, p) => s + (parseFloat(p.Value) || 0), 0);
 
     // Consumazioni
-    const consumNonPagate = (consumAll || []).filter(c => !c.datapagamento);
+    const consumNonPagate = (consumAll || []).filter(c => !c.DataPagamento);
     const consumTot = (consumAll || []).length;
 
     // KPI
@@ -425,13 +425,13 @@ window.caricaProfilo = async function() {
         tbody.innerHTML = periodi.map(p => {
             const pagato = getPagato(pagList, p.mese, p.anno);
             const dovuto = getDovuto(dovutiList, p.mese, p.anno, tipo);
-            const rec = (pagList || []).find(x => x.mese == p.mese && x.anno == p.anno);
+            const rec = (pagList || []).find(x => x.Mese == p.mese && x.Anno == p.anno);
             const stato = pagato > 0
                 ? `<span class="badge-paid">✓ Saldato</span>`
                 : (dovuto > 0 ? `<span class="badge-unpaid">Non pagato</span>` : `<span style="color:#bbb;font-size:0.8rem;">—</span>`);
             return `<tr>
                 <td data-label="Mese/Anno">${MESI[p.mese]} ${p.anno}</td>
-                <td data-label="Data Pagamento">${fmtDate(rec?.datapagamento)}</td>
+                <td data-label="Data Pagamento">${fmtDate(rec?.DataPagamento)}</td>
                 <td data-label="Importo">${pagato > 0 ? fmt(pagato) : '—'}</td>
                 <td data-label="Stato">${stato}</td>
             </tr>`;
@@ -448,10 +448,10 @@ window.caricaProfilo = async function() {
         tbodyNP.innerHTML = '<tr><td colspan="4" class="empty-row">Nessuna consumazione in sospeso ✓</td></tr>';
     } else {
         tbodyNP.innerHTML = consumNonPagate.map(c => `<tr>
-            <td data-label="Data">${fmtDate(c.datacreazione)}</td>
-            <td data-label="Prodotto">${prodottiMap[c.prodottono] ?? '#' + c.prodottono}</td>
-            <td data-label="Qty">${c.qty ?? '—'}</td>
-            <td data-label="Note" style="color:#778;font-size:0.85rem;">${c.note ?? ''}</td>
+            <td data-label="Data">${fmtDate(c.DataCreazione)}</td>
+            <td data-label="Prodotto">${prodottiMap[c.ProdottoNo] ?? '#' + c.ProdottoNo}</td>
+            <td data-label="Qty">${c.Qty ?? '—'}</td>
+            <td data-label="Note" style="color:#778;font-size:0.85rem;">${c.Note ?? ''}</td>
         </tr>`).join('');
     }
 

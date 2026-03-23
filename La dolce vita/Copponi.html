@@ -354,25 +354,24 @@
     const ListaUtenti = await UtentiSelect();
     const ListaRegistro = await CassaConsumazioniSelect();
     const ListaRegistroFiltered = ListaRegistro.filter(record => {
-        const dp = record.datapagamento ?? record.DataPagamento;
-        return dp === null || dp === undefined;
+        return record.DataPagamento === null || record.DataPagamento === undefined;
     });    
     const ListaGroupedByUtente = [];
     ListaUtenti.forEach(record => {
         ListaGroupedByUtente.push({
             id: record.id,
-            NomeUtente: record.nome ?? record.Nome ?? '',
+            NomeUtente: record.Nome ?? '',
             DaPagare: 0
         });
     });
     ListaRegistroFiltered.forEach(record => {
-        const utente = ListaGroupedByUtente.find(u => u.id === (record.utenteno ?? record.UtenteNo));
+        const utente = ListaGroupedByUtente.find(u => u.id === record.UtenteNo);
         if (utente) {
-            var RecProdotto = ListaProdotti.find(p => p.id === (record.prodottono ?? record.ProdottoNo));
-            utente.DaPagare += RecProdotto ? (RecProdotto.prezzo ?? RecProdotto.Prezzo ?? 0) * (record.qty ?? record.Qty ?? 0) : (parseFloat(record.prezzo ?? record.Prezzo) || 0);
+            var RecProdotto = ListaProdotti.find(p => p.id === record.ProdottoNo);
+            utente.DaPagare += RecProdotto ? (RecProdotto.Prezzo ?? 0) * (record.Qty ?? 0) : (parseFloat(record.Prezzo) || 0);
         } else {
             ListaGroupedByUtente.push({
-                DaPagare: parseFloat(record.prezzo ?? record.Prezzo)
+                DaPagare: parseFloat(record.Prezzo)
             });
         }
     });
@@ -383,7 +382,7 @@
       const records = ListaGroupedByUtente[utenteId];
       const totaleDaSaldare = records.DaPagare;
       const utente = ListaUtenti.find(u => u.id === utenteId);
-      const nomeUtente = records.NomeUtente || (utente ? (utente.nome ?? utente.Nome ?? 'Utente sconosciuto') : "Utente sconosciuto");
+      const nomeUtente = records.NomeUtente || (utente ? (utente.Nome ?? 'Utente sconosciuto') : "Utente sconosciuto");
 
       const tr = document.createElement("tr");
       tr.innerHTML = `

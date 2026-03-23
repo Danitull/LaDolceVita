@@ -562,19 +562,19 @@ async function caricaTutto() {
         { data: acquisti },
         { data: movManuali },
     ] = await Promise.all([
-        sb.from('Utenti').select('id,nome').eq('isdeleted', false),
-        sb.from('ElencoProdotti').select('id,prodotto').eq('isdeleted', false),
-        sb.from('PagamentoAffitti').select('*').eq('isdeleted', false),
-        sb.from('PagamentoWiFi').select('*').eq('isdeleted', false),
-        sb.from('PagamentoUtenze').select('*').eq('isdeleted', false),
-        sb.from('CassaConsumazioni').select('*').eq('isdeleted', false).not('datapagamento', 'is', null),
-        sb.from('CassaConsumazioni').select('*').eq('isdeleted', false).is('datapagamento', null),
-        sb.from('Acquisti_Spese').select('*').eq('isdeleted', false),
+        sb.from('Utenti').select('id,Nome').eq('IsDeleted', false),
+        sb.from('ElencoProdotti').select('id,Prodotto').eq('IsDeleted', false),
+        sb.from('PagamentoAffitti').select('*').eq('IsDeleted', false),
+        sb.from('PagamentoWiFi').select('*').eq('IsDeleted', false),
+        sb.from('PagamentoUtenze').select('*').eq('IsDeleted', false),
+        sb.from('CassaConsumazioni').select('*').eq('IsDeleted', false).not('DataPagamento', 'is', null),
+        sb.from('CassaConsumazioni').select('*').eq('IsDeleted', false).is('DataPagamento', null),
+        sb.from('Acquisti_Spese').select('*').eq('IsDeleted', false),
         sb.from('FondoCassa').select('*').eq('isdeleted', false).order('data', { ascending: false }),
     ]);
 
-    ALL.utentiMap  = Object.fromEntries((utenti||[]).map(u => [u.id, u.nome ?? u.Nome ?? '']));
-    ALL.prodottiMap = Object.fromEntries((prodotti||[]).map(p => [p.id, p.prodotto ?? p.Prodotto ?? '']));
+    ALL.utentiMap  = Object.fromEntries((utenti||[]).map(u => [u.id, u.Nome ?? '']));
+    ALL.prodottiMap = Object.fromEntries((prodotti||[]).map(p => [p.id, p.Prodotto ?? '']));
     ALL.pagAff       = pagAff       || [];
     ALL.pagWifi      = pagWifi      || [];
     ALL.pagUt        = pagUt        || [];
@@ -584,16 +584,16 @@ async function caricaTutto() {
     ALL.movManuali   = movManuali   || [];
 
     // ─── KPI TOTALI (senza filtro anno) ─────────────────────────────────────
-    const totAff     = sum(ALL.pagAff,  'value');
-    const totWifi    = sum(ALL.pagWifi, 'value');
-    const totUt      = sum(ALL.pagUt,   'value');
-    const totCons    = sum(ALL.consPagate, 'prezzo');
+    const totAff     = sum(ALL.pagAff,  'Value');
+    const totWifi    = sum(ALL.pagWifi, 'Value');
+    const totUt      = sum(ALL.pagUt,   'Value');
+    const totCons    = sum(ALL.consPagate, 'Prezzo');
     const totManEnt  = ALL.movManuali.filter(m => m.tipo === 'entrata').reduce((s,m) => s + (parseFloat(m.importo)||0), 0);
     const totManUsc  = ALL.movManuali.filter(m => m.tipo === 'uscita').reduce((s,m) => s + (parseFloat(m.importo)||0), 0);
     const totEntrate = totAff + totWifi + totUt + totCons + totManEnt;
-    const totUscite  = sum(ALL.acquisti, 'prezzo') + totManUsc;
+    const totUscite  = sum(ALL.acquisti, 'Prezzo') + totManUsc;
     const saldo      = totEntrate - totUscite;
-    const totDebiti  = sum(ALL.consNonPagate, 'prezzo');
+    const totDebiti  = sum(ALL.consNonPagate, 'Prezzo');
 
     document.getElementById('kpi-entrate').textContent = fmt(totEntrate);
     document.getElementById('kpi-uscite').textContent  = fmt(totUscite);
@@ -648,9 +648,9 @@ function renderTabelle(annoFiltro) {
     const anno = annoFiltro === 'all' ? null : parseInt(annoFiltro);
 
     // ─── Filtra per anno ──────────────────────────────────────────────────
-    const filterPag = r => !anno || r.anno === anno;
-    const filterDate = r => !anno || (r.dataacquisto && new Date(r.dataacquisto).getFullYear() === anno);
-    const filterDateCons = r => !anno || (r.datacreazione && new Date(r.datacreazione).getFullYear() === anno);
+    const filterPag = r => !anno || r.Anno === anno;
+    const filterDate = r => !anno || (r.DataAcquisto && new Date(r.DataAcquisto).getFullYear() === anno);
+    const filterDateCons = r => !anno || (r.DataCreazione && new Date(r.DataCreazione).getFullYear() === anno);
 
     const pagAff  = ALL.pagAff.filter(filterPag);
     const pagWifi = ALL.pagWifi.filter(filterPag);
@@ -660,10 +660,10 @@ function renderTabelle(annoFiltro) {
 
     // ─── Tabella entrate ──────────────────────────────────────────────────
     const pagamenti = [
-        ...pagAff.map(p  => ({ nome: ALL.utentiMap[p.utenteno]  ?? '#'+p.utenteno, tipo: '🏠 Affitto',        meseAnno: `${MESI[p.mese]} ${p.anno}`,              val: parseFloat(p.value)||0 })),
-        ...pagWifi.map(p => ({ nome: ALL.utentiMap[p.utenteno]  ?? '#'+p.utenteno, tipo: '📡 WiFi',           meseAnno: `${MESI[p.mese]} ${p.anno}`,              val: parseFloat(p.value)||0 })),
-        ...pagUt.map(p   => ({ nome: ALL.utentiMap[p.utenteno]  ?? '#'+p.utenteno, tipo: '💡 Utenze',         meseAnno: `${MESI[p.mese]} ${p.anno}`,              val: parseFloat(p.value)||0 })),
-        ...consPag.map(p => ({ nome: ALL.utentiMap[p.utenteno]  ?? '#'+p.utenteno, tipo: '🧾 Consumazione',   meseAnno: fmtDate(p.datapagamento),                 val: parseFloat(p.prezzo)||0 })),
+        ...pagAff.map(p  => ({ nome: ALL.utentiMap[p.UtenteNo]  ?? '#'+p.UtenteNo, tipo: '🏠 Affitto',        meseAnno: `${MESI[p.Mese]} ${p.Anno}`,              val: parseFloat(p.Value)||0 })),
+        ...pagWifi.map(p => ({ nome: ALL.utentiMap[p.UtenteNo]  ?? '#'+p.UtenteNo, tipo: '📡 WiFi',           meseAnno: `${MESI[p.Mese]} ${p.Anno}`,              val: parseFloat(p.Value)||0 })),
+        ...pagUt.map(p   => ({ nome: ALL.utentiMap[p.UtenteNo]  ?? '#'+p.UtenteNo, tipo: '💡 Utenze',         meseAnno: `${MESI[p.Mese]} ${p.Anno}`,              val: parseFloat(p.Value)||0 })),
+        ...consPag.map(p => ({ nome: ALL.utentiMap[p.UtenteNo]  ?? '#'+p.UtenteNo, tipo: '🧾 Consumazione',   meseAnno: fmtDate(p.DataPagamento),                 val: parseFloat(p.Prezzo)||0 })),
     ];
     const totEnt = pagamenti.reduce((s,p) => s + p.val, 0);
 
@@ -684,16 +684,16 @@ function renderTabelle(annoFiltro) {
     }
 
     // ─── Tabella uscite ───────────────────────────────────────────────────
-    const totUsc = sum(acq, 'prezzo');
+    const totUsc = sum(acq, 'Prezzo');
     const tbodyUsc = document.getElementById('tbody-uscite');
     if (!acq.length) {
         tbodyUsc.innerHTML = '<tr><td colspan="4" class="no-data">Nessun acquisto per l\'anno selezionato</td></tr>';
     } else {
         tbodyUsc.innerHTML = acq.map(a => `<tr>
-            <td data-label="Prodotto" style="font-weight:600;">${ALL.prodottiMap[a.prodottono] ?? '#'+a.prodottono}</td>
-            <td data-label="Data">${fmtDate(a.dataacquisto)}</td>
-            <td data-label="Prezzo" style="font-weight:700;color:#e74c3c;">${fmt(a.prezzo||0)}</td>
-            <td data-label="Note" style="color:#778;font-size:0.85rem;">${a.note ?? ''}</td>
+            <td data-label="Prodotto" style="font-weight:600;">${ALL.prodottiMap[a.ProdottoNo] ?? '#'+a.ProdottoNo}</td>
+            <td data-label="Data">${fmtDate(a.DataAcquisto)}</td>
+            <td data-label="Prezzo" style="font-weight:700;color:#e74c3c;">${fmt(a.Prezzo||0)}</td>
+            <td data-label="Note" style="color:#778;font-size:0.85rem;">${a.Note ?? ''}</td>
         </tr>`).join('') +
         `<tr style="background:rgba(231,76,60,0.06);font-weight:700;">
             <td colspan="2">Totale uscite</td>
@@ -704,16 +704,16 @@ function renderTabelle(annoFiltro) {
 
     // ─── Tabella debiti (sempre tutti, non filtrati per anno) ─────────────
     const cons = ALL.consNonPagate;
-    const totDeb = sum(cons, 'prezzo');
+    const totDeb = sum(cons, 'Prezzo');
     const tbodyDeb = document.getElementById('tbody-debiti');
     if (!cons.length) {
         tbodyDeb.innerHTML = '<tr><td colspan="4" class="no-data" style="color:#27ae60;">✓ Nessun debito aperto</td></tr>';
     } else {
         tbodyDeb.innerHTML = cons.map(c => `<tr>
-            <td data-label="Residente" style="font-weight:600;">${ALL.utentiMap[c.utenteno] ?? '#'+c.utenteno}</td>
-            <td data-label="Prodotto">${ALL.prodottiMap[c.prodottono] ?? '#'+c.prodottono}</td>
-            <td data-label="Data" style="color:#778;font-size:0.85rem;">${fmtDate(c.datacreazione)}</td>
-            <td data-label="Importo" style="font-weight:700;color:#f39c12;">${fmt(c.prezzo||0)}</td>
+            <td data-label="Residente" style="font-weight:600;">${ALL.utentiMap[c.UtenteNo] ?? '#'+c.UtenteNo}</td>
+            <td data-label="Prodotto">${ALL.prodottiMap[c.ProdottoNo] ?? '#'+c.ProdottoNo}</td>
+            <td data-label="Data" style="color:#778;font-size:0.85rem;">${fmtDate(c.DataCreazione)}</td>
+            <td data-label="Importo" style="font-weight:700;color:#f39c12;">${fmt(c.Prezzo||0)}</td>
         </tr>`).join('') +
         `<tr style="background:rgba(243,156,18,0.08);font-weight:700;">
             <td colspan="3">Totale debiti aperti</td>
@@ -749,15 +749,15 @@ function renderChartMensile() {
         mesi.push({ anno: d.getFullYear(), mese: d.getMonth() + 1, label: `${MESI_LABEL[d.getMonth()]} ${d.getFullYear()}` });
     }
     const entrate = mesi.map(({ anno, mese }) => {
-        const aff  = ALL.pagAff.filter(p => p.anno === anno && p.mese === mese).reduce((s,p) => s+(parseFloat(p.value)||0), 0);
-        const wifi = ALL.pagWifi.filter(p => p.anno === anno && p.mese === mese).reduce((s,p) => s+(parseFloat(p.value)||0), 0);
-        const ut   = ALL.pagUt.filter(p => p.anno === anno && p.mese === mese).reduce((s,p) => s+(parseFloat(p.value)||0), 0);
-        const cons = ALL.consPagate.filter(p => p.datapagamento && new Date(p.datapagamento).getFullYear()===anno && new Date(p.datapagamento).getMonth()+1===mese).reduce((s,p) => s+(parseFloat(p.prezzo)||0), 0);
+        const aff  = ALL.pagAff.filter(p => p.Anno === anno && p.Mese === mese).reduce((s,p) => s+(parseFloat(p.Value)||0), 0);
+        const wifi = ALL.pagWifi.filter(p => p.Anno === anno && p.Mese === mese).reduce((s,p) => s+(parseFloat(p.Value)||0), 0);
+        const ut   = ALL.pagUt.filter(p => p.Anno === anno && p.Mese === mese).reduce((s,p) => s+(parseFloat(p.Value)||0), 0);
+        const cons = ALL.consPagate.filter(p => p.DataPagamento && new Date(p.DataPagamento).getFullYear()===anno && new Date(p.DataPagamento).getMonth()+1===mese).reduce((s,p) => s+(parseFloat(p.Prezzo)||0), 0);
         const man  = ALL.movManuali.filter(m => m.tipo==='entrata' && m.data && new Date(m.data).getFullYear()===anno && new Date(m.data).getMonth()+1===mese).reduce((s,m) => s+(parseFloat(m.importo)||0), 0);
         return aff + wifi + ut + cons + man;
     });
     const uscite = mesi.map(({ anno, mese }) => {
-        const acq = ALL.acquisti.filter(a => a.dataacquisto && new Date(a.dataacquisto).getFullYear()===anno && new Date(a.dataacquisto).getMonth()+1===mese).reduce((s,a) => s+(parseFloat(a.prezzo)||0), 0);
+        const acq = ALL.acquisti.filter(a => a.DataAcquisto && new Date(a.DataAcquisto).getFullYear()===anno && new Date(a.DataAcquisto).getMonth()+1===mese).reduce((s,a) => s+(parseFloat(a.Prezzo)||0), 0);
         const man = ALL.movManuali.filter(m => m.tipo==='uscita' && m.data && new Date(m.data).getFullYear()===anno && new Date(m.data).getMonth()+1===mese).reduce((s,m) => s+(parseFloat(m.importo)||0), 0);
         return acq + man;
     });
@@ -838,7 +838,7 @@ document.getElementById('formMovimento').addEventListener('submit', async functi
 window.eliminaMovimento = async function(id) {
     const ok = confirm('Eliminare questo movimento?');
     if (!ok) return;
-    const { error } = await sb.from('FondoCassa').update({ isdeleted: true }).eq('id', id);
+    const { error } = await sb.from('FondoCassa').update({ isdeleted: true }).eq('id', id); // FondoCassa usa lowercase
     if (error) { alert('Errore: ' + error.message); return; }
     caricaTutto();
 };

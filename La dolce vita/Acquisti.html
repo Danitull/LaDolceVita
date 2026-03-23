@@ -353,7 +353,7 @@ async function init() {
     // Load categorie e prodotti per dropdown raggruppato
     const [{ data: catData }, { data: prodData }] = await Promise.all([
         sb.from('CategorieProdotti').select('*'),
-        sb.from('ElencoProdotti').select('id,prodotto,categoriaid').eq('isdeleted', false).order('prodotto'),
+        sb.from('ElencoProdotti').select('id,Prodotto,CategoriaId').eq('IsDeleted', false).order('Prodotto'),
     ]);
     prodotti = prodData || [];
     // Normalizza nomi colonne (lowercase)
@@ -363,18 +363,18 @@ async function init() {
         icona: c.icona ?? c.Icona ?? '📦',
     }));
     const sel = document.getElementById('f-prodotto');
-    const prodSenzaCat = prodotti.filter(p => !p.categoriaid);
+    const prodSenzaCat = prodotti.filter(p => !p.CategoriaId);
     let optHtml = '<option value="">— Seleziona prodotto —</option>';
     categorie.forEach(cat => {
-        const gruppo = prodotti.filter(p => p.categoriaid === cat.id);
+        const gruppo = prodotti.filter(p => p.CategoriaId === cat.id);
         if (!gruppo.length) return;
         optHtml += `<optgroup label="${cat.icona} ${cat.nome}">` +
-            gruppo.map(p => `<option value="${p.id}">${p.prodotto}</option>`).join('') +
+            gruppo.map(p => `<option value="${p.id}">${p.Prodotto}</option>`).join('') +
             '</optgroup>';
     });
     if (prodSenzaCat.length) {
         optHtml += `<optgroup label="📦 Altro">` +
-            prodSenzaCat.map(p => `<option value="${p.id}">${p.prodotto}</option>`).join('') +
+            prodSenzaCat.map(p => `<option value="${p.id}">${p.Prodotto}</option>`).join('') +
             '</optgroup>';
     }
     sel.innerHTML = optHtml;
@@ -400,10 +400,10 @@ async function carica() {
 
     const { data, error } = await sb.from('Acquisti_Spese')
         .select('*')
-        .eq('isdeleted', false)
-        .gte('dataacquisto', start)
-        .lte('dataacquisto', end)
-        .order('dataacquisto', { ascending: false });
+        .eq('IsDeleted', false)
+        .gte('DataAcquisto', start)
+        .lte('DataAcquisto', end)
+        .order('DataAcquisto', { ascending: false });
 
     if (error) { console.error(error); return; }
     acquisti = data || [];
@@ -418,17 +418,17 @@ function renderTabella() {
         return;
     }
     tbody.innerHTML = acquisti.map(r => {
-        const prod = prodotti.find(p => p.id === r.prodottono);
-        const nome = prod ? prod.prodotto : `#${r.prodottono}`;
-        const data = r.dataacquisto ? new Date(r.dataacquisto).toLocaleDateString('it-IT') : '—';
-        const prezzo = r.prezzo != null ? `€ ${Number(r.prezzo).toFixed(2)}` : '—';
+        const prod = prodotti.find(p => p.id === r.ProdottoNo);
+        const nome = prod ? prod.Prodotto : `#${r.ProdottoNo}`;
+        const data = r.DataAcquisto ? new Date(r.DataAcquisto).toLocaleDateString('it-IT') : '—';
+        const prezzo = r.Prezzo != null ? `€ ${Number(r.Prezzo).toFixed(2)}` : '—';
         return `<tr>
             <td data-label="Prodotto" style="font-weight:600;">${nome}</td>
             <td data-label="Data">${data}</td>
-            <td data-label="Qty">${r.qty ?? '—'}</td>
-            <td data-label="Confezioni">${r.confezioni ?? '—'}</td>
+            <td data-label="Qty">${r.Qty ?? '—'}</td>
+            <td data-label="Confezioni">${r.Confezioni ?? '—'}</td>
             <td data-label="Prezzo €">${prezzo}</td>
-            <td data-label="Note" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${r.note ?? ''}">${r.note ?? '—'}</td>
+            <td data-label="Note" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${r.Note ?? ''}">${r.Note ?? '—'}</td>
             <td data-label="Azioni" style="white-space:nowrap;">
                 <button class="PlusIconTable" style="font-size:13px;padding:5px 10px;" onclick="apriModalModifica(${r.id})">✏️</button>
                 <button class="btn-del-row" onclick="eliminaRecord(${r.id})">🗑</button>
@@ -438,7 +438,7 @@ function renderTabella() {
 }
 
 function renderTotali() {
-    const totale = acquisti.reduce((s, r) => s + (parseFloat(r.prezzo) || 0), 0);
+    const totale = acquisti.reduce((s, r) => s + (parseFloat(r.Prezzo) || 0), 0);
     const count = acquisti.length;
     document.getElementById('stat-totale').textContent = `€ ${totale.toFixed(2)}`;
     document.getElementById('stat-count').textContent = count;
@@ -460,12 +460,12 @@ window.apriModalModifica = function(id) {
     document.getElementById('f-edit-id').value = id;
     document.getElementById('modal-title').textContent = '✏️ Modifica Acquisto';
     document.getElementById('btn-submit').textContent = 'Aggiorna';
-    document.getElementById('f-prodotto').value = r.prodottono ?? '';
-    document.getElementById('f-data').value = r.dataacquisto ?? '';
-    document.getElementById('f-qty').value = r.qty ?? '';
-    document.getElementById('f-confezioni').value = r.confezioni ?? '';
-    document.getElementById('f-prezzo').value = r.prezzo ?? '';
-    document.getElementById('f-note').value = r.note ?? '';
+    document.getElementById('f-prodotto').value = r.ProdottoNo ?? '';
+    document.getElementById('f-data').value = r.DataAcquisto ?? '';
+    document.getElementById('f-qty').value = r.Qty ?? '';
+    document.getElementById('f-confezioni').value = r.Confezioni ?? '';
+    document.getElementById('f-prezzo').value = r.Prezzo ?? '';
+    document.getElementById('f-note').value = r.Note ?? '';
     document.getElementById('ModalContainerPanel').style.display = 'block';
 };
 
@@ -477,8 +477,8 @@ window.resetForm = function() {
 window.eliminaRecord = async function(id) {
     const ok = window.showConfirm ? await showConfirm('Eliminare questo acquisto?') : confirm('Eliminare questo acquisto?');
     if (!ok) return;
-    const upd = { isdeleted: true };
-    if (sessionUser) upd.utentedelete = sessionUser.id;
+    const upd = { IsDeleted: true };
+    if (sessionUser) upd.UtenteDelete = sessionUser.id;
     const { error } = await sb.from('Acquisti_Spese').update(upd).eq('id', id);
     if (error) { if (window.showToast) showToast('Errore: ' + error.message, 'error'); else alert('Errore: ' + error.message); return; }
     carica();
@@ -490,12 +490,12 @@ document.getElementById('dataForm').addEventListener('submit', async function(e)
     if (!prodottoNo) { if (window.showToast) showToast('Seleziona un prodotto.', 'warning'); else alert('Seleziona un prodotto.'); return; }
 
     const payload = {
-        prodottono: parseInt(prodottoNo),
-        dataacquisto: document.getElementById('f-data').value || null,
-        qty: document.getElementById('f-qty').value !== '' ? parseFloat(document.getElementById('f-qty').value) : null,
-        confezioni: document.getElementById('f-confezioni').value !== '' ? parseFloat(document.getElementById('f-confezioni').value) : null,
-        prezzo: document.getElementById('f-prezzo').value !== '' ? parseFloat(document.getElementById('f-prezzo').value) : null,
-        note: document.getElementById('f-note').value || null,
+        ProdottoNo: parseInt(prodottoNo),
+        DataAcquisto: document.getElementById('f-data').value || null,
+        Qty: document.getElementById('f-qty').value !== '' ? parseFloat(document.getElementById('f-qty').value) : null,
+        Confezioni: document.getElementById('f-confezioni').value !== '' ? parseFloat(document.getElementById('f-confezioni').value) : null,
+        Prezzo: document.getElementById('f-prezzo').value !== '' ? parseFloat(document.getElementById('f-prezzo').value) : null,
+        Note: document.getElementById('f-note').value || null,
     };
 
     const editId = document.getElementById('f-edit-id').value;
@@ -504,10 +504,10 @@ document.getElementById('dataForm').addEventListener('submit', async function(e)
 
     let error;
     if (editId) {
-        if (sessionUser) payload.utentemodifica = sessionUser.id;
+        if (sessionUser) payload.UtenteModifica = sessionUser.id;
         ({ error } = await sb.from('Acquisti_Spese').update(payload).eq('id', parseInt(editId)));
     } else {
-        if (sessionUser) { payload.utentecreazione = sessionUser.id; payload.utentemodifica = sessionUser.id; }
+        if (sessionUser) { payload.UtenteCreazione = sessionUser.id; payload.UtenteModifica = sessionUser.id; }
         ({ error } = await sb.from('Acquisti_Spese').insert(payload));
     }
 
@@ -521,14 +521,14 @@ window.esportaCSVAcquisti = function() {
     if (!acquisti.length) { if (window.showToast) showToast('Nessun dato da esportare.', 'warning'); return; }
     const rows = [['Data', 'Prodotto', 'Qty', 'Confezioni', 'Prezzo €', 'Note']];
     acquisti.forEach(r => {
-        const prod = prodotti.find(p => p.id === r.prodottono);
+        const prod = prodotti.find(p => p.id === r.ProdottoNo);
         rows.push([
-            r.dataacquisto || '',
-            prod ? prod.prodotto : '#'+r.prodottono,
-            r.qty ?? '',
-            r.confezioni ?? '',
-            r.prezzo ?? '',
-            r.note || '',
+            r.DataAcquisto || '',
+            prod ? prod.Prodotto : '#'+r.ProdottoNo,
+            r.Qty ?? '',
+            r.Confezioni ?? '',
+            r.Prezzo ?? '',
+            r.Note || '',
         ]);
     });
     const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
